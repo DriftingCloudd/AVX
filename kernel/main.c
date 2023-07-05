@@ -20,6 +20,7 @@
 #include "include/sdcard.h"
 #include "include/fpioa.h"
 #include "include/dmac.h"
+#include "include/sd_final.h"
 extern void _start(void);
 #endif
 extern void _entry(void);
@@ -44,6 +45,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     consoleinit();
     printfinit();   // init a lock for printf 
     print_logo();
+    sd_test();
     #ifdef DEBUG
     printf("hart %d enter main()...\n", hartid);
     #endif

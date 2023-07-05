@@ -58,18 +58,19 @@ OBJS += \
   $K/sdcard.o \
   $K/dmac.o \
   $K/sysctl.o \
+  $K/sd_final.o \
 
 endif
 
-# TOOLPREFIX	:= riscv64-unknown-elf-
-TOOLPREFIX	:= riscv64-linux-gnu-
+TOOLPREFIX	:= riscv64-unknown-elf-
+# TOOLPREFIX	:= riscv64-linux-gnu-
 CC = $(TOOLPREFIX)gcc
 AS = $(TOOLPREFIX)gas
 LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 
-CFLAGS = -Wall -Werror -O -fno-omit-frame-pointer -ggdb -g
+CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -g
 CFLAGS += -MD
 CFLAGS += -mcmodel=medany
 CFLAGS += -ffreestanding -fno-common -nostdlib -mno-relax
