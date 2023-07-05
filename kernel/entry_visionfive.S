@@ -1,6 +1,7 @@
     .section .text.entry
     .globl _start
 _start:
+    //.space 0x20000
     add t0, a0, 1
     slli t0, t0, 14
     // lui sp, %hi(boot_stack)

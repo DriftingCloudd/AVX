@@ -38,8 +38,9 @@ main(unsigned long hartid, unsigned long dtb_pa)
 {
   inithartid(hartid);
   
-  if (first == 0) {
+  if (hartid == 1) {
     first = 1;
+    cpuinit();
     consoleinit();
     printfinit();   // init a lock for printf 
     print_logo();

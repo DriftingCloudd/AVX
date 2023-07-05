@@ -39,7 +39,7 @@ kvminit()
   kvmmap(CLINT_V, CLINT, 0x10000, PTE_R | PTE_W);
 
   // PLIC
-  kvmmap(PLIC_V, PLIC, 0x4000, PTE_R | PTE_W);
+  kvmmap(PLIC_V, PLIC, 0x4000, PTE_R | PTE_W | PTE_D | PTE_A);
   kvmmap(PLIC_V + 0x200000, PLIC + 0x200000, 0x4000, PTE_R | PTE_W);
 
   #ifdef k210

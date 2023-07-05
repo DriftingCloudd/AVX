@@ -11,4 +11,7 @@ void backtrace();
 
 void print_logo();
 
+void printstring(const char* s);
+
+void printint(int xx, int base, int sign);
 #endif 

@@ -120,14 +120,14 @@
 // for use by the kernel and user pages
 // from physical address 0x80200000 to PHYSTOP.
 #ifndef QEMU
-#define KERNBASE                0x80020000
+#define KERNBASE                0x80200000
 // #define KERNBASE                0xb0000000
 #else
 #define KERNBASE                0x80200000
 #endif
 
 // #define PHYSTOP                 0x240000000
-#define PHYSTOP                 0x80600000
+#define PHYSTOP                 0x80a00000
 
 // map the trampoline page to the highest address,
 // in both user and kernel space.

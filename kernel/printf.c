@@ -28,7 +28,7 @@ void printstring(const char* s) {
     }
 }
 
-static void
+void
 printint(int xx, int base, int sign)
 {
   char buf[16];
@@ -123,6 +123,7 @@ printf(char *fmt, ...)
 void
 panic(char *s)
 {
+  printf("%p\n", s);
   printf("panic: ");
   printf(s);
   printf("\n");

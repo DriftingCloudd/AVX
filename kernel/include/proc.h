@@ -70,6 +70,7 @@ struct proc {
   int utime;
 };
 
+void            cpuinit(void);
 void            reg_info(void);
 int             cpuid(void);
 void            exit(int);

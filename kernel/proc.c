@@ -49,6 +49,20 @@ void reg_info(void) {
   printf("}\n");
 }
 
+void
+cpuinit(void)
+{
+  struct cpu * it;
+  for(it = cpus; it < &cpus[NCPU]; it++){
+    it->proc = 0;
+    it->intena = 0;
+    it->noff = 0;
+  }
+  #ifdef debug
+    printf("cpuinit\n");
+  #endif
+}
+
 // initialize the proc table at boot time.
 void
 procinit(void)
