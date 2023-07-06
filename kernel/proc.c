@@ -72,7 +72,25 @@ procinit(void)
   initlock(&pid_lock, "nextpid");
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
-
+      p->state = UNUSED;
+      p->parent = 0;
+      p->chan = 0;
+      p->killed = 0;
+      p->xstate = 0;
+      p->pid = 0;
+      p->kstack = 0;
+      p->sz = 0;
+      p->pagetable = 0;
+      p->kpagetable = 0;
+      p->trapframe = 0;
+      for(int i=0;i<NOFILE;i++)
+        p->ofile[i] = 0;
+      p->cwd = 0;
+      p->name[0] = 0;
+      p->vma = 0;
+      p->tmask = 0;
+      p->ktime = 0;
+      p->utime = 0;
       // Allocate a page for the process's kernel stack.
       // Map it high in memory, followed by an invalid
       // guard page.

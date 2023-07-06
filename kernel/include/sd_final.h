@@ -1,4 +1,5 @@
 #include "types.h"
+#include "memlayout.h"
 
 typedef struct {				/*!< SDMMC Structure        */
 	uint32  CTRL;		/*!< Control Register       */
@@ -42,8 +43,8 @@ typedef struct {				/*!< SDMMC Structure        */
 	uint32  BUFADDR;		/*!< Current Buffer Descriptor Address Register */
 } SDMMC_T;
 
-#define SD_BASE            0x16020000
-#define SDMMC                 ((SDMMC_T            *) SD_BASE)
+
+#define SDMMC                 ((SDMMC_T            *) SD_BASE_V)
 
 /** @brief  SDIO DMA descriptor control (des0) register defines
  */
@@ -256,3 +257,6 @@ void SD_SetClock(SDMMC_T *pSDMMC, uint32 clk_rate, uint32 speed);
 void SDIO_Setup_Callback(SDMMC_T *pSDMMC,
 	void (*wake_evt)(SDMMC_T *pSDMMC, uint32 event, uint32 arg),
 	uint32 (*wait_evt)(SDMMC_T *pSDMMC, uint32 event, uint32 arg));
+void sd_init();
+uint32 sd_read(uint32 *dat, int size, int addr);
+uint32 sd_write(uint32 *dat, int size, int addr);

@@ -161,6 +161,7 @@ int platform_init(SDMMC_T *pSDMMC){
 	/* disable clock to CIU (needs latch) */
 	pSDMMC->CLKENA = 0;
 	pSDMMC->CLKSRC = 0;
+	return 0;
 }
 int Platform_CardNDetect(SDMMC_T *pSDMMC){
     return (pSDMMC->CDETECT & 1);
@@ -224,7 +225,7 @@ uint32 wait_for_sdio_irq(SDMMC_T *pSDMMC)
 
 uint32 SD_Send_Command(SDMMC_T *pSDMMC, uint32 cmd, uint32 arg)
 {
-    uint32 ret, ival;
+    uint32 ret = 0, ival;
 	uint32 imsk = pSDMMC->INTMASK;
 	// ret = sdioif->wait_evt(pSDMMC, SDIO_START_COMMAND, (cmd & 0x3F));
 	// ival = SDIO_CMD_INT_MSK & ~ret;
@@ -405,7 +406,7 @@ int SD_Card_SetBlockSize(SDMMC_T *pSDMMC, uint32 blkSize, uint32 rca)
 	printf("response: %p\n", val);
 
 	pSDMMC->BLKSIZ = 512;
-
+	return 0;
 }
 
 void SDIO_Setup_Callback(SDMMC_T *pSDMMC,
@@ -427,7 +428,7 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 	{
 		blk = size * 4 / 512;
 	}
-	int tt = 0, tt_final = blk * 512;
+	int tt = 0;
 	for (int i = 0; i < blk; i++)
 	{
 		SDMMC->BLKSIZ = 512;
@@ -437,9 +438,9 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 		{
 			if (tt < size)
 			{
-				*(uint32 *)(SD_BASE + 0x200) = dat[tt];
+				*(uint32 *)(SD_BASE_V + 0x200) = dat[tt];
 			}
-			*(uint32 *)(SD_BASE + 0x200) = 0;
+			*(uint32 *)(SD_BASE_V + 0x200) = 0;
 			tt++;
 			// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
 			// printf("data %d: %d\n", i, temp_data);
@@ -458,7 +459,7 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 //use cmd17, later can change to cmd18
 uint32 sd_read(uint32 *dat, int size, int addr){
 	int blk;
-	uint32 temp;
+	
 	if ((size * 4) % 512)
 	{
 		blk = size * 4 / 512 + 1;
@@ -467,7 +468,7 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 	{
 		blk = size * 4 / 512;
 	}
-	int tt = 0, tt_final = blk * 512;
+	int tt = 0;
 	for (int i = 0; i < blk; i++)
 	{
 		SDMMC->BLKSIZ = 512;
@@ -477,9 +478,9 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 		// {
 		// 	if (tt < size)
 		// 	{
-		// 		dat[tt] = *(uint32 *)(SD_BASE + 0x200);
+		// 		dat[tt] = *(uint32 *)(SD_BASE_V + 0x200);
 		// 	}
-		// 	temp = *(uint32 *)(SD_BASE + 0x200);
+		// 	temp = *(uint32 *)(SD_BASE_V + 0x200);
 		// 	tt++;
 		// 	// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
 		// 	// printf("data %d: %d\n", i, temp_data);
@@ -492,7 +493,7 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 		for (int j = 0; j < 128; j++)
 		{
 			
-			dat[tt] = *(uint32 *)(SD_BASE + 0x200);
+			dat[tt] = *(uint32 *)(SD_BASE_V + 0x200);
 			tt++;
 			// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
 			// printf("data %d: %d\n", i, temp_data);
@@ -508,11 +509,46 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 	
 }
 
+void sd_init()
+{
+	uint32 rca;
+	uint16 fifo_depth;
+
+    platform_init(SDMMC);
+
+    while (Platform_CardNDetect(SDMMC)) {}
+
+    SDIO_Setup_Callback(SDMMC, SDIO_WakeEvent, SDIO_WaitEvent);
+
+    rca = SD_Card_Init(SDMMC, 400000);
+
+    SD_Card_SetBlockSize(SDMMC, 512, rca);
+
+    printf("FIFOTH: %p\n", SDMMC->FIFOTH);
+	
+	uint32 fifoth_t = SDMMC->FIFOTH;
+
+	fifo_depth = ((fifoth_t & 0x0fff0000) >> 16) + 1;
+
+	SDMMC->FIFOTH = ((fifoth_t & 0xf0000000) | ((fifo_depth / 2 - 1) << 16) | (fifo_depth / 2));
+
+	printf("FIFOTH: %p\n", SDMMC->FIFOTH);
+
+	printf("HCON: %p\n", SDMMC->HCON);
+
+	/* Enable the SDIO Card Interrupt */
+	// if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
+	// 	printf("DBG: Enabled interrupt for function 1\r\n");
+	// }
+	
+	printf("Card interface enabled use AT commands!\r\n");
+
+	#ifdef debug
+	printf("sd_init\n");
+	#endif
+}
+
 int sd_test(void){
-    int ret;
-	static uint8 dat[512];
-	uint32 val;
-	uint16 len;
 	uint32 rca;
 	uint16 fifo_depth;
 
@@ -555,7 +591,7 @@ int sd_test(void){
 	int tt = 1;
 	while (SDMMC->RINTSTS & 0x10)
 	{
-		*(uint32 *)(SD_BASE + 0x200) = tt;
+		*(uint32 *)(SD_BASE_V + 0x200) = tt;
 		tt++;
 		// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
 		// printf("data %d: %d\n", i, temp_data);
@@ -577,7 +613,7 @@ int sd_test(void){
 	for (int i = 0; i < 128; i++)
 	{
 		// wait_for_read_irq(LPC_SDMMC);
-		temp_data = *(uint32 *)(SD_BASE + 0x200);
+		temp_data = *(uint32 *)(SD_BASE_V + 0x200);
 		printf("rintst: %p\n", SDMMC->RINTSTS);
 		printf("data %d: %d\n", i, temp_data);
 		for (int j = 0; j < 100000; j++)
@@ -588,7 +624,7 @@ int sd_test(void){
 	// tt = 0;
 	// while (SDMMC->RINTSTS & 0x20)
 	// 	{
-	// 		temp_data = *(uint32 *)(SD_BASE + 0x200);
+	// 		temp_data = *(uint32 *)(SD_BASE_V + 0x200);
 	// 		tt++;
 	// 		printf("rintst: %p\n", SDMMC->RINTSTS);
 	// 		printf("data %d: %d\n", tt, temp_data);

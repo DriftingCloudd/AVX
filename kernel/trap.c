@@ -231,7 +231,11 @@ int devintr(void) {
 		timer_tick();
 		return 2;
 	}
-	else { return 0;}
+	else {
+    printf("scause: %p\n", scause);
+    printf("stval: %p\n", r_stval());
+    return 0;
+  }
 }
 
 void trapframedump(struct trapframe *tf)

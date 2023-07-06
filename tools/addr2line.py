@@ -11,7 +11,7 @@ for line in lines:
     address = line.strip()
 
     # 调用addr2line命令获取源代码文件和行号
-    result = subprocess.run(['addr2line', '-e', '../target/kernel', address], stdout=subprocess.PIPE)
+    result = subprocess.run(['riscv64-unknown-elf-addr2line', '-e', '../target/kernel', address], stdout=subprocess.PIPE)
 
     # 解析addr2line输出，获取源代码文件和行号
     output = result.stdout.decode('utf-8').strip().split('\n')

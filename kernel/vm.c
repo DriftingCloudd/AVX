@@ -42,42 +42,10 @@ kvminit()
   kvmmap(PLIC_V, PLIC, 0x4000, PTE_R | PTE_W | PTE_D | PTE_A);
   kvmmap(PLIC_V + 0x200000, PLIC + 0x200000, 0x4000, PTE_R | PTE_W);
 
-  #ifdef k210
-  // GPIOHS
-  kvmmap(GPIOHS_V, GPIOHS, 0x1000, PTE_R | PTE_W);
-
-  // DMAC
-  kvmmap(DMAC_V, DMAC, 0x1000, PTE_R | PTE_W);
-
-  // GPIO
-  // kvmmap(GPIO_V, GPIO, 0x1000, PTE_R | PTE_W);
-
-  // SPI_SLAVE
-  kvmmap(SPI_SLAVE_V, SPI_SLAVE, 0x1000, PTE_R | PTE_W);
-
-  // FPIOA
-  kvmmap(FPIOA_V, FPIOA, 0x1000, PTE_R | PTE_W);
-
-  // SPI0
-  kvmmap(SPI0_V, SPI0, 0x1000, PTE_R | PTE_W);
-
-  // SPI1
-  kvmmap(SPI1_V, SPI1, 0x1000, PTE_R | PTE_W);
-
-  // SPI2
-  kvmmap(SPI2_V, SPI2, 0x1000, PTE_R | PTE_W);
-
-  // SYSCTL
-  kvmmap(SYSCTL_V, SYSCTL, 0x1000, PTE_R | PTE_W);
-  
-  #endif
-
   #ifdef visionfive
-  //kvmmap(GPIO, GPIO, 0x10000, PTE_R | PTE_W);
+  kvmmap(SD_BASE_V, SD_BASE, 0x10000, PTE_R | PTE_W | PTE_A | PTE_D);
   #endif
   
-  // map rustsbi
-  // kvmmap(RUSTSBI_BASE, RUSTSBI_BASE, KERNBASE - RUSTSBI_BASE, PTE_R | PTE_X);
   // map kernel text executable and read-only.
   kvmmap(KERNBASE, KERNBASE, (uint64)etext - KERNBASE, PTE_R | PTE_X | PTE_A | PTE_D);
   // map kernel data and the physical RAM we'll make use of.
@@ -210,6 +178,8 @@ kwalkaddr(pagetable_t kpt, uint64 va)
 int
 mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)
 {
+  //for visionfive 2
+  perm |= PTE_A | PTE_D;
   uint64 a, last;
   pte_t *pte;
 

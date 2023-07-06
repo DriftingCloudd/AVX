@@ -51,14 +51,15 @@ OBJS += \
 
 else
 OBJS += \
-  $K/spi.o \
-  $K/gpiohs.o \
-  $K/fpioa.o \
-  $K/utils.o \
-  $K/sdcard.o \
-  $K/dmac.o \
-  $K/sysctl.o \
-  $K/sd_final.o \
+	$K/sd_final.o
+#   $K/spi.o \
+#   $K/gpiohs.o \
+#   $K/fpioa.o \
+#   $K/utils.o \
+#   $K/sdcard.o \
+#   $K/dmac.o \
+#   $K/sysctl.o 
+  
 
 endif
 

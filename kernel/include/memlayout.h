@@ -39,13 +39,12 @@
 
 #define VIRT_OFFSET             0x3F00000000L
 
-#ifdef k210
-#define UART                    0x38000000L
-#else
 // qemu puts UART registers here in physical memory.
 #define UART                    0x10000000L
-#endif
 #define UART_V                  (UART + VIRT_OFFSET)
+
+#define SD_BASE            0x16020000
+#define SD_BASE_V               (SD_BASE + VIRT_OFFSET)
 
 #ifdef QEMU
 // virtio mmio interface
@@ -69,62 +68,11 @@
 #define PLIC_MCLAIM(hart)       (PLIC_V + 0x200004 + (hart) * 0x2000)
 #define PLIC_SCLAIM(hart)       (PLIC_V + 0x201004 + (hart) * 0x2000)
 
-#ifdef k210
-#define GPIOHS                  0x38001000
-#define DMAC                    0x50000000
-#define GPIO                    0x50200000
-#define SPI_SLAVE               0x50240000
-#define FPIOA                   0x502B0000
-#define SPI0                    0x52000000
-#define SPI1                    0x53000000
-#define SPI2                    0x54000000
-#define SYSCTL                  0x50440000
-
-#define GPIOHS_V                (0x38001000 + VIRT_OFFSET)
-#define DMAC_V                  (0x50000000 + VIRT_OFFSET)
-#define GPIO_V                  (0x50200000 + VIRT_OFFSET)
-#define SPI_SLAVE_V             (0x50240000 + VIRT_OFFSET)
-#define FPIOA_V                 (0x502B0000 + VIRT_OFFSET)
-#define SPI0_V                  (0x52000000 + VIRT_OFFSET)
-#define SPI1_V                  (0x53000000 + VIRT_OFFSET)
-#define SPI2_V                  (0x54000000 + VIRT_OFFSET)
-#define SYSCTL_V                (0x50440000 + VIRT_OFFSET)
-#endif
-
-#ifdef visionfive
-#define GPIO                    0x13040000
-#define GPIOHS                  0x38001000
-#define DMAC                    0x50000000
-#define SPI_SLAVE               0x50240000
-#define FPIOA                   0x502B0000
-#define SPI0                    0x52000000
-#define SPI1                    0x53000000
-#define SPI2                    0x54000000
-#define SYSCTL                  0x50440000
-
-#define GPIOHS_V                (0x38001000 + VIRT_OFFSET)
-#define DMAC_V                  (0x50000000 + VIRT_OFFSET)
-#define GPIO_V                  (GPIO + VIRT_OFFSET)
-#define SPI_SLAVE_V             (0x50240000 + VIRT_OFFSET)
-#define FPIOA_V                 (0x502B0000 + VIRT_OFFSET)
-#define SPI0_V                  (0x52000000 + VIRT_OFFSET)
-#define SPI1_V                  (0x53000000 + VIRT_OFFSET)
-#define SPI2_V                  (0x54000000 + VIRT_OFFSET)
-#define SYSCTL_V                (0x50440000 + VIRT_OFFSET)
-#endif
-
-// the physical address of rustsbi
-#define RUSTSBI_BASE            0x80000000
 
 // the kernel expects there to be RAM
 // for use by the kernel and user pages
 // from physical address 0x80200000 to PHYSTOP.
-#ifndef QEMU
 #define KERNBASE                0x80200000
-// #define KERNBASE                0xb0000000
-#else
-#define KERNBASE                0x80200000
-#endif
 
 // #define PHYSTOP                 0x240000000
 #define PHYSTOP                 0x80a00000
@@ -149,7 +97,7 @@
 //   TRAMPOLINE (the same page as in the kernel)
 #define TRAPFRAME               (TRAMPOLINE - PGSIZE)
 
-#define MAXUVA                  RUSTSBI_BASE
+#define MAXUVA                  0x80000000L
 #define USER_STACK_BOTTOM (MAXUVA - (2*PGSIZE))
 #define USER_MMAP_START (USER_STACK_BOTTOM - 0x10000000)
 

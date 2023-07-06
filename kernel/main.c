@@ -45,7 +45,6 @@ main(unsigned long hartid, unsigned long dtb_pa)
     consoleinit();
     printfinit();   // init a lock for printf 
     print_logo();
-    sd_test();
     #ifdef DEBUG
     printf("hart %d enter main()...\n", hartid);
     #endif
@@ -57,10 +56,6 @@ main(unsigned long hartid, unsigned long dtb_pa)
     procinit();
     plicinit();
     plicinithart();
-    #ifdef k210
-    fpioa_pin_init();
-    dmac_init();
-    #endif 
     disk_init();
     binit();         // buffer cache
     fileinit();      // file table
@@ -74,7 +69,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
 #ifdef QEMU
       sbi_hart_start(i, (unsigned long)_entry, 0);
 #else
-      sbi_hart_start(i, (unsigned long)_start, 0);
+      //sbi_hart_start(i, (unsigned long)_start, 0);
 #endif
     }
     __sync_synchronize();
