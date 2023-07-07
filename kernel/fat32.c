@@ -80,7 +80,11 @@ int fat32_init()
     #ifdef DEBUG
     printf("[fat32_init] enter!\n");
     #endif
+    #ifdef visionfive
     struct buf *b = bread(0, 8192);
+    #else
+    struct buf *b = bread(0, 0);
+    #endif
     if (strncmp((char const*)(b->data + 82), "FAT32", 5))
         panic("not FAT32 volume");
     // fat.bpb.byts_per_sec = *(uint16 *)(b->data + 11);

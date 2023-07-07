@@ -38,8 +38,11 @@ void
 main(unsigned long hartid, unsigned long dtb_pa)
 {
   inithartid(hartid);
-  
-  if (hartid == 1) {
+  #ifdef QEMU
+  if (first == 0) {
+  #else
+  if(hartid == 1) {
+  #endif
     first = 1;
     cpuinit();
     consoleinit();
