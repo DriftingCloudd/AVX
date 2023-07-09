@@ -136,6 +136,7 @@ extern uint64 sys_unlinkat();
 extern uint64 sys_mount();
 extern uint64 sys_umount();
 extern uint64 sys_times();
+extern uint64 sys_futex();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -184,6 +185,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_mount]       sys_mount,
   [SYS_umount]      sys_umount,
   [SYS_times]       sys_times,
+  [SYS_futex]       sys_futex,
 };
 
 static char *sysnames[] = {
@@ -230,6 +232,7 @@ static char *sysnames[] = {
   [SYS_mount]       "mount",
   [SYS_umount]      "umount",
   [SYS_times]       "times",
+  [SYS_futex]       "futex",
 };
 
 void
