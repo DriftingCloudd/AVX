@@ -49,11 +49,11 @@
 #define SYS_umount      39
 #define SYS_times       153
 #define SYS_getuid      174
-
 #define SYS_setgid      144
 #define SYS_setuid      146
 #define SYS_geteuid     175
 #define SYS_getgid      176
 #define SYS_getegid     177
+#define SYS_lseek       62
 
 #endif

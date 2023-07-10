@@ -493,6 +493,19 @@ sys_unlinkat(void)
 }
 
 uint64
+sys_lseek(void)
+{
+  struct file *f;
+  uint64 offset;
+  int fd,whence;
+
+  if (argfd(0,&fd,&f) < 0 || argaddr(1,&offset) < 0 || argint(2,&whence) < 0) 
+    return -1;
+
+  return fileseek(f,offset,whence);
+}
+
+uint64
 sys_remove(void)
 {
   char path[FAT32_MAX_PATH];

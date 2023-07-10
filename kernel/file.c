@@ -265,3 +265,35 @@ get_next_dirent(struct file *f, uint64 addr, int n)
 
   return copysize;
 }
+
+uint64
+fileseek(struct file *f, uint64 offset, int whence)
+{
+  uint64 ret = -1;
+  if (f->type == FD_ENTRY) {
+    elock(f->ep);
+    if (whence == SEEK_SET) {
+        ret = offset;
+        f ->off = offset;
+    } else if (whence == SEEK_CUR) {
+        f ->off += offset;
+        ret = f ->off;
+    } else if (whence == SEEK_END) {
+      f ->off = f ->ep ->file_size + offset;
+      ret = f ->off;
+    }
+    eunlock(f->ep);
+  } else if (f->type == FD_PIPE) {
+    acquire(&f->pipe->lock);
+    if (whence == SEEK_SET) {
+      f ->off = offset;
+      ret = offset;
+    } else if (whence == SEEK_CUR) {
+      f ->off += offset;
+      ret = f ->off;
+    }
+    release(&f->pipe->lock);
+  }
+
+  return ret;
+}

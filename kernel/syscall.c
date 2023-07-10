@@ -142,6 +142,7 @@ extern uint64 sys_setuid();
 extern uint64 sys_geteuid();
 extern uint64 sys_getgid();
 extern uint64 sys_getegid();
+extern uint64 sys_lseek();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -196,6 +197,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_geteuid]     sys_geteuid,
   [SYS_getgid]      sys_getgid,
   [SYS_getegid]     sys_getegid,
+  [SYS_lseek]       sys_lseek,
 };
 
 static char *sysnames[] = {
@@ -248,6 +250,7 @@ static char *sysnames[] = {
   [SYS_geteuid]     "geteuid",
   [SYS_getgid]      "getgid",
   [SYS_getegid]     "getegid",
+  [SYS_lseek]       "lseek",
 };
 
 void

@@ -25,6 +25,10 @@ struct devsw {
 extern struct devsw devsw[];
 
 #define CONSOLE 1
+#define SEEK_SET  (int)0
+#define SEEK_CUR  (int)1
+#define SEEK_END  (int)2
+
 
 struct file*    filealloc(void);
 void            fileclose(struct file*);
@@ -35,5 +39,6 @@ int             filestat(struct file*, uint64 addr);
 int             filewrite(struct file*, uint64, int n);
 int             dirnext(struct file *f, uint64 addr);
 int             get_next_dirent(struct file *f, uint64 addr, int n);
+uint64          fileseek(struct file *f, uint64 offset, int whence);
 
 #endif
