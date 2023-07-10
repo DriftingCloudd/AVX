@@ -313,6 +313,12 @@ sys_gettimeofday(void)
 }
 
 uint64
+sys_getuid(void)
+{
+  return myproc()->uid;
+}
+
+uint64
 sys_uname(void)
 {
   uint64 addr;

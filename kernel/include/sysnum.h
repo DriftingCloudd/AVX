@@ -48,4 +48,5 @@
 #define SYS_mount       40
 #define SYS_umount      39
 #define SYS_times       153
+#define SYS_getuid      174
 #endif
