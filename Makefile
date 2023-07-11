@@ -119,8 +119,6 @@ build: $T/kernel userprogs
 	@$(OBJCOPY) $T/kernel --strip-all -O binary $(image)
 
 image = $T/kernel.bin
-k210 = $T/k210.bin
-k210-serialport := /dev/ttyUSB0
 
 QEMU = qemu-system-riscv64
 CPUS := 1
@@ -148,18 +146,6 @@ qemu-run:
 	@make build platform=qemu
 	@make fs
 	@$(QEMU) $(QEMUOPTS)
-
-run: build
-ifeq ($(platform), k210)
-	@$(OBJCOPY) $T/kernel --strip-all -O binary $(image)
-	@$(OBJCOPY) $(RUSTSBI) --strip-all -O binary $(k210)
-	@dd if=$(image) of=$(k210) bs=128k seek=1
-	@$(OBJDUMP) -D -b binary -m riscv $(k210) > $T/k210.asm
-	@sudo chmod 777 $(k210-serialport)
-	@python3 ./tools/kflash.py -p $(k210-serialport) -b 1500000 -t $(k210)
-else
-	@$(QEMU) $(QEMUOPTS)
-endif
 
 $U/initcode: $U/initcode.S
 	$(CC) $(CFLAGS) -march=rv64g -nostdinc -I. -Ikernel -c $U/initcode.S -o $U/initcode.o

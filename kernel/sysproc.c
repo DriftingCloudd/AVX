@@ -12,7 +12,7 @@
 #include "include/printf.h"
 #include "include/uname.h"
 
-extern int exec(char *path, char **argv);
+extern int exec(char *path, char **argv, char ** env);
 
 uint64
 sys_clone(void) 
@@ -73,7 +73,7 @@ sys_exec(void)
       goto bad;
   }
 
-  int ret = exec(path, argv);
+  int ret = exec(path, argv, 0);
 
   for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
     kfree(argv[i]);
@@ -118,7 +118,7 @@ sys_execve(void)
       goto bad;
   }
 
-  int ret = exec(path, argv);
+  int ret = exec(path, argv, 0);
 
   for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
     kfree(argv[i]);

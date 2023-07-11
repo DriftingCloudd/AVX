@@ -332,7 +332,6 @@ int SD_SendCmd(SDMMC_T *pSDMMC, uint32 cmd, uint32 arg)
 */
 uint32 SD_Card_Init(SDMMC_T *pSDMMC, uint32 freq)
 {
-	int ret;
 	uint32 val;
 	uint32 rca;
 	/* Set Clock to 400KHz */
@@ -344,14 +343,14 @@ uint32 SD_Card_Init(SDMMC_T *pSDMMC, uint32 freq)
 	printf("arrive a\n");
 	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
 	printf("responese: %p\n", pSDMMC->RESP0);
-	ret = SD_Send_Command(pSDMMC, CMD5, 0);
+	SD_Send_Command(pSDMMC, CMD5, 0);
 	// if (ret) return ret;
 	val = sdioif->response[0];
 	printf("response: %p\n", val);
 	printf("arrive b\n");
 
 	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
-	ret = SD_Send_Command(pSDMMC, CMD0, 0);
+	SD_Send_Command(pSDMMC, CMD0, 0);
 	// if (ret) return ret;
 	val = sdioif->response[0];
 	printf("response: %p\n", val);
