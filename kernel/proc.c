@@ -177,6 +177,8 @@ found:
   p->vma = NULL;
   p->ktime = 1;
   p->utime = 1;
+  p->uid = 0;
+  p->gid = 0;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
     release(&p->lock);

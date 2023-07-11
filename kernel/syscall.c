@@ -136,6 +136,13 @@ extern uint64 sys_unlinkat();
 extern uint64 sys_mount();
 extern uint64 sys_umount();
 extern uint64 sys_times();
+extern uint64 sys_getuid();
+extern uint64 sys_setgid();
+extern uint64 sys_setuid();
+extern uint64 sys_geteuid();
+extern uint64 sys_getgid();
+extern uint64 sys_getegid();
+extern uint64 sys_lseek();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -184,6 +191,13 @@ static uint64 (*syscalls[])(void) = {
   [SYS_mount]       sys_mount,
   [SYS_umount]      sys_umount,
   [SYS_times]       sys_times,
+  [SYS_getuid]      sys_getuid,
+  [SYS_setgid]      sys_setgid,
+  [SYS_setuid]      sys_setuid,
+  [SYS_geteuid]     sys_geteuid,
+  [SYS_getgid]      sys_getgid,
+  [SYS_getegid]     sys_getegid,
+  [SYS_lseek]       sys_lseek,
 };
 
 static char *sysnames[] = {
@@ -230,6 +244,13 @@ static char *sysnames[] = {
   [SYS_mount]       "mount",
   [SYS_umount]      "umount",
   [SYS_times]       "times",
+  [SYS_getuid]      "getuid",
+  [SYS_setgid]      "setgid",
+  [SYS_setuid]      "setuid",
+  [SYS_geteuid]     "geteuid",
+  [SYS_getgid]      "getgid",
+  [SYS_getegid]     "getegid",
+  [SYS_lseek]       "lseek",
 };
 
 void

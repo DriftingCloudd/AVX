@@ -313,6 +313,54 @@ sys_gettimeofday(void)
 }
 
 uint64
+sys_getuid(void)
+{
+  return myproc()->uid;
+}
+
+uint64
+sys_geteuid(void)
+{
+  return myproc()->uid;
+}
+
+uint64
+sys_setuid(void)
+{
+  int uid;
+  if (argint(0,&uid) < 0) 
+    return -1;
+  myproc()->uid = uid;
+
+  return 0;
+}
+
+uint64
+sys_setgid(void)
+{
+  int gid;
+  if (argint(0,&gid) < 0) 
+    return -1;
+  myproc()->gid = gid;
+
+  return 0;
+}
+
+uint64
+sys_getgid(void)
+{
+  return myproc() ->gid;
+}
+
+uint64
+sys_getegid(void)
+{
+  return myproc() ->gid;
+}
+
+
+
+uint64
 sys_uname(void)
 {
   uint64 addr;
