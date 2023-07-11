@@ -358,7 +358,21 @@ sys_getegid(void)
   return myproc() ->gid;
 }
 
+uint64
+sys_exit_group(void)
+{
+  return 0;
+}
 
+uint64
+sys_set_tid_address(void)
+{
+  uint64 address;
+  argaddr(0,&address);
+  myproc()->clear_child_tid = address;
+  
+  return myproc() ->pid;
+}
 
 uint64
 sys_uname(void)
