@@ -31,10 +31,18 @@ argfd(int n, int *pfd, struct file **pf)
   int fd;
   struct file *f;
 
-  if(argint(n, &fd) < 0)
+  if(argint(n, &fd) < 0){
+    printf("argfd: argint error\n");
     return -1;
-  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL)
+  }
+  //mmap映射匿名区域的时候会需要fd为-1
+  if(fd == -1){
+    return -2;
+  }
+  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
+    printf("fd: %d argfd: fd error\n", fd);
     return -1;
+  }
   if(pfd)
     *pfd = fd;
   if(pf)
@@ -787,7 +795,31 @@ sys_mmap()
 {
   uint64 start;
   int prot,flags,fd,off,len;
-  if (argaddr(0,&start) < 0 || argint(1,&len) < 0 || argint(2,&prot) < 0 || argint(3,&flags) < 0 || (argfd(4,&fd,NULL) < 0 && fd != -1) || argint(5,&off) < 0) {
+  if(argaddr(0,&start) < 0){
+    printf("argaddr start error\n");
+    return -1;
+  }
+  if(argint(1,&len) < 0){
+    printf("argint len error\n");
+    return -1;
+  }
+  if(argint(2,&prot) < 0){
+    printf("argint prot error\n");
+    return -1;
+  }
+  if(argint(3,&flags) < 0){
+    printf("argint flags error\n");
+    return -1;
+  }
+  int ret = argfd(4,&fd,NULL);
+  if(ret == -2 && flags & MAP_ANONYMOUS){
+    fd = -1;
+  }else if(ret < 0){
+    printf("argfd fd error\n");
+    return -1;
+  }
+  if(argint(5,&off) < 0){
+    printf("argint off error\n");
     return -1;
   }
   return mmap(start,len,prot,flags,fd,off);

@@ -8,21 +8,23 @@
 #include "include/vm.h"
 #include "include/kalloc.h"
 #include "include/string.h"
+#include "include/vma.h"
 
 uint64 mmap(uint64 start,uint64 len,int prot,int flags,int fd,long int offset)
 {
     struct proc *p = myproc();
-    if (fd < 0 || offset < 0 || start % PGSIZE != 0) {
+    if (offset < 0) {
         return -1;
     }
-    int perm = PTE_U;
-    /*
-    if(prot & PROT_READ) 
-        perm  |= (PTE_R | PTE_A);
+    int perm = PTE_U | PTE_A | PTE_D;
+
+    if(prot & PROT_READ)
+        perm |= PTE_R;
     if(prot & PROT_WRITE)
-        perm  |= (PTE_W | PTE_D);
-        */
-    perm |= PTE_W | PTE_R | PTE_A | PTE_D;
+        perm |= PTE_W;
+    if(prot & PROT_EXEC)
+        perm  |= (PTE_X | PTE_A);
+    
     struct file *f = fd == -1 ? NULL : p->ofile[fd];
     if(fd != -1 && f == NULL)
         return -1;

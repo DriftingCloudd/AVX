@@ -122,9 +122,10 @@ loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t 
         *phdr = ph;
       }
     }else{
-      printf("ph.type: %d ph.type != ELF_PROG_LOAD\n", ph.type);
+      //printf("ph.type: %d ph.type != ELF_PROG_LOAD\n", ph.type);
     }
   }
+  printf("loadelf success\n");
   return 0;
 }
 

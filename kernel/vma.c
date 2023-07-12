@@ -59,7 +59,7 @@ struct vma* alloc_vma(struct proc *p,enum segtype type,uint64 addr, uint64 sz,in
     }
     if (0 != sz) {
         if (alloc) {
-            if (0 != uvmalloc(p->pagetable,start,end,perm)) {
+            if (0 != uvmalloc1(p->pagetable,start,end,perm)) {
                 printf("uvmalloc failed\n");
                 kfree(vma);
                 return NULL;

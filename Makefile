@@ -41,7 +41,8 @@ OBJS += \
   $K/plic.o \
   $K/console.o \
   $K/mmap.o \
-  $K/fs.o
+  $K/fs.o \
+  $K/vma.o 
 
 
 ifeq ($(platform), qemu)
