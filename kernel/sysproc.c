@@ -142,6 +142,14 @@ sys_exit(void)
   return 0;  // not reached
 }
 
+
+//todo
+uint64
+sys_exit_group(void)
+{
+  return 0;  // not reached
+}
+
 uint64 sys_nanosleep(void) {
 	uint64 addr_sec, addr_usec;
 
@@ -395,17 +403,26 @@ uint64 sys_futex(void)
             if (userVal != val) {
                 return -1;
             }
-            futexWait(uaddr, myThread(), timeout ? &t : 0);
+            // TODO
+            // futexWait(uaddr, myThread(), timeout ? &t : 0);
             break;
         case FUTEX_WAKE:
             // printf("val: %d\n", val);
-            futexWake(uaddr, val);
+            // TODO
+            // futexWake(uaddr, val);
             break;
         case FUTEX_REQUEUE:
             // printf("val: %d\n", val);
-            futexRequeue(uaddr, val, uaddr2);
+            // TODO
+            // futexRequeue(uaddr, val, uaddr2);
             break;
         default:
             panic("Futex type not support!\n");
   }
 };
+
+//TODO
+uint64 sys_set_tid_address(void){
+  struct proc *p = myproc();
+  
+}
