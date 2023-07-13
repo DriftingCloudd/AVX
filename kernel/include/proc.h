@@ -68,6 +68,7 @@ struct proc {
   struct vma *vma;
   int ktime;
   int utime;
+
 };
 
 void            cpuinit(void);
