@@ -24,7 +24,7 @@
 #define SYS_write       64
 #define SYS_remove      25
 #define SYS_trace       18
-#define SYS_sysinfo     19
+#define SYS_sysinfo     179 //from 19 to 179
 #define SYS_mkdir       1030
 #define SYS_close       57
 #define SYS_test_proc   22
@@ -59,7 +59,6 @@
 #define SYS_exit_group  94
 #define SYS_set_tid_address 96
 #define SYS_clock_gettime   113
-
 #define SYS_futex       98
 #define SYS_set_tid_address 96
 #define SYS_utimensat   88

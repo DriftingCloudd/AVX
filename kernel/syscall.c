@@ -299,20 +299,33 @@ uint64
 sys_sysinfo(void)
 {
   uint64 addr;
-  // struct proc *p = myproc();
-
   if (argaddr(0, &addr) < 0) {
     return -1;
   }
-
   struct sysinfo info;
+  memset(&info,0,sizeof(info));
+
+  info.uptime = r_time() / CLK_FREQ;
+  info.totalram = PHYSTOP - KERNBASE;
+  info.freemem = freemem_amount();
+  info.bufferram = 512 * 2500;  // attention
+  info.nproc = procnum();
+  info.mem_unit = PGSIZE;
+
+  if (either_copyout(1,addr,(char*)&info,sizeof(info)) < 0)
+    return -1;
+
+  return 0;
+  /*
   info.freemem = freemem_amount();
   info.nproc = procnum();
-
+  */
   // if (copyout(p->pagetable, addr, (char *)&info, sizeof(info)) < 0) {
+  /*
   if (copyout2(addr, (char *)&info, sizeof(info)) < 0) {
     return -1;
   }
+  */
 
   return 0;
 }
