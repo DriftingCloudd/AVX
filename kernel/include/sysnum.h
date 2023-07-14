@@ -4,6 +4,7 @@
 // System call numbers
 #define SYS_fork         1
 #define SYS_exit        93
+#define SYS_exit_group  94
 #define SYS_wait         3
 #define SYS_pipe         4
 #define SYS_read        63
@@ -59,4 +60,7 @@
 #define SYS_set_tid_address 96
 #define SYS_clock_gettime   113
 
+#define SYS_futex       98
+#define SYS_set_tid_address 96
+#define SYS_utimensat   88
 #endif

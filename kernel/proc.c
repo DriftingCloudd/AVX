@@ -175,6 +175,7 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->vma = NULL;
+  p->filelimit = NOFILE;
   p->ktime = 1;
   p->utime = 1;
   p->uid = 0;

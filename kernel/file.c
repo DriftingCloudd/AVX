@@ -208,6 +208,32 @@ dirnext(struct file *f, uint64 addr)
   return 1;
 }
 
+struct file*
+findfile(char* path)
+{
+  int dev;
+  // struct dirent* ep = ename(NULL,path,&dev);
+  struct dirent* ep = lookup_path(NULL, path, &dev);
+  struct proc* p = myproc();
+  if(ep == NULL)return NULL;
+  elock(ep);
+  for(int i = 0;i<NOFILEMAX(p);i++){
+    if(p->ofile[i]->type==FD_ENTRY&&p->ofile[i]->ep==ep){
+      eunlock(ep);
+      eput(ep);
+      return p->ofile[i];
+    }
+    if(p->ofile[i]->type==FD_DEVICE&&p->ofile[i]->major==dev){
+      eunlock(ep);
+      eput(ep);
+      return p->ofile[i];
+    }
+  }
+  eunlock(ep);
+  eput(ep);
+  return NULL;
+}
+
 // 和dirnext不同，要新建一个类linux的目录结构
 int
 get_next_dirent(struct file *f, uint64 addr, int n)
