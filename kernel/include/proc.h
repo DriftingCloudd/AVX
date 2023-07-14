@@ -71,6 +71,7 @@ struct proc {
   int ktime;
   int utime;
   uint64 clear_child_tid;
+
 };
 
 void            cpuinit(void);

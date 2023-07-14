@@ -97,6 +97,7 @@ extern uint64 sys_dup3(void);
 extern uint64 sys_exec(void);
 extern uint64 sys_execve(void);
 extern uint64 sys_exit(void);
+extern uint64 sys_exit_group(void);
 extern uint64 sys_fork(void);
 extern uint64 sys_fstat(void);
 extern uint64 sys_getpid(void);
@@ -145,10 +146,14 @@ extern uint64 sys_getegid();
 extern uint64 sys_lseek();
 extern uint64 sys_exit_group();
 extern uint64 sys_set_tid_address();
+extern uint64 sys_futex();
+extern uint64 sys_set_tid_address();
+extern uint64 sys_utimensat();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
   [SYS_exit]        sys_exit,
+  [SYS_exit_group]        sys_exit_group,
   [SYS_wait]        sys_wait,
   [SYS_pipe]        sys_pipe,
   [SYS_read]        sys_read,
@@ -202,11 +207,15 @@ static uint64 (*syscalls[])(void) = {
   [SYS_lseek]       sys_lseek,
   [SYS_exit_group]  sys_exit_group,
   [SYS_set_tid_address] sys_set_tid_address,
+  [SYS_futex]       sys_futex,
+  [SYS_set_tid_address] sys_set_tid_address,
+  [SYS_utimensat]   sys_utimensat,
 };
 
 static char *sysnames[] = {
   [SYS_fork]        "fork",
   [SYS_exit]        "exit",
+  [SYS_exit_group]   "exit_group",
   [SYS_wait]        "wait",
   [SYS_pipe]        "pipe",
   [SYS_read]        "read",
@@ -257,6 +266,9 @@ static char *sysnames[] = {
   [SYS_lseek]       "lseek",
   [SYS_exit_group]  "exit_group",
   [SYS_set_tid_address] "set_tid_address",
+  [SYS_futex]       "futex",
+  [SYS_set_tid_address] "sys_set_tid_address",
+  [SYS_utimensat]   "sys_utimensat",
 };
 
 void

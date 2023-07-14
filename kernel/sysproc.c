@@ -11,6 +11,7 @@
 #include "include/string.h"
 #include "include/printf.h"
 #include "include/uname.h"
+#include "include/futex.h"
 
 extern int exec(char *path, char **argv, char ** env);
 
@@ -138,6 +139,14 @@ sys_exit(void)
   if(argint(0, &n) < 0)
     return -1;
   exit(n);
+  return 0;  // not reached
+}
+
+
+//todo
+uint64
+sys_exit_group(void)
+{
   return 0;  // not reached
 }
 
@@ -426,4 +435,56 @@ sys_uname(void)
   }
 
   return 0;
+}
+
+//by comedymaker
+//todo
+//para: uint32_t *uaddr, int futex_op, uint32_t val,
+//                    const struct timespec *timeout,   /* or: uint32_t val2 */
+//                    uint32_t *uaddr2, uint32_t val3
+uint64 sys_futex(void)
+{
+  int futex_op, val, val3, userVal;
+  
+  uint64 uaddr, timeout, uaddr2;
+  struct proc *p = myproc();
+  TimeSpec t;
+  if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
+		return -1;
+  futex_op &= (FUTEX_PRIVATE_FLAG - 1);
+  switch (futex_op)
+  {
+        case FUTEX_WAIT:
+            copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
+            if (timeout) {
+                if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
+                    panic("copy time error!\n");
+                }
+            }
+            // printf("val: %d\n", userVal);
+            if (userVal != val) {
+                return -1;
+            }
+            // TODO
+            // futexWait(uaddr, myThread(), timeout ? &t : 0);
+            break;
+        case FUTEX_WAKE:
+            // printf("val: %d\n", val);
+            // TODO
+            // futexWake(uaddr, val);
+            break;
+        case FUTEX_REQUEUE:
+            // printf("val: %d\n", val);
+            // TODO
+            // futexRequeue(uaddr, val, uaddr2);
+            break;
+        default:
+            panic("Futex type not support!\n");
+  }
+};
+
+//TODO
+uint64 sys_set_tid_address(void){
+  struct proc *p = myproc();
+  
 }
