@@ -149,6 +149,7 @@ extern uint64 sys_set_tid_address();
 extern uint64 sys_futex();
 extern uint64 sys_utimensat();
 extern uint64 sys_clock_gettime();
+extern uint64 sys_syslog();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -207,6 +208,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_exit_group]  sys_exit_group,
   [SYS_set_tid_address] sys_set_tid_address,
   [SYS_clock_gettime] sys_clock_gettime,
+  [SYS_syslog]      sys_syslog,
 };
 
 static char *sysnames[] = {
@@ -266,6 +268,7 @@ static char *sysnames[] = {
   [SYS_futex]       "futex",
   [SYS_utimensat]   "sys_utimensat",
   [SYS_clock_gettime] "clock_gettime",
+  [SYS_syslog]      "syslog",
 };
 
 void

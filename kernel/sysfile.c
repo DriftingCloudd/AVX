@@ -21,7 +21,17 @@
 #include "include/printf.h"
 #include "include/vm.h"
 #include "include/mmap.h"
+#include "include/sysinfo.h"
 
+
+char syslogbuffer[1024];
+int bufferlength = 0;
+
+void initlogbuffer() {
+  bufferlength = 0;
+  strncpy(syslogbuffer,"[log]init done\n",1024);
+  bufferlength += strlen(syslogbuffer);
+}
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -837,5 +847,23 @@ sys_munmap()
 
   // TODO
   //return munmap(start,len);
+  return 0;
+}
+
+uint64
+sys_syslog()
+{
+  int type,len;
+  uint64 bufp;
+  if (argint(0,&type) < 0 || argaddr(1,&bufp) < 0 || argint(2,&len) < 0) {
+    return -1;
+  }
+  if (type == SYSLOG_ACTION_READ_ALL) {
+    if (either_copyout(1,bufp,syslogbuffer,bufferlength) < 0)
+      return -1;
+    return bufferlength;
+  } else if (type == SYSLOG_ACTION_SIZE_BUFFER)
+    return sizeof(syslogbuffer);
+  
   return 0;
 }

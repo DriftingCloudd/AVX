@@ -20,4 +20,8 @@ struct sysinfo {
 							/* Padding to 64 bytes */
 };
 
+void initlogbuffer();
+#define SYSLOG_ACTION_READ_ALL (3)
+#define SYSLOG_ACTION_SIZE_BUFFER (10)
+
 #endif
