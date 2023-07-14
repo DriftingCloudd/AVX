@@ -143,12 +143,6 @@ sys_exit(void)
 }
 
 
-//todo
-uint64
-sys_exit_group(void)
-{
-  return 0;  // not reached
-}
 
 uint64 sys_nanosleep(void) {
 	uint64 addr_sec, addr_usec;
@@ -482,9 +476,3 @@ uint64 sys_futex(void)
             panic("Futex type not support!\n");
   }
 };
-
-//TODO
-uint64 sys_set_tid_address(void){
-  struct proc *p = myproc();
-  
-}

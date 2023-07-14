@@ -73,7 +73,7 @@ struct dirent*  new_ename(struct dirent *env,char *path);
 int             eread(struct dirent *entry, int user_dst, uint64 dst, uint off, uint n);
 int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off, uint n);
 struct dirent*  new_create(struct dirent*, char *,short,int);
-static struct dirent *lookup_path(char *path, int parent, char *name);
+struct dirent *lookup_path(char *path, int parent, char *name);
 
 
 // 用于sys_dirent64的返回结果，需要先得到dirent，然后再把信息放到这个结构体上面返回。

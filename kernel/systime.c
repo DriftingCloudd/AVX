@@ -9,6 +9,31 @@
 #include "include/error.h"
 #include "include/fat32.h"
 
+static int
+argfd(int n, int *pfd, struct file **pf)
+{
+  int fd;
+  struct file *f;
+
+  if(argint(n, &fd) < 0){
+    printf("argfd: argint error\n");
+    return -1;
+  }
+  //mmap映射匿名区域的时候会需要fd为-1
+  if(fd == -1){
+    return -2;
+  }
+  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
+    printf("fd: %d argfd: fd error\n", fd);
+    return -1;
+  }
+  if(pfd)
+    *pfd = fd;
+  if(pf)
+    *pf = f;
+  return 0;
+}
+
 //todo
 // int utimensat(int dirfd, const char *pathname,
 //                     const struct timespec times[_Nullable 2], int flags);

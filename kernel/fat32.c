@@ -947,7 +947,7 @@ static struct dirent *new_lookup_path(struct dirent *env, char *path, int parent
 }
 
 // FAT32 version of namex in xv6's original file system.
-static struct dirent *lookup_path(char *path, int parent, char *name)
+struct dirent *lookup_path(char *path, int parent, char *name)
 {
     struct dirent *entry, *next;
     if (*path == '/') {
