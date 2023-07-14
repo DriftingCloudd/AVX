@@ -1,20 +1,17 @@
 ash -c exit (usertrap)
 sh -c exit (usertrap)
-cal (syscall 113)
-clear
-date 
-df 
-dirname /aaa/bbb
-dmesg 
-du
-expr 1 + 1
-false
-true
-which ls
-uname
-uptime
-printf "abc\n"
-ps
+cal (openat error)
+date (syscall 29 66)
+df (usertrap)
+dirname /aaa/bbb (syscall 29 66)
+dmesg (syscall 116)
+du (syscall 79)
+expr 1 + 1 (syscall 29 66)
+which ls (syscall 48)
+uname (syscall 29 66)
+uptime (syscall 179)
+printf "abc\n" (不知道为啥没输出)
+ps (syscall 179)
 pwd
 free
 hwclock
