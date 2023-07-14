@@ -12,14 +12,12 @@ uname (syscall 29 66)
 uptime (syscall 179)
 printf "abc\n" (不知道为啥没输出)
 ps (syscall 179)
-pwd
-free
+pwd (usertrap)
+free (29,66,openat)
 hwclock
 kill 10
-ls
-sleep 1
-echo "#### file opration test"
-touch test.txt
+ls (syscall 29)
+touch test.txt (88)
 echo "hello world" > test.txt
 cat test.txt
 cut -c 3 test.txt

@@ -206,6 +206,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_lseek]       sys_lseek,
   [SYS_exit_group]  sys_exit_group,
   [SYS_set_tid_address] sys_set_tid_address,
+  [SYS_clock_gettime] sys_clock_gettime,
 };
 
 static char *sysnames[] = {
@@ -277,6 +278,7 @@ syscall(void)
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
         // trace
+    printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }
