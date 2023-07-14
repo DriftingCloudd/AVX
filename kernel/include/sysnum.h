@@ -57,5 +57,6 @@
 #define SYS_lseek       62
 #define SYS_exit_group  94
 #define SYS_set_tid_address 96
+#define SYS_clock_gettime   113
 
 #endif

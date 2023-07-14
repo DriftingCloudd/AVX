@@ -20,6 +20,11 @@ struct tms
 	long tms_cstime; 
 };
 
+struct timespec2 {
+	long tv_sec;	// seconds
+	long tv_nsec;	// nanoseconds
+};
+
 void timerinit();
 void set_next_timeout();
 void timer_tick();

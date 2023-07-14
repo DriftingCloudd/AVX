@@ -145,6 +145,7 @@ extern uint64 sys_getegid();
 extern uint64 sys_lseek();
 extern uint64 sys_exit_group();
 extern uint64 sys_set_tid_address();
+extern uint64 sys_clock_gettime();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -202,6 +203,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_lseek]       sys_lseek,
   [SYS_exit_group]  sys_exit_group,
   [SYS_set_tid_address] sys_set_tid_address,
+  [SYS_clock_gettime] sys_clock_gettime,
 };
 
 static char *sysnames[] = {
@@ -257,6 +259,7 @@ static char *sysnames[] = {
   [SYS_lseek]       "lseek",
   [SYS_exit_group]  "exit_group",
   [SYS_set_tid_address] "set_tid_address",
+  [SYS_clock_gettime] "clock_gettime",
 };
 
 void
