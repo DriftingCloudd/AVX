@@ -56,6 +56,8 @@ struct proc {
   int uid;                     // Process User ID
   int gid;                     // Process Group ID
 
+  uint64 filelimit;
+
   // these are private to the process, so p->lock need not be held.
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
@@ -71,7 +73,10 @@ struct proc {
   int ktime;
   int utime;
   uint64 clear_child_tid;
+
 };
+
+#define NOFILEMAX(p) (p->filelimit<NOFILE?p->filelimit:NOFILE)
 
 void            cpuinit(void);
 void            reg_info(void);

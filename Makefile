@@ -34,6 +34,7 @@ OBJS += \
   $K/pipe.o \
   $K/exec.o \
   $K/sysfile.o \
+  $K/systime.o \
   $K/kernelvec.o \
   $K/timer.o \
   $K/disk.o \
