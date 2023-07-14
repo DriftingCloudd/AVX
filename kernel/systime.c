@@ -6,6 +6,8 @@
 #include "include/timer.h"
 #include "include/vm.h"
 #include "include/proc.h"
+#include "include/error.h"
+#include "include/fat32.h"
 
 //todo
 // int utimensat(int dirfd, const char *pathname,
@@ -19,7 +21,7 @@ uint64 sys_utimensat(void)
     uint64 pathAddr, times;
 	TimeSpec t[2];
     char pathName[255];
-	struct dirent *dp, ep;
+	struct dirent *dp, *ep;
     int flags, devNo;
     if(argfd(0,&fd,&fp)<0 && fd!=AT_FDCWD && fd!=-1){
 	  return -1;
@@ -53,7 +55,42 @@ uint64 sys_utimensat(void)
 		}	
 	}
 	
-	dp = fp->ep;
+	if(pathName[0] == '/')	//指定了绝对路径，忽略fd
+	{
+		dp = NULL;
+	}
+	else if(fd == AT_FDCWD)
+	{
+		dp = NULL;
+	}
+	else
+	{
+		if(fp == NULL)
+		{
+			// __debug_warn("[sys_utimensat] DIRFD error\n");
+			return -EMFILE;
+		}
+		dp = fp->ep;
+	}
 	// ep = ename(dp, pathName, &devNo);
+	// ep = lookup_path(dp, pathName, devNo);
+	// if (!ep)
+	// {
+	// 	return -ENOENT;
+	// }
 
+	if (pathAddr)
+	{
+		f = findfile(pathName);
+	}
+	else if (fd >= 0 && t[0].second != 1)
+	{
+		if(argfd(0, &fd , &f)<0) return -1;	
+	}
+	f->t0_sec = t[0].second;
+		f->t0_nsec = t[0].microSecond;
+		f->t1_sec = t[1].second;
+		f->t1_nsec = t[1].microSecond;
+	
+	return 0;
 }
