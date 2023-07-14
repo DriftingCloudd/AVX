@@ -812,7 +812,7 @@ sys_mmap()
     return -1;
   }
   int ret = argfd(4,&fd,NULL);
-  if(ret == -2 && flags & MAP_ANONYMOUS){
+  if(ret == -2 && (flags & MAP_ANONYMOUS)){
     fd = -1;
   }else if(ret < 0){
     printf("argfd fd error\n");
