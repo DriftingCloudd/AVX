@@ -219,6 +219,7 @@ static char *sysnames[] = {
   [SYS_dup3]         "dup3",
   [SYS_getpid]      "getpid",
   [SYS_sbrk]        "sbrk",
+  [SYS_brk]         "brk",
   [SYS_sleep]       "sleep",
   [SYS_uptime]      "uptime",
   [SYS_open]        "open",
@@ -268,7 +269,8 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
-        // trace
+    // trace
+    printf("pid %d: sysnum:%d %s -> %d\n", p->pid, num, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }

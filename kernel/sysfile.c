@@ -794,12 +794,13 @@ uint64
 sys_mmap()
 {
   uint64 start;
-  int prot,flags,fd,off,len;
+  int prot,flags,fd,off;
+  uint64 len;
   if(argaddr(0,&start) < 0){
     printf("argaddr start error\n");
     return -1;
   }
-  if(argint(1,&len) < 0){
+  if(argaddr(1,&len) < 0){
     printf("argint len error\n");
     return -1;
   }
@@ -822,6 +823,7 @@ sys_mmap()
     printf("argint off error\n");
     return -1;
   }
+  printf("mmap start:%p len:%d prot:%d flags:%d fd:%d off:%d\n",start,len,prot,flags,fd,off);
   return mmap(start,len,prot,flags,fd,off);
 }
 

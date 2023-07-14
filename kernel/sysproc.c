@@ -370,6 +370,7 @@ sys_set_tid_address(void)
   uint64 address;
   argaddr(0,&address);
   myproc()->clear_child_tid = address;
+  copyout(myproc()->pagetable, address, 0, sizeof(int));
   
   return myproc() ->pid;
 }
