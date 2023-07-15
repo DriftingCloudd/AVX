@@ -1,137 +1,48 @@
-## 测试程序列表
-
-* [ ] __NR_setitimer 103
-* [ ] __NR_clock_settime 112
-* [ ] __NR_clock_gettime 113
-* [ ] __NR_syslog 116
-* [ ] __NR_sched_setaffinity 122
-* [ ] __NR_sched_getaffinity 123
-* [ ] __NR_sched_yield 124
-* [ ] __NR_sched_get_priority_max 125
-* [ ] __NR_sched_get_priority_min 126
-* [ ] __NR_kill 129
-* [ ] __NR_tkill 130
-* [ ] __NR_rt_sigaction 134
-* [ ] __NR_rt_sigprocmask 135
-* [ ] __NR_rt_sigreturn 139
-* [ ] __NR_removexattr 14
-* [ ] __NR_setpriority 140
-* [ ] __NR_getpriority 141
-* [ ] __NR_reboot 142
-* [ ] __NR_setgid 144
-* [ ] __NR_setuid 146
-* [ ] __NR_getresuid 148
-* [ ] __NR_lremovexattr 15
-* [ ] __NR_getresgid 150
-* [ ] __NR_times 153
-* [ ] __NR_setpgid 154
-* [ ] __NR_getpgid 155
-* [ ] __NR_getsid 156
-* [ ] __NR_setsid 157
-* [ ] __NR_getgroups 158
-* [ ] __NR_setgroups 159
-* [ ] __NR_uname 160
-* [ ] __NR_sethostname 161
-* [ ] __NR_getrlimit 163
-* [ ] __NR_setrlimit 164
-* [ ] __NR_umask 166
-* [ ] __NR_prctl 167
-* [ ] __NR_gettimeofday 169
-* [ ] __NR_getcwd 17
-* [ ] __NR_adjtimex 171
-* [ ] __NR_getpid 172
-* [ ] __NR_getppid 173
-* [ ] __NR_getuid 174
-* [ ] __NR_geteuid 175
-* [ ] __NR_getgid 176
-* [ ] __NR_getegid 177
-* [ ] __NR_gettid 178
-* [ ] __NR_sysinfo 179
-* [ ] __NR_msgget 186
-* [ ] __NR_msgctl 187
-* [ ] __NR_semget 190
-* [ ] __NR_semctl 191
-* [ ] __NR_semop 193
-* [ ] __NR_shmget 194
-* [ ] __NR_shmctl 195
-* [ ] __NR_shmat 196
-* [ ] __NR_shmdt 197
-* [ ] __NR_socket 198
-* [ ] __NR_socketpair 199
-* [ ] __NR_bind 200
-* [ ] __NR_listen 201
-* [ ] __NR_getsockname 204
-* [ ] __NR_getpeername 205
-* [ ] __NR_setsockopt 208
-* [ ] __NR_getsockopt 209
-* [ ] __NR_shutdown 210
-* [ ] __NR_readahead 213
-* [ ] __NR_brk 214
-* [ ] __NR_munmap 215
-* [ ] __NR_mremap 216
-* [ ] __NR_clone 220
-* [ ] __NR_execve 221
-* [ ] __NR3264_mmap 222
-* [ ] __NR_swapon 224
-* [ ] __NR_swapoff 225
-* [ ] __NR_mprotect 226
-* [ ] __NR_mlock 228
-* [ ] __NR_munlock 229
-* [ ] __NR_dup 23
-* [ ] __NR_madvise 233
-* [ ] __NR_dup3 24
-* [ ] __NR3264_fcntl 25
-* [ ] __NR_wait4 260
-* [ ] __NR_prlimit64 261
-* [ ] __NR_clock_adjtime 266
-* [ ] __NR_syncfs 267
-* [ ] __NR_setns 268
-* [ ] __NR_renameat2 276
-* [ ] __NR_ioctl 29
-* [ ] __NR_flock 32
-* [ ] __NR_mknodat 33
-* [ ] __NR_mkdirat 34
-* [ ] __NR_unlinkat 35
-* [ ] __NR_symlinkat 36
-* [ ] __NR_linkat 37
-* [ ] __NR_umount2 39
-* [ ] __NR_mount 40
-* [ ] __NR_pivot_root 41
-* [ ] __NR3264_statfs 43
-* [ ] __NR3264_ftruncate 46
-* [ ] __NR_fallocate 47
-* [ ] __NR_faccessat 48
-* [ ] __NR_chdir 49
-* [ ] __NR_setxattr 5
-* [ ] __NR_fchdir 50
-* [ ] __NR_chroot 51
-* [ ] __NR_fchmod 52
-* [ ] __NR_fchmodat 53
-* [ ] __NR_fchownat 54
-* [ ] __NR_fchown 55
-* [ ] __NR_openat 56
-* [ ] __NR_close 57
-* [ ] __NR_pipe2 59
-* [ ] __NR_lsetxattr 6
-* [ ] __NR_getdents64 61
-* [ ] __NR3264_lseek 62
-* [ ] __NR_read 63
-* [ ] __NR_write 64
-* [ ] __NR_readv 65
-* [ ] __NR_writev 66
-* [ ] __NR3264_sendfile 71
-* [ ] __NR_ppoll 73
-* [ ] __NR_readlinkat 78
-* [ ] __NR3264_fstatat 79
-* [ ] __NR3264_fstat 80
-* [ ] __NR_sync 81
-* [ ] __NR_utimensat 88
-* [ ] __NR_acct 89
-* [ ] __NR_capget 90
-* [ ] __NR_capset 91
-* [ ] __NR_personality 92
-* [ ] __NR_exit 93
-* [ ] __NR_exit_group 94
-* [ ] __NR_set_tid_address 96
-* [ ] __NR_unshare 97
-* [ ] __NR_futex 98 (on doing)
+ash -c exit (usertrap)
+sh -c exit (usertrap)
+cal (openat error)
+date (syscall 29 66)
+df (usertrap)
+dirname /aaa/bbb (syscall 29 66)
+dmesg (syscall 116)
+du (syscall 79)
+expr 1 + 1 (syscall 29 66)
+which ls (syscall 48)
+uname (syscall 29 66)
+uptime (syscall 179)
+printf "abc\n" (不知道为啥没输出)
+ps (syscall 179)
+pwd (usertrap)
+free (29,66,openat)
+hwclock
+kill 10
+ls (syscall 29)
+touch test.txt (88)
+echo "hello world" > test.txt
+cat test.txt
+cut -c 3 test.txt
+od test.txt
+head test.txt
+tail test.txt 
+hexdump -C test.txt 
+md5sum test.txt
+echo "ccccccc" >> test.txt
+echo "bbbbbbb" >> test.txt
+echo "aaaaaaa" >> test.txt
+echo "2222222" >> test.txt
+echo "1111111" >> test.txt
+echo "bbbbbbb" >> test.txt
+sort test.txt | ./busybox uniq
+stat test.txt
+strings test.txt 
+wc test.txt
+[ -f test.txt ]
+more test.txt
+rm test.txt
+mkdir test_dir
+mv test_dir test
+rmdir test
+grep hello busybox_cmd.txt
+cp busybox_cmd.txt busybox_cmd.bak
+rm busybox_cmd.bak
+find -name "busybox_cmd.txt"

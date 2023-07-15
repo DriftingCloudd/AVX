@@ -106,11 +106,13 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_open(void);
 extern uint64 sys_pipe(void);
 extern uint64 sys_read(void);
+extern uint64 sys_readv(void);
 extern uint64 sys_sbrk(void);
 extern uint64 sys_brk(void);
 extern uint64 sys_sleep(void);
 extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
+extern uint64 sys_writev(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_test_proc(void);
 extern uint64 sys_dev(void);
@@ -148,6 +150,10 @@ extern uint64 sys_exit_group();
 extern uint64 sys_set_tid_address();
 extern uint64 sys_futex();
 extern uint64 sys_utimensat();
+extern uint64 sys_clock_gettime();
+extern uint64 sys_syslog();
+extern uint64 sys_ioctl();
+
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -205,8 +211,12 @@ static uint64 (*syscalls[])(void) = {
   [SYS_lseek]       sys_lseek,
   [SYS_exit_group]  sys_exit_group,
   [SYS_set_tid_address] sys_set_tid_address,
-  [SYS_futex]       sys_futex,
+  [SYS_clock_gettime] sys_clock_gettime,
+  [SYS_syslog]      sys_syslog,
+  [SYS_writev]      sys_writev,
+  [SYS_readv]       sys_readv,
   [SYS_utimensat]   sys_utimensat,
+  [SYS_ioctl]       sys_ioctl,
 };
 
 static char *sysnames[] = {
@@ -264,7 +274,12 @@ static char *sysnames[] = {
   [SYS_exit_group]  "exit_group",
   [SYS_set_tid_address] "set_tid_address",
   [SYS_futex]       "futex",
-  [SYS_utimensat]   "sys_utimensat",
+  [SYS_utimensat]   "utimensat",
+  [SYS_clock_gettime] "clock_gettime",
+  [SYS_syslog]      "syslog",
+  [SYS_writev]      "writev",
+  [SYS_readv]       "readv",
+  [SYS_ioctl]       "ioctl",
 };
 
 void
@@ -276,8 +291,9 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
-    // trace
-    //printf("pid %d: sysnum:%d %s -> %d\n", p->pid, num, sysnames[num], p->trapframe->a0);
+        // trace
+    // if(num != 64 && num != 63)
+      printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }
@@ -300,20 +316,33 @@ uint64
 sys_sysinfo(void)
 {
   uint64 addr;
-  // struct proc *p = myproc();
-
   if (argaddr(0, &addr) < 0) {
     return -1;
   }
-
   struct sysinfo info;
+  memset(&info,0,sizeof(info));
+
+  info.uptime = r_time() / CLK_FREQ;
+  info.totalram = PHYSTOP - KERNBASE;
+  info.freemem = freemem_amount();
+  info.bufferram = 512 * 2500;  // attention
+  info.nproc = procnum();
+  info.mem_unit = PGSIZE;
+
+  if (either_copyout(1,addr,(char*)&info,sizeof(info)) < 0)
+    return -1;
+
+  return 0;
+  /*
   info.freemem = freemem_amount();
   info.nproc = procnum();
-
+  */
   // if (copyout(p->pagetable, addr, (char *)&info, sizeof(info)) < 0) {
+  /*
   if (copyout2(addr, (char *)&info, sizeof(info)) < 0) {
     return -1;
   }
+  */
 
   return 0;
 }

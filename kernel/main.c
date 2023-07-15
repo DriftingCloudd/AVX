@@ -61,6 +61,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     plicinithart();
     disk_init();
     binit();         // buffer cache
+    initlogbuffer();
     fileinit();      // file table
     userinit();      // first user process
     printf("hart %d init done\n", hartid);

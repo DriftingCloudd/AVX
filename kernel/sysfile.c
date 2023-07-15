@@ -21,7 +21,17 @@
 #include "include/printf.h"
 #include "include/vm.h"
 #include "include/mmap.h"
+#include "include/sysinfo.h"
 
+
+char syslogbuffer[1024];
+int bufferlength = 0;
+
+void initlogbuffer() {
+  bufferlength = 0;
+  strncpy(syslogbuffer,"[log]init done\n",1024);
+  bufferlength += strlen(syslogbuffer);
+}
 
 // Fetch the nth word-sized system call argument as a file descriptor
 // and return both the descriptor and the corresponding struct file.
@@ -162,6 +172,66 @@ sys_close(void)
   myproc()->ofile[fd] = 0;
   fileclose(f);
   return 0;
+}
+
+uint64
+sys_readv(void)
+{
+  struct file *f;
+  int fd;
+  uint64 iov;
+  int iovcnt;
+  iovec v[IOVMAX];
+  struct proc *p = myproc();
+
+  if (argfd(0, &fd, &f) < 0) return -1;
+  if (argaddr(1, &iov) < 0) return -1;
+  if (argint(2, &iovcnt) < 0) return -1;
+
+  if (iov)
+  {
+    copyin(p->pagetable, (char*) v, iov, sizeof(v));
+  }
+  else  
+    return -1;
+  
+  uint64 len = 0;
+  for (int i = 0; i < iovcnt; i++)
+  {
+    len += fileread(f, (uint64)(v[i].iov_base), v[i].iov_len);
+  }
+  
+  return len;
+}
+
+uint64
+sys_writev(void)
+{
+  struct file *f;
+  int fd;
+  uint64 iov;
+  int iovcnt;
+  iovec v[IOVMAX];
+  struct proc *p = myproc();
+
+  if (argfd(0, &fd, &f) < 0) return -1;
+  if (argaddr(1, &iov) < 0) return -1;
+  if (argint(2, &iovcnt) < 0) return -1;
+
+  if (iov)
+  {
+    copyin(p->pagetable, (char*) v, iov, sizeof(v));
+  }
+  else  
+    return -1;
+
+  uint64 len = 0;
+  for (int i = 0; i < iovcnt; i++)
+  {
+    len += filewrite(f, (uint64)(v[i].iov_base), v[i].iov_len);
+  }
+  
+  return len;
 }
 
 uint64
@@ -700,6 +770,12 @@ fail:
 }
 
 uint64
+sys_ioctl(void)
+{
+  return 0;
+}
+
+uint64
 sys_getdents64(void)
 {
   struct file *f;
@@ -813,7 +889,7 @@ sys_mmap()
     return -1;
   }
   int ret = argfd(4,&fd,NULL);
-  if(ret == -2 && flags & MAP_ANONYMOUS){
+  if(ret == -2 && (flags & MAP_ANONYMOUS)){
     fd = -1;
   }else if(ret < 0){
     printf("argfd fd error\n");
@@ -837,5 +913,23 @@ sys_munmap()
 
   // TODO
   //return munmap(start,len);
+  return 0;
+}
+
+uint64
+sys_syslog()
+{
+  int type,len;
+  uint64 bufp;
+  if (argint(0,&type) < 0 || argaddr(1,&bufp) < 0 || argint(2,&len) < 0) {
+    return -1;
+  }
+  if (type == SYSLOG_ACTION_READ_ALL) {
+    if (either_copyout(1,bufp,syslogbuffer,bufferlength) < 0)
+      return -1;
+    return bufferlength;
+  } else if (type == SYSLOG_ACTION_SIZE_BUFFER)
+    return sizeof(syslogbuffer);
+  
   return 0;
 }
