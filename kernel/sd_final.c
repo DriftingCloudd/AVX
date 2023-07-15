@@ -213,7 +213,7 @@ uint32 wait_for_sdio_irq(SDMMC_T *pSDMMC)
 	while (1)
 	{
 		rintst = pSDMMC->RINTSTS;
-		printf("rintst: %p\n", rintst);
+		//printf("rintst: %p\n", rintst);
 		if (rintst & 0xffff0004)
 		{
 			break;
@@ -496,14 +496,14 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 			tt++;
 			// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
 			// printf("data %d: %d\n", i, temp_data);
-			for (int j = 0; j < 100000; j++)
-			{
-				/* code */
-			}
+			// for (int j = 0; j < 100000; j++)
+			// {
+			// 	/* code */
+			// }
 		}
 		SD_IRQHandler(SDMMC);
 	}
-	printf("tt: %d\n", tt);
+	//printf("tt: %d\n", tt);
 	return 0;
 	
 }

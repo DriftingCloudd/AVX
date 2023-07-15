@@ -81,7 +81,8 @@ int fat32_init()
     printf("[fat32_init] enter!\n");
     #endif
     #ifdef visionfive
-    struct buf *b = bread(0, 8192);
+    //struct buf *b = bread(0, 8192);
+    struct buf *b = bread(0, 2048);
     #else
     struct buf *b = bread(0, 0);
     #endif
@@ -93,6 +94,7 @@ int fat32_init()
     fat.bpb.rsvd_sec_cnt = *(uint16 *)(b->data + 14);
     fat.bpb.fat_cnt = *(b->data + 16);
     fat.bpb.hidd_sec = *(uint32 *)(b->data + 28);
+    fat.bpb.rsvd_sec_cnt += fat.bpb.hidd_sec;
     fat.bpb.tot_sec = *(uint32 *)(b->data + 32);
     fat.bpb.fat_sz = *(uint32 *)(b->data + 36);
     fat.bpb.root_clus = *(uint32 *)(b->data + 44);
@@ -109,6 +111,8 @@ int fat32_init()
     printf("[FAT32 init]fat_cnt: %d\n", fat.bpb.fat_cnt);
     printf("[FAT32 init]fat_sz: %d\n", fat.bpb.fat_sz);
     printf("[FAT32 init]first_data_sec: %d\n", fat.first_data_sec);
+    printf("[FAT32 init]rsvd_sec_cnt: %d\n", fat.bpb.rsvd_sec_cnt);
+    printf("[FAT32 init]hiddden_sec: %d\n", fat.bpb.hidd_sec);
     #endif
 
     // make sure that byts_per_sec has the same value with BSIZE 
