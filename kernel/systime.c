@@ -12,23 +12,17 @@
 static int
 argfd(int n, int *pfd, struct file **pf)
 {
-  int fd;
-  struct file *f;
-
-  if(argint(n, &fd) < 0){
-    printf("argfd: argint error\n");
+  int fd = -1;
+  struct file *f = NULL;
+  if(pfd)*pfd = -1;
+  if(pf)*pf = NULL;
+  struct proc* p = myproc();
+  if(argint(n, &fd) < 0)
     return -1;
-  }
-  //mmap映射匿名区域的时候会需要fd为-1
-  if(fd == -1){
-    return -2;
-  }
-  if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
-    printf("fd: %d argfd: fd error\n", fd);
-    return -1;
-  }
   if(pfd)
     *pfd = fd;
+  if(fd < 0 || fd >= NOFILEMAX(p) || (f=p->ofile[fd]) == NULL)
+    return -1;
   if(pf)
     *pf = f;
   return 0;

@@ -65,4 +65,5 @@
 #define SYS_syslog      116
 #define SYS_writev      66
 #define SYS_readv      65
+#define SYS_ioctl       29
 #endif

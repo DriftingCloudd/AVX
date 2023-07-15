@@ -174,7 +174,6 @@ sys_close(void)
   return 0;
 }
 
-//TODO
 uint64
 sys_readv(void)
 {
@@ -205,7 +204,6 @@ sys_readv(void)
   return len;
 }
 
-//TODO
 uint64
 sys_writev(void)
 {
@@ -769,6 +767,12 @@ fail:
   if (src)
     eput(src);
   return -1;
+}
+
+uint64
+sys_ioctl(void)
+{
+  return 0;
 }
 
 uint64

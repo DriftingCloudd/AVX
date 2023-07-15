@@ -152,6 +152,7 @@ extern uint64 sys_futex();
 extern uint64 sys_utimensat();
 extern uint64 sys_clock_gettime();
 extern uint64 sys_syslog();
+extern uint64 sys_ioctl();
 
 
 static uint64 (*syscalls[])(void) = {
@@ -214,6 +215,8 @@ static uint64 (*syscalls[])(void) = {
   [SYS_syslog]      sys_syslog,
   [SYS_writev]      sys_writev,
   [SYS_readv]       sys_readv,
+  [SYS_utimensat]   sys_utimensat,
+  [SYS_ioctl]       sys_ioctl,
 };
 
 static char *sysnames[] = {
@@ -271,11 +274,12 @@ static char *sysnames[] = {
   [SYS_exit_group]  "exit_group",
   [SYS_set_tid_address] "set_tid_address",
   [SYS_futex]       "futex",
-  [SYS_utimensat]   "sys_utimensat",
+  [SYS_utimensat]   "utimensat",
   [SYS_clock_gettime] "clock_gettime",
   [SYS_syslog]      "syslog",
   [SYS_writev]      "writev",
   [SYS_readv]       "readv",
+  [SYS_ioctl]       "ioctl",
 };
 
 void
@@ -288,7 +292,8 @@ syscall(void)
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
         // trace
-    printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
+    // if(num != 64 && num != 63)
+      printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }
