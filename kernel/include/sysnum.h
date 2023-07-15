@@ -63,4 +63,6 @@
 #define SYS_set_tid_address 96
 #define SYS_utimensat   88
 #define SYS_syslog      116
+#define SYS_writev      66
+#define SYS_readv      65
 #endif

@@ -36,6 +36,12 @@ struct devsw {
   int (*write)(int, uint64, int);
 };
 
+typedef struct {
+  void  *iov_base;    /* Starting address */
+  uint32 iov_len;     /* Number of bytes to transfer */
+}iovec;
+#define IOVMAX 64
+
 extern struct devsw devsw[];
 
 #define CONSOLE 1

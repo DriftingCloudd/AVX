@@ -174,6 +174,68 @@ sys_close(void)
   return 0;
 }
 
+//TODO
+uint64
+sys_readv(void)
+{
+  struct file *f;
+  int fd;
+  uint64 iov;
+  int iovcnt;
+  iovec v[IOVMAX];
+  struct proc *p = myproc();
+
+  if (argfd(0, &fd, &f) < 0) return -1;
+  if (argaddr(1, &iov) < 0) return -1;
+  if (argint(2, &iovcnt) < 0) return -1;
+
+  if (iov)
+  {
+    copyin(p->pagetable, (char*) v, iov, sizeof(v));
+  }
+  else  
+    return -1;
+  
+  uint64 len = 0;
+  for (int i = 0; i < iovcnt; i++)
+  {
+    len += fileread(f, (uint64)(v[i].iov_base), v[i].iov_len);
+  }
+  
+  return len;
+}
+
+//TODO
+uint64
+sys_writev(void)
+{
+  struct file *f;
+  int fd;
+  uint64 iov;
+  int iovcnt;
+  iovec v[IOVMAX];
+  struct proc *p = myproc();
+
+  if (argfd(0, &fd, &f) < 0) return -1;
+  if (argaddr(1, &iov) < 0) return -1;
+  if (argint(2, &iovcnt) < 0) return -1;
+
+  if (iov)
+  {
+    copyin(p->pagetable, (char*) v, iov, sizeof(v));
+  }
+  else  
+    return -1;
+
+  uint64 len = 0;
+  for (int i = 0; i < iovcnt; i++)
+  {
+    len += filewrite(f, (uint64)(v[i].iov_base), v[i].iov_len);
+  }
+  
+  return len;
+}
+
 uint64
 sys_fstat(void)
 {

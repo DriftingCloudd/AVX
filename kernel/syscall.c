@@ -106,11 +106,13 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_open(void);
 extern uint64 sys_pipe(void);
 extern uint64 sys_read(void);
+extern uint64 sys_readv(void);
 extern uint64 sys_sbrk(void);
 extern uint64 sys_brk(void);
 extern uint64 sys_sleep(void);
 extern uint64 sys_wait(void);
 extern uint64 sys_write(void);
+extern uint64 sys_writev(void);
 extern uint64 sys_uptime(void);
 extern uint64 sys_test_proc(void);
 extern uint64 sys_dev(void);
@@ -150,6 +152,7 @@ extern uint64 sys_futex();
 extern uint64 sys_utimensat();
 extern uint64 sys_clock_gettime();
 extern uint64 sys_syslog();
+
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -209,6 +212,8 @@ static uint64 (*syscalls[])(void) = {
   [SYS_set_tid_address] sys_set_tid_address,
   [SYS_clock_gettime] sys_clock_gettime,
   [SYS_syslog]      sys_syslog,
+  [SYS_writev]      sys_writev,
+  [SYS_readv]       sys_readv,
 };
 
 static char *sysnames[] = {
@@ -269,6 +274,8 @@ static char *sysnames[] = {
   [SYS_utimensat]   "sys_utimensat",
   [SYS_clock_gettime] "clock_gettime",
   [SYS_syslog]      "syslog",
+  [SYS_writev]      "writev",
+  [SYS_readv]       "readv",
 };
 
 void
