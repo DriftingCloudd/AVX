@@ -198,6 +198,10 @@ found:
 
   p->kstack = VKSTACK;
 
+  p->exec_close = kalloc();
+  for (int fd = 0; fd < NOFILE; fd++)
+    p->exec_close[fd] = 0;
+
   // Set up new context to start executing at forkret,
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
@@ -215,6 +219,8 @@ freeproc(struct proc *p)
 {
   if(p->trapframe)
     kfree((void*)p->trapframe);
+  if(p->ofile)
+    kfree((void*)p->exec_close);
   p->trapframe = 0;
   if (p->kpagetable) {
     kvmfree(p->kpagetable, 1);

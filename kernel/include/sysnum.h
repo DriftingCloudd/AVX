@@ -68,5 +68,6 @@
 #define SYS_ioctl       29
 #define SYS_faccessat   48
 #define SYS_fstatat     79
+#define SYS_fcntl       25
 
 #endif

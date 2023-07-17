@@ -346,6 +346,17 @@ int exec(char *path, char **argv, char ** env)
   p->sz = sz;
   p->trapframe->epc = elf.entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
+  
+  // maybe it's wrong
+  for (int fd = 0; fd < NOFILEMAX(p); fd++) {
+    struct file *f = p -> ofile[fd];
+    if (f && p->exec_close[fd]) {
+      fileclose(f);
+      p->ofile[fd] = 0;
+      p->exec_close[fd] = 0;
+    }
+  }
+
   proc_freepagetable(oldpagetable, oldsz);
   w_satp(MAKE_SATP(p->kpagetable));
   sfence_vma();

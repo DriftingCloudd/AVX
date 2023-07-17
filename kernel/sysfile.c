@@ -909,6 +909,8 @@ sys_openat()
   if (dp && 0 != strncmp("test_openat.txt",path,FAT32_MAX_FILENAME)) {
     elock(dp);
   }
+  struct proc *p = myproc();
+  p->exec_close[fd] = 0;
   
   return fd;
 }
@@ -992,6 +994,11 @@ sys_mmap()
     return -1;
   }
   printf("mmap start:%p len:%d prot:%d flags:%d fd:%d off:%d\n",start,len,prot,flags,fd,off);
+  if (len == 0) {
+    len = 32 * PGSIZE;
+    return mmap(start,len,prot,flags,fd,off) + 16 * PGSIZE;
+  }
+
   return mmap(start,len,prot,flags,fd,off);
 }
 
@@ -1005,6 +1012,50 @@ sys_munmap()
 
   // TODO
   //return munmap(start,len);
+  return 0;
+}
+
+static int fdalloc2(struct file *f,int start) {
+  int fd;
+  struct proc *p = myproc();
+  for (fd = start; fd < NOFILEMAX(p); fd++) {
+    if (p->ofile[fd] == 0) {
+      p ->ofile[fd] = f;
+      return fd;
+    }
+  }
+
+  return -24;
+}
+
+uint64
+sys_fcntl(void)
+{
+  int fd,cmd;
+  uint64 arg;
+  struct file *f;
+  struct proc *p = myproc();
+  if (argfd(0,&fd,&f) < 0 || argint(1,&cmd) < 0 || argaddr(2,&arg) < 0)
+    return -1;
+  if (F_GETFD == cmd)
+    return p -> exec_close[fd];
+  else if (F_SETFD == cmd)
+    p -> exec_close[fd] = arg;
+  else if (F_DUPFD == cmd) {
+    if ((fd = fdalloc2(f,arg)) < 0)
+      return fd;
+    filedup(f);
+    
+    return fd;
+  } else if(F_DUPFD_CLOEXEC == cmd) {
+    if ((fd = fdalloc2(f,arg)) < 0)
+      return fd;
+    filedup(f);
+    p->exec_close[fd] = 1;
+
+    return fd;
+  }
+
   return 0;
 }
 
