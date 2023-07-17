@@ -30,9 +30,9 @@ fetchaddr(uint64 addr, uint64 *ip)
 int
 fetchstr(uint64 addr, char *buf, int max)
 {
-  // struct proc *p = myproc();
-  // int err = copyinstr(p->pagetable, buf, addr, max);
-  int err = copyinstr2(buf, addr, max);
+  struct proc *p = myproc();
+  int err = copyinstr(p->pagetable, buf, addr, max);
+  //int err = copyinstr2(buf, addr, max);
   if(err < 0)
     return err;
   return strlen(buf);
@@ -153,6 +153,7 @@ extern uint64 sys_utimensat();
 extern uint64 sys_clock_gettime();
 extern uint64 sys_syslog();
 extern uint64 sys_ioctl();
+extern uint64 sys_faccessat();
 
 
 static uint64 (*syscalls[])(void) = {
@@ -217,6 +218,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_readv]       sys_readv,
   [SYS_utimensat]   sys_utimensat,
   [SYS_ioctl]       sys_ioctl,
+  [SYS_faccessat]   sys_faccessat,
 };
 
 static char *sysnames[] = {
@@ -280,6 +282,7 @@ static char *sysnames[] = {
   [SYS_writev]      "writev",
   [SYS_readv]       "readv",
   [SYS_ioctl]       "ioctl",
+  [SYS_faccessat]   "faccessat",
 };
 
 void

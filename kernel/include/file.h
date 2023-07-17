@@ -48,6 +48,10 @@ extern struct devsw devsw[];
 #define SEEK_SET  (int)0
 #define SEEK_CUR  (int)1
 #define SEEK_END  (int)2
+#define R_OK	4		/* Test for read permission.  */
+#define W_OK	2		/* Test for write permission.  */
+#define X_OK	1		/* Test for execute permission.  */
+#define F_OK	0		/* Test for existence.  */  
 
 
 struct file*    filealloc(void);

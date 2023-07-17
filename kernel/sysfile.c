@@ -49,10 +49,17 @@ argfd(int n, int *pfd, struct file **pf)
   if(fd == -1){
     return -2;
   }
+  
+  if (fd == -100) {
+    *pfd = fd;
+    return -1;
+  }
+
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
     printf("fd: %d argfd: fd error\n", fd);
     return -1;
   }
+  
   if(pfd)
     *pfd = fd;
   if(pf)
@@ -852,7 +859,7 @@ sys_openat()
   if (!(ep->attribute & ATTR_DIRECTORY) && (flags & O_TRUNC)) {
     etrunc(ep);
   }
-  f->type = FD_ENTRY;
+  f->type = FD_ENTRY; 
   f->off = (flags & O_APPEND) ? ep->file_size : 0;
   f->ep = ep;
   f->readable = !(flags & O_WRONLY);
@@ -865,6 +872,50 @@ sys_openat()
   return fd;
 }
 
+uint64
+sys_faccessat(void)
+{
+  int dirfd,mode,flags,devno = -1,emode = R_OK | W_OK | X_OK;
+  struct file *fp;
+  struct dirent *dp, *ep;
+  struct proc *p = myproc();
+  char path[FAT32_MAX_FILENAME];
+
+  if (argfd(0,&dirfd,&fp) < 0 && dirfd != AT_FDCWD) {
+    return -24;
+  }
+  /*
+  if (argstr(1,path,FAT32_MAX_FILENAME + 1) < 0 || argint(2,&mode) < 0 || argint(3,&flags) < 0) {
+    return -1;
+  }
+  */
+  if (argstr(1,path,FAT32_MAX_FILENAME + 1) < 0)
+    return -1;
+  if (argint(2,&mode) < 0) 
+    return -1;
+  if (argint(3,&flags) < 0)
+    return -1;
+
+  
+  if (path[0] == '/')
+    dp = NULL;
+  else if (AT_FDCWD == dirfd)
+    dp = p->cwd;
+  else {
+    if (NULL == fp)
+      return -24;
+    dp = fp->ep;
+  }
+  ep = new_ename(dp,path);
+  if (NULL == ep)
+    return -1;
+  if (mode == F_OK)
+    return 0;
+  if ((emode & mode) != mode)
+    return -1;
+
+  return 0;
+}
 
 uint64
 sys_mmap()

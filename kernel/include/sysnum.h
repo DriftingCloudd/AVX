@@ -66,4 +66,6 @@
 #define SYS_writev      66
 #define SYS_readv      65
 #define SYS_ioctl       29
+#define SYS_faccessat   48
+
 #endif
