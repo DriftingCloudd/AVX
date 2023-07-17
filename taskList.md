@@ -3,7 +3,7 @@ sh -c exit (usertrap)
 cal (openat error)
 df (usertrap)
 dmesg (syscall 116)
-du (syscall 79)
+du (remove也返回-1)
 which ls (syscall 48)
 uptime (syscall 179)
 printf "abc\n" (remove返回了-1)
@@ -13,7 +13,7 @@ free (29,66,openat)
 hwclock (openat)
 kill 10 (syscall 129)
 ls (usertrap)
-touch test.txt (88)
+touch test.txt
 echo "hello world" > test.txt
 cat test.txt
 cut -c 3 test.txt

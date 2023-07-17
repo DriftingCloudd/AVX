@@ -732,6 +732,42 @@ void kstat(struct dirent *de, struct kstat *kst)
     kst->st_mtime_sec = 0;
 }
 
+static int hashpath(char* name){
+  int hashvalue = 0;
+  for(int i = 0;name[i];i++){
+    hashvalue = hashvalue*128;
+    hashvalue += name[i];
+    if(hashvalue > 1000000){
+      hashvalue = hashvalue%1000000;
+    }
+  }
+  return hashvalue;
+}
+
+
+void ekstat(struct dirent *de, struct kstat *st)
+{
+    st->st_dev = 1;
+    st->st_size = de->file_size;
+    st->st_blksize = 4096; // Maybe it's right
+    st->st_blocks = (st->st_size + st->st_blksize - 1) / st->st_blksize;
+    st->st_atime_nsec = 0;
+    st->st_atime_sec = 0;
+    st->st_ctime_nsec = 0;
+    st->st_ctime_sec = 0;
+    st->st_mtime_nsec = 0;
+    st->st_mtime_sec = 0;
+    st->st_uid = 0;
+    st->st_gid = 0;
+    st->st_rdev = de->dev;
+    st->st_nlink = 1;
+    st->st_ino = hashpath(de->filename);
+    st->st_mode = 0;
+    st->st_mode = (de->attribute & ATTR_DIRECTORY) ? S_IFDIR : S_IFREG;
+    st->st_mode |= 0x1ff;
+}
+
+
 /**
  * Read filename from directory entry.
  * @param   buffer      pointer to the array that stores the name

@@ -154,6 +154,7 @@ extern uint64 sys_clock_gettime();
 extern uint64 sys_syslog();
 extern uint64 sys_ioctl();
 extern uint64 sys_faccessat();
+extern uint64 sys_fstatat();
 
 
 static uint64 (*syscalls[])(void) = {
@@ -219,6 +220,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_utimensat]   sys_utimensat,
   [SYS_ioctl]       sys_ioctl,
   [SYS_faccessat]   sys_faccessat,
+  [SYS_fstatat]     sys_fstatat,
 };
 
 static char *sysnames[] = {
@@ -283,6 +285,7 @@ static char *sysnames[] = {
   [SYS_readv]       "readv",
   [SYS_ioctl]       "ioctl",
   [SYS_faccessat]   "faccessat",
+  [SYS_fstatat]     "fstatat",
 };
 
 void

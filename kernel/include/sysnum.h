@@ -67,5 +67,6 @@
 #define SYS_readv      65
 #define SYS_ioctl       29
 #define SYS_faccessat   48
+#define SYS_fstatat     79
 
 #endif

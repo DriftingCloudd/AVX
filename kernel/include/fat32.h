@@ -23,6 +23,15 @@
 #define FAT32_MAX_PATH      260
 #define ENTRY_CACHE_NUM     50
 
+#define S_IFMT				0170000
+#define S_IFSOCK			0140000		// socket
+#define S_IFLNK				0120000		// symbolic link
+#define S_IFREG				0100000		// regular file
+#define S_IFBLK				0060000		// block device
+#define S_IFDIR				0040000		// directory
+#define S_IFCHR				0020000		// character device
+#define S_IFIFO				0010000		// FIFO
+
 struct dirent {
     char  filename[FAT32_MAX_FILENAME + 1];
     uint8   attribute;
@@ -69,6 +78,7 @@ struct dirent*  ename(char *path);
 struct dirent*  enameparent(char *path, char *name);
 struct dirent*  new_enameparent(struct dirent *env, char *path, char *name);
 struct dirent*  new_ename(struct dirent *env,char *path);
+void ekstat(struct dirent *de, struct kstat *st);
 
 int             eread(struct dirent *entry, int user_dst, uint64 dst, uint off, uint n);
 int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off, uint n);

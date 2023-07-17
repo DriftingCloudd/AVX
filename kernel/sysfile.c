@@ -252,6 +252,47 @@ sys_fstat(void)
   return filestat(f, st);
 }
 
+uint64
+sys_fstatat(void)
+{
+  int fd,flags;
+  uint64 st;
+  char pathname[FAT32_MAX_FILENAME];
+  struct file *fp;
+  struct dirent *dp,*ep;
+  
+  if (argfd(0,&fd,&fp) < 0 && fd != AT_FDCWD)
+    return -24;  // 打开文件太多
+  if (argstr(1,pathname,FAT32_MAX_FILENAME + 1) < 0 || argaddr(2,&st) < 0 || argint(3,&flags) < 0)
+    return -1;
+  
+  struct proc *p = myproc();
+  if (AT_FDCWD == fd)
+    dp = NULL;
+  else {
+    if (pathname[0] != '/' && fp == NULL)
+      return -24;
+    dp = fp ? fp -> ep : NULL;
+    if (dp && !(dp -> attribute & ATTR_DIRECTORY))
+      return -1;
+  }
+
+  ep = new_ename(dp,pathname);
+  if (NULL == ep)
+    return -2;
+  
+  struct kstat kst;
+  elock(ep);
+  ekstat(ep,&kst);
+  eunlock(ep);
+  eput(ep);
+
+  if (copyout(p->pagetable,st,(char*)&kst,sizeof(kst)) < 0)
+    return -1;
+
+  return 0;
+}
+
 static struct dirent*
 create(char *path, short type, int mode)
 {
