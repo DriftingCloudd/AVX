@@ -31,9 +31,6 @@ wc test.txt
 [ -f test.txt ]
 more test.txt
 rm test.txt
-mkdir test_dir
-mv test_dir test
-rmdir test
 grep hello busybox_cmd.txt
 cp busybox_cmd.txt busybox_cmd.bak
 rm busybox_cmd.bak

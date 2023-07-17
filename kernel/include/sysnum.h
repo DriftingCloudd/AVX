@@ -70,5 +70,6 @@
 #define SYS_fstatat     79
 #define SYS_sendfile    71
 #define SYS_fcntl       25
+#define SYS_renameat2   276
 
 #endif
