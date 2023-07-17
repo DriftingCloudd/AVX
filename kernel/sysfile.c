@@ -1037,7 +1037,7 @@ sys_renameat2(void)
       return -9;
     newdp = p->cwd;
   }
-  if ((src = new_ename(olddp,old_path) == NULL) || (pdst = new_enameparent(newdp,new_path,old_path)) == NULL || (name = formatname(old_path)) == NULL)
+  if ((src = new_ename(olddp,old_path)) == NULL || (pdst = new_enameparent(newdp,new_path,old_path)) == NULL || (name = formatname(old_path)) == NULL)
     goto failure;
   for (struct dirent *ep = pdst; NULL != ep; ep = ep ->parent)
     if (ep == src)
