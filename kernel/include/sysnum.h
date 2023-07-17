@@ -22,7 +22,7 @@
 #define SYS_uptime      14
 #define SYS_open        15
 #define SYS_write       64
-#define SYS_remove      25
+#define SYS_remove      87  //from 25 to 87
 #define SYS_trace       18
 #define SYS_sysinfo     179 //from 19 to 179
 #define SYS_mkdir       1030
@@ -69,5 +69,6 @@
 #define SYS_faccessat   48
 #define SYS_fstatat     79
 #define SYS_sendfile    71
+#define SYS_fcntl       25
 
 #endif
