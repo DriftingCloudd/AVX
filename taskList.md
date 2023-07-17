@@ -1,22 +1,18 @@
 ash -c exit (usertrap)
 sh -c exit (usertrap)
 cal (openat error)
-date (syscall 29 66)
 df (usertrap)
-dirname /aaa/bbb (syscall 29 66)
 dmesg (syscall 116)
 du (syscall 79)
-expr 1 + 1 (syscall 29 66)
 which ls (syscall 48)
-uname (syscall 29 66)
 uptime (syscall 179)
-printf "abc\n" (不知道为啥没输出)
-ps (syscall 179)
+printf "abc\n" (remove返回了-1)
+ps (usertrap)
 pwd (usertrap)
 free (29,66,openat)
-hwclock
-kill 10
-ls (syscall 29)
+hwclock (openat)
+kill 10 (syscall 129)
+ls (usertrap)
 touch test.txt (88)
 echo "hello world" > test.txt
 cat test.txt
