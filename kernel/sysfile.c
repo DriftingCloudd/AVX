@@ -1025,3 +1025,32 @@ sys_syslog()
   
   return 0;
 }
+
+uint64 
+sys_sendfile(void)
+{
+  int out_fd;
+  int in_fd;
+  struct file *fout;
+  struct file *fin;
+  uint64 offset;
+  uint64 count;
+  if(argfd(0, &out_fd, &fout) < 0)
+  {
+    return -1;
+  }
+  if(argfd(1, &in_fd, &fin) < 0)
+  {
+    return -1;
+  }
+  if(argaddr(2, &offset) < 0)
+  {
+    return -1;
+  }
+  if(argaddr(3, &count) < 0)
+  {
+    return -1;
+  }
+  
+  return file_send(fin,fout,offset,count);
+}

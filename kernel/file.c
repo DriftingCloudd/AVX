@@ -323,3 +323,54 @@ fileseek(struct file *f, uint64 offset, int whence)
 
   return ret;
 }
+
+//TODO
+uint64 file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n)
+{
+  uint64 off = 0;
+  uint64 rlen = 0;
+  uint64 wlen = 0;
+  uint64 ret = 0;
+  if(addr){
+    if(either_copyin(1,&off,addr,sizeof(uint64))<0){
+      return -1;
+    }
+  }else{
+    off = fin->off;
+  }
+  if(fileillegal(fin)||fileillegal(fout)){
+      return -1;
+  }
+  print_f_info(fin);
+  print_f_info(fout);
+  fileiolock(fin);
+  fileiolock(fout);
+  while(n){
+    char buf[512];
+    rlen = MIN(n,512);
+    rlen = fileinput(fin,0,(uint64)&buf,rlen,off);
+    printf("[filesend] send rlen %p\n",rlen);
+    off += rlen;
+    n -= rlen;
+    if(!rlen){
+      break;
+    }
+    wlen = fileoutput(fout,0,(uint64)&buf,rlen,fout->off);
+    printf("[filesend] send wlen:%p\n",rlen,wlen);
+    fout->off += wlen;
+    ret += wlen;
+  }
+  fileiounlock(fout);
+  fileiounlock(fin);
+  //printf("[filesend]after send fout off:%p\n",fout->off);
+  if(addr){
+    if(either_copyout(1,addr,&off,sizeof(uint64))<0){
+      __debug_warn("[filesend]obtain addr bad\n");
+      return -1;
+    }
+  }else{
+    fin->off = off;
+  }
+  return ret;
+  
+}
