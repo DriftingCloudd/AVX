@@ -156,6 +156,7 @@ extern uint64 sys_ioctl();
 extern uint64 sys_faccessat();
 extern uint64 sys_fstatat();
 extern uint64 sys_fcntl();
+extern uint64 sys_renameat2();
 
 
 static uint64 (*syscalls[])(void) = {
@@ -223,6 +224,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_faccessat]   sys_faccessat,
   [SYS_fstatat]     sys_fstatat,
   [SYS_fcntl]       sys_fcntl,
+  [SYS_renameat2]   sys_renameat2,
 };
 
 static char *sysnames[] = {
@@ -288,7 +290,8 @@ static char *sysnames[] = {
   [SYS_ioctl]       "ioctl",
   [SYS_faccessat]   "faccessat",
   [SYS_fstatat]     "fstatat",
-  [SYS_fcntl]       "fcntl"
+  [SYS_fcntl]       "fcntl",
+  [SYS_renameat2]   "renameat2",
 };
 
 void
