@@ -73,7 +73,7 @@ LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 
-CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -g -Werror
+CFLAGS = -Wall -O -fno-omit-frame-pointer -ggdb -g
 CFLAGS += -MD
 CFLAGS += -mcmodel=medany
 CFLAGS += -ffreestanding -fno-common -nostdlib -mno-relax

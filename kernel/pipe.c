@@ -84,7 +84,7 @@ pipewrite(struct pipe *pi, int user, uint64 addr, int n)
     // if(copyin(pr->pagetable, &ch, addr + i, 1) == -1)
     // if(copyin2(&ch, addr + i, 1) == -1)
     //   break;
-    if(either_copyin(user,&ch, addr + i, 1) == -1)
+    if(either_copyin(&ch, user, addr + i, 1) == -1)
       break;
     pi->data[pi->nwrite++ % PIPESIZE] = ch;
   }

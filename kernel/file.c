@@ -249,7 +249,6 @@ dirnext(struct file *f, uint64 addr)
 struct file*
 findfile(char* path)
 {
-  int dev;
   char name[FAT32_MAX_FILENAME + 1];
   // struct dirent* ep = ename(NULL,path,&dev);
   struct dirent* ep = new_lookup_path(NULL ,path, 0, name);
@@ -262,7 +261,7 @@ findfile(char* path)
       eput(ep);
       return p->ofile[i];
     }
-    if(p->ofile[i]->type==FD_DEVICE&&p->ofile[i]->major==dev){
+    if(p->ofile[i]->type==FD_DEVICE){
       eunlock(ep);
       eput(ep);
       return p->ofile[i];
@@ -420,7 +419,7 @@ uint64 file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n)
   uint64 wlen = 0;
   uint64 ret = 0;
   if(addr){
-    if(either_copyin(1,&off,addr,sizeof(uint64))<0){
+    if(either_copyin(&off,1,addr,sizeof(uint64))<0){
       return -1;
     }
   }else{

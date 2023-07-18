@@ -41,7 +41,7 @@ uint64 sys_utimensat(void)
 	TimeSpec t[2];
     char pathName[255];
 	struct dirent *dp, *ep;
-    int flags, devNo;
+    int flags;
     if(argfd(0,&fd,&fp)<0 && fd!=AT_FDCWD && fd!=-1){
 	  return -1;
 	}
@@ -91,25 +91,29 @@ uint64 sys_utimensat(void)
 		}
 		dp = fp->ep;
 	}
-	// ep = ename(dp, pathName, &devNo);
-	// ep = lookup_path(dp, pathName, devNo);
-	// if (!ep)
-	// {
-	// 	return -ENOENT;
-	// }
+	ep = new_ename(dp, pathName);
+	if (!ep)
+	{
+		return -ENOENT;
+	}
 
 	if (pathAddr)
 	{
 		f = findfile(pathName);
+		f->t0_sec = t[0].second;
+		f->t0_nsec = t[0].microSecond;
+		f->t1_sec = t[1].second;
+		f->t1_nsec = t[1].microSecond;
 	}
 	else if (fd >= 0 && t[0].second != 1)
 	{
 		if(argfd(0, &fd , &f)<0) return -1;	
+		if(t[0].second > f->t0_sec || t[0].second == 0) f->t0_sec = t[0].second;
+		if(t[0].microSecond > f->t0_nsec || t[0].microSecond == 0) f->t0_nsec = t[0].microSecond;
+		if(t[1].second > f->t1_sec || t[1].second == 0) f->t1_sec = t[1].second;
+		if(t[1].microSecond > f->t1_nsec || t[1].microSecond == 0) f->t1_nsec = t[1].microSecond;
 	}
-	f->t0_sec = t[0].second;
-		f->t0_nsec = t[0].microSecond;
-		f->t1_sec = t[1].second;
-		f->t1_nsec = t[1].microSecond;
+	
 	
 	return 0;
 }
