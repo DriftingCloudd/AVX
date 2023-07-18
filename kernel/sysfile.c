@@ -132,6 +132,7 @@ sys_dup(void)
 uint64
 sys_dup3(void)
 {
+  /*
   struct file *f;
   int new;
   int fd;
@@ -141,6 +142,18 @@ sys_dup3(void)
     return -1;
   filedup(f);
   return fd;
+  */
+  struct file *f;
+  int newfd;
+  struct proc *p = myproc();
+  if (argfd(0,0,&f) < 0 || argint(1,&newfd) < 0 || newfd < 0)
+    return -1;
+  if (newfd >= NOFILEMAX(p)) 
+    return -24;
+  if (p->ofile[newfd] != f)
+    p ->ofile[newfd] = filedup(f);
+  
+  return newfd;
 }
 
 uint64
