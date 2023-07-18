@@ -250,8 +250,9 @@ struct file*
 findfile(char* path)
 {
   int dev;
+  char name[FAT32_MAX_FILENAME + 1];
   // struct dirent* ep = ename(NULL,path,&dev);
-  struct dirent* ep = lookup_path(NULL, path, &dev);
+  struct dirent* ep = new_lookup_path(NULL ,path, 0, name);
   struct proc* p = myproc();
   if(ep == NULL)return NULL;
   elock(ep);
