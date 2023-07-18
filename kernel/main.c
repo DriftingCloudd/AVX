@@ -33,6 +33,7 @@ volatile static int started = 0;
 static int first = 0;
 extern void boot_stack(void);
 extern void boot_stack_top(void);
+extern void initlogbuffer(void);
 
 void
 main(unsigned long hartid, unsigned long dtb_pa)

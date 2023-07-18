@@ -420,7 +420,7 @@ uint64 file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n)
   uint64 wlen = 0;
   uint64 ret = 0;
   if(addr){
-    if(either_copyin(1,&off,addr,sizeof(uint64))<0){
+    if(either_copyin(&off,1,addr,sizeof(uint64))<0){
       return -1;
     }
   }else{
