@@ -56,7 +56,7 @@ argfd(int n, int *pfd, struct file **pf)
   }
 
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
-    printf("fd: %d argfd: fd error\n", fd);
+    printf("fd: %d argfd: fd error\n", fd); 
     return -1;
   }
   
@@ -890,7 +890,15 @@ sys_openat()
     elock(ep);
   }
   // 如果ename成功创建了ep,那么返回的dirent是已经上锁的
-  // TODO:检查设备
+
+  if ((ep->attribute & ATTR_DIRECTORY) && ( !(flags&O_WRONLY) && !(flags&O_RDWR) )) {
+    eunlock(ep);
+    eput(ep);
+    printf("directory only can be read\n");
+
+    return -1;
+  }
+
   if(NULL == (f = filealloc()) || (fd = fdalloc(f)) < 0) {
     // 文件描述符或者文件创建失败
     if (f) {
@@ -898,7 +906,7 @@ sys_openat()
     }
     eunlock(ep);
     eput(ep);
-    return -1;
+    return -24;
   }
   if (!(ep->attribute & ATTR_DIRECTORY) && (flags & O_TRUNC)) {
     etrunc(ep);
@@ -909,7 +917,7 @@ sys_openat()
   f->readable = !(flags & O_WRONLY);
   f->writable = (flags & O_WRONLY) || (flags & O_RDWR);
   eunlock(ep);
-  if (dp && 0 != strncmp("test_openat.txt",path,FAT32_MAX_FILENAME)) {
+  if (dp) {
     elock(dp);
   }
   struct proc *p = myproc();
