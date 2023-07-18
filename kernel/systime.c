@@ -106,6 +106,8 @@ uint64 sys_utimensat(void)
 	{
 		if(argfd(0, &fd , &f)<0) return -1;	
 	}
+	if (NULL == f)
+		return -2;
 	f->t0_sec = t[0].second;
 		f->t0_nsec = t[0].microSecond;
 		f->t1_sec = t[1].second;

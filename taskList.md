@@ -5,29 +5,29 @@ ps (usertrap)
 hwclock (openat)
 kill 10 (syscall 129)
 ls (usertrap)
-touch test.txt
-echo "hello world" > test.txt
-cat test.txt
-cut -c 3 test.txt
-od test.txt
-head test.txt
-tail test.txt 
-hexdump -C test.txt 
-md5sum test.txt
-echo "ccccccc" >> test.txt
-echo "bbbbbbb" >> test.txt
-echo "aaaaaaa" >> test.txt
-echo "2222222" >> test.txt
-echo "1111111" >> test.txt
-echo "bbbbbbb" >> test.txt
-sort test.txt | ./busybox uniq
-stat test.txt
-strings test.txt 
-wc test.txt
-[ -f test.txt ]
-more test.txt
-rm test.txt
-grep hello busybox_cmd.txt
+touch test.txt(ok)
+echo "hello world" > test.txt (ok)
+cat test.txt (filesend)
+cut -c 3 test.txt (ok)
+od test.txt (ok)
+head test.txt (ok)
+tail test.txt (ok)
+hexdump -C test.txt (dup3出问题)
+md5sum test.txt (ok)
+echo "ccccccc" >> test.txt (ok)
+echo "bbbbbbb" >> test.txt (ok)
+echo "aaaaaaa" >> test.txt (ok)
+echo "2222222" >> test.txt (ok)
+echo "1111111" >> test.txt (ok)
+echo "bbbbbbb" >> test.txt (ok)
+sort test.txt | ./busybox uniq (ok)
+stat test.txt (ok)
+strings test.txt (ok) 
+wc test.txt (ok)
+[ -f test.txt ] (ok)
+more test.txt (sendfile)
+rm test.txt (ok)
+grep hello busybox_cmd.txt (openat打不开？)
 cp busybox_cmd.txt busybox_cmd.bak
 rm busybox_cmd.bak
 find -name "busybox_cmd.txt"
