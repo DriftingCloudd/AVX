@@ -385,7 +385,7 @@ void fileiolock(struct file* f){
         acquire(&f->pipe->lock);
         break;
     case FD_DEVICE:
-        acquire(&(devsw + f->major)->lk);
+        // acquire(&(devsw + f->major)->lk);
         break;
     case FD_ENTRY:
         elock(f->ep);
@@ -401,7 +401,7 @@ void fileiounlock(struct file* f){
         release(&f->pipe->lock);
         break;
     case FD_DEVICE:
-        release(&(devsw + f->major)->lk);
+        // release(&(devsw + f->major)->lk);
         break;
     case FD_ENTRY:
         eunlock(f->ep);
