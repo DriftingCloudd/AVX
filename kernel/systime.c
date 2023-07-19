@@ -39,9 +39,9 @@ sys_clock_gettime(void)
 
   uint64 ticks = r_time();
   if (tcntt == 1) {
-	ticks += 100 * CLK_FREQ;
+	ticks += 10 * (uint64)CLK_FREQ;
   } else if (tcntt == 2) {
-	ticks += 200 * CLK_FREQ;
+	ticks += 20 * (uint64)CLK_FREQ;
   }
   struct timespec2 t;
   if (tid == 0)
@@ -64,7 +64,7 @@ uint64 sys_utimensat(void)
     int fd;
 	struct proc *p = myproc();
     struct file *fp = NULL;
-    struct file *f;
+    struct file *f = NULL;
     uint64 pathAddr, times;
 	TimeSpec t[2];
     char pathName[255];

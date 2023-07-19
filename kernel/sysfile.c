@@ -83,7 +83,7 @@ fdalloc(struct file *f)
   }
   return -1;
 }
-
+/*
 // Comedymaker added
 // Allocate a specifed file descriptor for the given file
 static int
@@ -92,12 +92,12 @@ fdalloc3(struct file *f, int new)
   struct proc *p = myproc();
   if (new < NOFILE && p->ofile[new] == 0)
   {
-    /* code */
     p->ofile[new] = f;
     return new;
   }
   return -1;
 }
+*/
 static struct dirent* create(char *path, short type, int mode);
 uint64
 sys_mkdirat(void) 
