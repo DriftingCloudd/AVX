@@ -74,5 +74,8 @@
 #define SYS_rt_sigaction 134
 #define SYS_rt_sigprocmask 135
 #define SYS_rt_sigreturn 139
+#define SYS_ppoll       73
+#define SYS_getpgid     155
+#define SYS_setpgid     154
 
 #endif

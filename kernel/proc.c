@@ -183,6 +183,7 @@ found:
   p->utime = 1;
   p->uid = 0;
   p->gid = 0;
+  p->pgid = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){

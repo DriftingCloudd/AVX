@@ -56,6 +56,7 @@ struct proc {
   int pid;                     // Process ID
   int uid;                     // Process User ID
   int gid;                     // Process Group ID
+  int pgid;
 
   uint64 filelimit;
 

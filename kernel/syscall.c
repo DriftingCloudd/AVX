@@ -160,6 +160,9 @@ extern uint64 sys_fcntl();
 extern uint64 sys_renameat2();
 extern uint64 sys_rt_sigaction(void);
 extern uint64 sys_rt_sigprocmask(void);
+extern uint64 sys_ppoll();
+extern uint64 sys_getpgid();
+extern uint64 sys_setpgid();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -230,6 +233,9 @@ static uint64 (*syscalls[])(void) = {
   [SYS_rt_sigaction] sys_rt_sigaction,
   [SYS_rt_sigprocmask] sys_rt_sigprocmask,
   [SYS_renameat2]   sys_renameat2,
+  [SYS_ppoll]       sys_ppoll,
+  [SYS_getpgid]      sys_getpgid,
+  [SYS_setpgid]     sys_setpgid,
 };
 
 static char *sysnames[] = {
@@ -300,6 +306,9 @@ static char *sysnames[] = {
   [SYS_rt_sigaction] "rt_sigaction",
   [SYS_rt_sigprocmask] "rt_sigprocmask",
   [SYS_renameat2]   "renameat2",
+  [SYS_ppoll]       "ppoll",
+  [SYS_getpgid]      "getpgid",
+  [SYS_setpgid]      "setpgid",
 };
 
 void
@@ -311,11 +320,11 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // if(num != 64 && num != 63)
-    //   printf("pid %d: %s\n", p->pid, sysnames[num]);
+    //printf("pid %d: %s\n", p->pid, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
     // if(num != 64 && num != 63)
-    //   printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
+    printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }

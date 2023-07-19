@@ -351,6 +351,27 @@ sys_setgid(void)
 }
 
 uint64
+sys_setpgid(void)
+{
+  int pid,pgid;
+  if (argint(0,&pid) < 0 || argint(1,&pgid) < 0)
+    return -1;
+  myproc()->pgid = pgid;
+
+  return 0;
+}
+
+uint64
+sys_getpgid(void)
+{
+  int pid;
+  if (argint(0,&pid) < 0)
+    return -1;
+
+  return myproc() -> pgid;
+}
+
+uint64
 sys_getgid(void)
 {
   return myproc() ->gid;
@@ -360,6 +381,18 @@ uint64
 sys_getegid(void)
 {
   return myproc() ->gid;
+}
+
+uint64
+sys_ppoll(void)
+{
+  return 0;
+}
+
+uint64
+sys_chroot(void)
+{
+  return 0;
 }
 
 uint64
