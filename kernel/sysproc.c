@@ -432,26 +432,6 @@ sys_uname(void)
   return 0;
 }
 
-uint64
-sys_clock_gettime(void)
-{
-  uint64 tid,addr;
-  if (argaddr(0,&tid) < 0 || argaddr(1,&addr) < 0)
-    return -1;
-
-  uint64 ticks = r_time();
-  struct timespec2 t;
-  if (tid == 0)
-  {
-    t.tv_sec = ticks / CLK_FREQ;
-    t.tv_nsec = ticks / CLK_FREQ / 1000000000;
-  }
-  if (either_copyout(1,addr,(char*)&t,sizeof(struct timespec2)) < 0)
-    return -1;
-
-  return 0;
-}
-
 //by comedymaker
 //todo
 //para: uint32_t *uaddr, int futex_op, uint32_t val,
