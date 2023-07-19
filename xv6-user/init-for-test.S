@@ -36,9 +36,12 @@ program_exit:
 
 busybox:
         .string "/busybox\0"
+param:
+        .string "du\0"
 argv_busybox:
-        .long busybox
-        .zero 12 //不知道为什么要填充12个字节，实际上才能让编译出来的代码填充了8个0字节。
+        .dword busybox
+        .dword param
+        .dword 0 //不知道为什么要填充12个字节，实际上才能让编译出来的代码填充了8个0字节。
 
 
 

@@ -265,6 +265,25 @@ sys_fstat(void)
   return filestat(f, st);
 }
 
+void print_kstat(struct kstat *st){
+  debug_print("st_dev: %d\n", st->st_dev);
+  debug_print("st_ino: %d\n", st->st_ino);
+  debug_print("st_mode: %d\n", st->st_mode);
+  debug_print("st_nlink: %d\n", st->st_nlink);
+  debug_print("st_uid: %d\n", st->st_uid);
+  debug_print("st_gid: %d\n", st->st_gid);
+  debug_print("st_rdev: %d\n", st->st_rdev);
+  debug_print("st_size: %d\n", st->st_size);
+  debug_print("st_blksize: %d\n", st->st_blksize);
+  debug_print("st_blocks: %d\n", st->st_blocks);
+  debug_print("st_atime_sec: %d\n", st->st_atime_sec);
+  debug_print("st_atime_nsec: %d\n", st->st_atime_nsec);
+  debug_print("st_mtime_sec: %d\n", st->st_mtime_sec);
+  debug_print("st_mtime_nsec: %d\n", st->st_mtime_nsec);
+  debug_print("st_ctime_sec: %d\n", st->st_ctime_sec);
+  debug_print("st_ctime_nsec: %d\n", st->st_ctime_nsec);
+}
+
 uint64
 sys_fstatat(void)
 {
@@ -279,6 +298,7 @@ sys_fstatat(void)
   if (argstr(1,pathname,FAT32_MAX_FILENAME + 1) < 0 || argaddr(2,&st) < 0 || argint(3,&flags) < 0)
     return -1;
   
+  //debug_print("fstatat: fd:%d pathname:%s st:%p flags:%d\n",fd,pathname,st,flags);
   struct proc *p = myproc();
   if (AT_FDCWD == fd)
     dp = NULL;
@@ -300,6 +320,7 @@ sys_fstatat(void)
   eunlock(ep);
   eput(ep);
 
+  //print_kstat(&kst);
   if (copyout(p->pagetable,st,(char*)&kst,sizeof(kst)) < 0)
     return -1;
 
@@ -1017,11 +1038,11 @@ sys_mmap()
     printf("argint off error\n");
     return -1;
   }
-  printf("mmap start:%p len:%d prot:%d flags:%d fd:%d off:%d\n",start,len,prot,flags,fd,off);
-  if (len == 0) {
-    len = 32 * PGSIZE;
-    return mmap(start,len,prot,flags,fd,off) + 16 * PGSIZE;
-  }
+  // debug_print("mmap start:%p len:%d prot:%d flags:%d fd:%d off:%d\n",start,len,prot,flags,fd,off);
+  // if (len == 0) {
+  //   len = 32 * PGSIZE;
+  //   return mmap(start,len,prot,flags,fd,off) + 16 * PGSIZE;
+  // }
 
   return mmap(start,len,prot,flags,fd,off);
 }

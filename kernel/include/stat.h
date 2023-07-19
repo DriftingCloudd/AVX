@@ -22,7 +22,7 @@ struct kstat {
         uint32 st_gid;
         uint64 st_rdev;
         unsigned long __pad;
-        unsigned int st_size;
+        long int st_size;
         uint32 st_blksize;
         int __pad2;
         uint64 st_blocks;

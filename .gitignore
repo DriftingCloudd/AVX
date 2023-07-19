@@ -24,3 +24,4 @@ init-for-test-bin.txt
 tmp
 tools/backtrace
 .idea
+sdcard.img

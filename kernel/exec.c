@@ -82,6 +82,16 @@ pagetable_t create_kpagetable(struct proc *p){
   return kpagetable;
 }
 
+void
+stackdisplay(pagetable_t pagetable,uint64 sp,uint64 sz)
+{
+  for(uint64 i = sp;i<sz;i+=8){
+    uint64 *pa = (void*)walkaddr(pagetable,i) + i - PGROUNDDOWN(i);
+    if(pa)printf("addr %p phaddr:%p value %p\n",i, pa, *pa);
+    else printf("addr %p value (nil)\n",i);
+  }
+}
+
 //加载elf文件，成功返回0，失败返回-1
 uint64
 loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t pagetable, pagetable_t kpagetable,uint64 * sz){
@@ -132,7 +142,7 @@ loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t 
       //printf("ph.type: %d ph.type != ELF_PROG_LOAD\n", ph.type);
     }
   }
-  printf("loadelf success\n");
+  // debug_print("loadelf success\n");
   return 0;
 }
 
@@ -320,7 +330,7 @@ int exec(char *path, char **argv, char ** env)
       goto bad;
     }
     sp -= sp%16;
-    if(copyout(pagetable, sp, (char *)envp, (argc+1)*sizeof(uint64)) < 0){
+    if(copyout(pagetable, sp, (char *)(envp+1), (argc+1)*sizeof(uint64)) < 0){
       printf("copyout failed\n");
       goto bad;
     }
@@ -334,6 +344,8 @@ int exec(char *path, char **argv, char ** env)
   if(copyout(pagetable, sp, (char *)ustack, (argc+2)*sizeof(uint64)) < 0)
     goto bad;
 
+  // printf("ustack[0]:%d\n",ustack[0]);
+  // stackdisplay(pagetable, sp, sz);
   // arguments to user main(argc, argv)
   // argc is returned via the system call return
   // value, which goes in a0.

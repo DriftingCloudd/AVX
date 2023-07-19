@@ -227,11 +227,12 @@ sys_sbrk(void)
 uint64
 sys_brk(void)
 {
-  int addr;
-  int n;
+  uint64 addr;
+  uint64 n;
 
-  if(argint(0, &n) < 0)
+  if(argaddr(0, &n) < 0)
     return -1;
+  // debug_print("sys_brk n = %p\n", n);
   addr = myproc()->sz;
   if (n == 0)
   {
@@ -239,9 +240,9 @@ sys_brk(void)
   }
   if (n >= addr)
   {
-    if(growproc(n - addr) < 0)
+    if(growproc(n) < 0)
       return -1;
-    else return 0;
+    else return myproc()->sz;
   }
   return -1;
 }
@@ -373,9 +374,10 @@ sys_set_tid_address(void)
   uint64 address;
   argaddr(0,&address);
   myproc()->clear_child_tid = address;
-  copyout(myproc()->pagetable, address, 0, sizeof(int));
+  int tid = 1;
+  copyout(myproc()->pagetable, address, (char*) &tid, sizeof(int));
   
-  return myproc() ->pid;
+  return tid;
 }
 
 uint64

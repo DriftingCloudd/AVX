@@ -747,9 +747,9 @@ static int hashpath(char* name){
 
 void ekstat(struct dirent *de, struct kstat *st)
 {
-    st->st_dev = 1;
+    st->st_dev = 0;
     st->st_size = de->file_size;
-    st->st_blksize = 4096; // Maybe it's right
+    st->st_blksize = 512; // Maybe it's right
     st->st_blocks = (st->st_size + st->st_blksize - 1) / st->st_blksize;
     st->st_atime_nsec = 0;
     st->st_atime_sec = 0;
