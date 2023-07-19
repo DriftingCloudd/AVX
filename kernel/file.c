@@ -113,6 +113,44 @@ filestat(struct file *f, uint64 addr)
   return -1;
 }
 
+uint64
+fileinput(struct file* f, int user, uint64 addr, int n, uint64 off){
+  uint64 r = 0;
+  switch (f->type) {
+    case FD_PIPE:
+        r = piperead(f->pipe, user, addr, n);
+        break;
+    case FD_DEVICE:
+        r = (devsw + f->major)->read(user, addr, n);
+        break;
+    case FD_ENTRY:
+        r = eread(f->ep, user, addr, off, n);
+        break;
+    case FD_NONE:
+    	return 0;
+  }
+  return r;
+}
+
+uint64
+fileoutput(struct file* f, int user, uint64 addr, int n, uint64 off){
+  uint64 r = 0;
+  switch (f->type) {
+    case FD_PIPE:
+        r = pipewrite(f->pipe, user, addr, n);
+        break;
+    case FD_DEVICE:
+        r = (devsw + f->major)->write(user, addr, n);
+        break;
+    case FD_ENTRY:
+        r = ewrite(f->ep, user, addr, off, n);
+        break;
+    case FD_NONE:
+    	return 0;
+  }
+  return r;
+}
+
 // Read from file f.
 // addr is a user virtual address.
 int
@@ -125,7 +163,7 @@ fileread(struct file *f, uint64 addr, int n)
 
   switch (f->type) {
     case FD_PIPE:
-        r = piperead(f->pipe, addr, n);
+        r = piperead(f->pipe, 1, addr, n);
         break;
     case FD_DEVICE:
         if(f->major < 0 || f->major >= NDEV || !devsw[f->major].read)
@@ -156,7 +194,7 @@ filewrite(struct file *f, uint64 addr, int n)
     return -1;
 
   if(f->type == FD_PIPE){
-    ret = pipewrite(f->pipe, addr, n);
+    ret = pipewrite(f->pipe, 1, addr, n);
   } else if(f->type == FD_DEVICE){
     if(f->major < 0 || f->major >= NDEV || !devsw[f->major].write)
       return -1;
@@ -211,9 +249,9 @@ dirnext(struct file *f, uint64 addr)
 struct file*
 findfile(char* path)
 {
-  int dev;
+  char name[FAT32_MAX_FILENAME + 1];
   // struct dirent* ep = ename(NULL,path,&dev);
-  struct dirent* ep = lookup_path(NULL, path, &dev);
+  struct dirent* ep = new_lookup_path(NULL ,path, 0, name);
   struct proc* p = myproc();
   if(ep == NULL)return NULL;
   elock(ep);
@@ -223,7 +261,7 @@ findfile(char* path)
       eput(ep);
       return p->ofile[i];
     }
-    if(p->ofile[i]->type==FD_DEVICE&&p->ofile[i]->major==dev){
+    if(p->ofile[i]->type==FD_DEVICE){
       eunlock(ep);
       eput(ep);
       return p->ofile[i];
@@ -324,53 +362,109 @@ fileseek(struct file *f, uint64 offset, int whence)
   return ret;
 }
 
+int fileillegal(struct file* f){
+  switch (f->type) {
+    case FD_PIPE:
+    case FD_DEVICE:
+        // if(f->major < 0 || f->major >= getdevnum() || !devsw[f->major].read || !devsw[f->major].write)
+        //   return 1;
+        if(f->major < 0 || !devsw[f->major].read || !devsw[f->major].write)
+          return 1;
+    case FD_ENTRY:
+        break;
+    default:
+      panic("fileillegal");
+      return 1;
+  }
+  return 0;
+}
+
+void fileiolock(struct file* f){
+  switch (f->type) {
+    case FD_PIPE:
+        acquire(&f->pipe->lock);
+        break;
+    case FD_DEVICE:
+        // acquire(&(devsw + f->major)->lk);
+        break;
+    case FD_ENTRY:
+        elock(f->ep);
+        break;
+    case FD_NONE:
+    	return;
+  }
+}
+
+void fileiounlock(struct file* f){
+  switch (f->type) {
+    case FD_PIPE:
+        release(&f->pipe->lock);
+        break;
+    case FD_DEVICE:
+        // release(&(devsw + f->major)->lk);
+        break;
+    case FD_ENTRY:
+        eunlock(f->ep);
+        break;
+    case FD_NONE:
+    	return;
+  }
+}
+
 //TODO
 uint64 file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n)
 {
-  // uint64 off = 0;
-  // uint64 rlen = 0;
-  // uint64 wlen = 0;
-  // uint64 ret = 0;
-  // if(addr){
-  //   if(either_copyin(1,&off,addr,sizeof(uint64))<0){
-  //     return -1;
-  //   }
-  // }else{
-  //   off = fin->off;
-  // }
-  // if(fileillegal(fin)||fileillegal(fout)){
-  //     return -1;
-  // }
-  // print_f_info(fin);
-  // print_f_info(fout);
-  // fileiolock(fin);
-  // fileiolock(fout);
-  // while(n){
-  //   char buf[512];
-  //   rlen = MIN(n,512);
-  //   rlen = fileinput(fin,0,(uint64)&buf,rlen,off);
-  //   printf("[filesend] send rlen %p\n",rlen);
-  //   off += rlen;
-  //   n -= rlen;
-  //   if(!rlen){
-  //     break;
-  //   }
-  //   wlen = fileoutput(fout,0,(uint64)&buf,rlen,fout->off);
-  //   printf("[filesend] send wlen:%p\n",rlen,wlen);
-  //   fout->off += wlen;
-  //   ret += wlen;
-  // }
-  // fileiounlock(fout);
-  // fileiounlock(fin);
-  // //printf("[filesend]after send fout off:%p\n",fout->off);
-  // if(addr){
-  //   if(either_copyout(1,addr,&off,sizeof(uint64))<0){
-  //     __debug_warn("[filesend]obtain addr bad\n");
-  //     return -1;
-  //   }
-  // }else{
-  //   fin->off = off;
-  // }
-  // return ret;
+  uint64 off = 0;
+  uint64 rlen = 0;
+  uint64 wlen = 0;
+  uint64 ret = 0;
+  if(addr){
+    if(either_copyin(&off,1,addr,sizeof(uint64))<0){
+      return -1;
+    }
+  }else{
+    off = fin->off;
+  }
+  if(fileillegal(fin)||fileillegal(fout)){
+      return -1;
+  }
+  fileiolock(fin);
+  fileiolock(fout);
+  while(n){
+    char buf[512];
+    // rlen = MIN(n,512);
+    if (n > 512)
+    {
+      rlen = 512;
+    }
+    else
+    {
+      rlen = n;
+    }
+    
+    
+    rlen = fileinput(fin,0,(uint64)&buf,rlen,off);
+    printf("[filesend] send rlen %p\n",rlen);
+    off += rlen;
+    n -= rlen;
+    if(!rlen){
+      break;
+    }
+    wlen = fileoutput(fout,0,(uint64)&buf,rlen,fout->off);
+    printf("[filesend] send wlen:%p\n",rlen,wlen);
+    fout->off += wlen;
+    ret += wlen;
+  }
+  fileiounlock(fout);
+  fileiounlock(fin);
+  //printf("[filesend]after send fout off:%p\n",fout->off);
+  if(addr){
+    if(either_copyout(1,addr,&off,sizeof(uint64))<0){
+      return -1;
+    }
+  }else{
+    fin->off = off;
+  }
+  return ret;
   
 }

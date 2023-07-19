@@ -56,7 +56,7 @@ argfd(int n, int *pfd, struct file **pf)
   }
 
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
-    printf("fd: %d argfd: fd error\n", fd);
+    printf("fd: %d argfd: fd error\n", fd); 
     return -1;
   }
   
@@ -132,6 +132,7 @@ sys_dup(void)
 uint64
 sys_dup3(void)
 {
+  /*
   struct file *f;
   int new;
   int fd;
@@ -141,6 +142,18 @@ sys_dup3(void)
     return -1;
   filedup(f);
   return fd;
+  */
+  struct file *f;
+  int newfd;
+  struct proc *p = myproc();
+  if (argfd(0,0,&f) < 0 || argint(1,&newfd) < 0 || newfd < 0)
+    return -1;
+  if (newfd >= NOFILEMAX(p)) 
+    return -24;
+  if (p->ofile[newfd] != f)
+    p ->ofile[newfd] = filedup(f);
+  
+  return newfd;
 }
 
 uint64
@@ -562,10 +575,13 @@ sys_getcwd(void)
     }
   }
 
-  // if (copyout(myproc()->pagetable, addr, s, strlen(s) + 1) < 0)
+  if (copyout(myproc()->pagetable, addr, s, strlen(s) + 1) < 0)
+    return -1;
+  /*
   if (copyout2(addr, s, strlen(s) + 1) < 0)
     return -1;
-  
+  */
+
   return addr;
 
 }
@@ -873,7 +889,7 @@ sys_openat()
 
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
-    if (flags & O_CREATE) {
+    if ((flags & O_CREATE) || strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
       ep = new_create(dp,path,T_FILE,flags);
       if (NULL == ep) {
         // 创建不了dirent
@@ -887,7 +903,15 @@ sys_openat()
     elock(ep);
   }
   // 如果ename成功创建了ep,那么返回的dirent是已经上锁的
-  // TODO:检查设备
+
+  if ((ep->attribute & ATTR_DIRECTORY) && ( !(flags&O_WRONLY) && !(flags&O_RDWR) )) {
+    eunlock(ep);
+    eput(ep);
+    printf("directory only can be read\n");
+
+    return -1;
+  }
+
   if(NULL == (f = filealloc()) || (fd = fdalloc(f)) < 0) {
     // 文件描述符或者文件创建失败
     if (f) {
@@ -895,7 +919,7 @@ sys_openat()
     }
     eunlock(ep);
     eput(ep);
-    return -1;
+    return -24;
   }
   if (!(ep->attribute & ATTR_DIRECTORY) && (flags & O_TRUNC)) {
     etrunc(ep);
@@ -906,7 +930,7 @@ sys_openat()
   f->readable = !(flags & O_WRONLY);
   f->writable = (flags & O_WRONLY) || (flags & O_RDWR);
   eunlock(ep);
-  if (dp && 0 != strncmp("test_openat.txt",path,FAT32_MAX_FILENAME)) {
+  if (dp) {
     elock(dp);
   }
   struct proc *p = myproc();
@@ -1013,6 +1037,94 @@ sys_munmap()
   // TODO
   //return munmap(start,len);
   return 0;
+}
+
+uint64
+sys_renameat2(void)
+{
+  char old_path[FAT32_MAX_PATH],new_path[FAT32_MAX_PATH], *name;
+  int olddirfd,newdirfd,srclock;
+  struct file *oldfp, *newfp;
+  struct dirent *olddp = NULL, *newdp = NULL, *src = NULL, *dst = NULL, *pdst = NULL;
+  struct proc *p = myproc();
+  
+  if (argstr(1,old_path,FAT32_MAX_PATH) < 0 || argstr(3,new_path,FAT32_MAX_PATH) < 0) 
+    return -36;
+  
+  if (argfd(0, &olddirfd, &oldfp) < 0) {
+    if (old_path[0] != '/' && olddirfd != AT_FDCWD)
+      return -9;
+    olddp = p->cwd;
+  }
+  if (argfd(2,&newdirfd,&newfp) < 0) {
+    if (new_path[0] != '/' && newdirfd != AT_FDCWD)
+      return -9;
+    newdp = p->cwd;
+  }
+  if ((src = new_ename(olddp,old_path)) == NULL || (pdst = new_enameparent(newdp,new_path,old_path)) == NULL || (name = formatname(old_path)) == NULL)
+    goto failure;
+  for (struct dirent *ep = pdst; NULL != ep; ep = ep ->parent)
+    if (ep == src)
+      goto failure;
+
+  uint off;
+  elock(src);
+  srclock = 1;
+  elock(pdst);
+  dst = dirlookup(pdst,name,&off);
+  if (NULL != dst) {
+    eunlock(pdst);
+    if (src == dst) 
+      goto failure;
+    else if (src ->attribute & dst ->attribute & ATTR_DIRECTORY) {
+      elock(dst);
+      if (!isdirempty(dst)) {
+        eunlock(dst);
+        goto failure;
+      }
+      elock(pdst);
+    } else {
+      goto failure;
+    }
+  }
+
+  if (dst) {
+    eremove(dst);
+    eunlock(dst);
+  }
+  
+  memmove(src->filename,name,FAT32_MAX_FILENAME);
+  emake(pdst,src,off);
+  if (src->parent != pdst) {
+    eunlock(pdst);
+    elock(src->parent);
+  }
+  eremove(src);
+  eunlock(src->parent);
+  struct dirent *psrc = src ->parent;
+  src ->parent = edup(pdst);
+  src ->off = off;
+  src ->valid = 1;
+  eunlock(src);
+  eput(psrc);
+  if (dst)
+    eput(dst);
+  eput(pdst);
+  eput(src);
+
+  return 0;
+
+failure:
+  if (srclock)
+    eunlock(src);
+  if (dst)
+    eput(dst);
+  if (pdst)
+    eput(pdst);
+  if (src)
+    eput(src);
+  return -1;
+
 }
 
 static int fdalloc2(struct file *f,int start) {

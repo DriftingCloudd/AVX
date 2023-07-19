@@ -157,6 +157,7 @@ extern uint64 sys_faccessat();
 extern uint64 sys_fstatat();
 extern uint64 sys_sendfile();
 extern uint64 sys_fcntl();
+extern uint64 sys_renameat2();
 extern uint64 sys_rt_sigaction(void);
 extern uint64 sys_rt_sigprocmask(void);
 
@@ -228,6 +229,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_fcntl]       sys_fcntl,
   [SYS_rt_sigaction] sys_rt_sigaction,
   [SYS_rt_sigprocmask] sys_rt_sigprocmask,
+  [SYS_renameat2]   sys_renameat2,
 };
 
 static char *sysnames[] = {
@@ -297,6 +299,7 @@ static char *sysnames[] = {
   [SYS_fcntl]       "fcntl",
   [SYS_rt_sigaction] "rt_sigaction",
   [SYS_rt_sigprocmask] "rt_sigprocmask",
+  [SYS_renameat2]   "renameat2",
 };
 
 void

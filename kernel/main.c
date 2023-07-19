@@ -16,6 +16,7 @@
 #include "include/vm.h"
 #include "include/disk.h"
 #include "include/buf.h"
+#include "include/sysinfo.h"
 #ifndef QEMU
 #include "include/sd_final.h"
 extern void _start(void);
@@ -30,6 +31,7 @@ volatile static int started = 0;
 static int first = 0;
 extern void boot_stack(void);
 extern void boot_stack_top(void);
+extern void initlogbuffer(void);
 
 void
 main(unsigned long hartid, unsigned long dtb_pa)

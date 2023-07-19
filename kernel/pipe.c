@@ -65,7 +65,7 @@ pipeclose(struct pipe *pi, int writable)
 }
 
 int
-pipewrite(struct pipe *pi, uint64 addr, int n)
+pipewrite(struct pipe *pi, int user, uint64 addr, int n)
 {
   int i;
   char ch;
@@ -82,7 +82,9 @@ pipewrite(struct pipe *pi, uint64 addr, int n)
       sleep(&pi->nwrite, &pi->lock);
     }
     // if(copyin(pr->pagetable, &ch, addr + i, 1) == -1)
-    if(copyin2(&ch, addr + i, 1) == -1)
+    // if(copyin2(&ch, addr + i, 1) == -1)
+    //   break;
+    if(either_copyin(&ch, user, addr + i, 1) == -1)
       break;
     pi->data[pi->nwrite++ % PIPESIZE] = ch;
   }
@@ -92,7 +94,7 @@ pipewrite(struct pipe *pi, uint64 addr, int n)
 }
 
 int
-piperead(struct pipe *pi, uint64 addr, int n)
+piperead(struct pipe *pi, int user, uint64 addr, int n)
 {
   int i;
   struct proc *pr = myproc();
@@ -111,7 +113,9 @@ piperead(struct pipe *pi, uint64 addr, int n)
       break;
     ch = pi->data[pi->nread++ % PIPESIZE];
     // if(copyout(pr->pagetable, addr + i, &ch, 1) == -1)
-    if(copyout2(addr + i, &ch, 1) == -1)
+    // if(copyout2(addr + i, &ch, 1) == -1)
+    //   break;
+    if(either_copyout(user, addr + i, &ch, 1) == -1)
       break;
   }
   wakeup(&pi->nwrite);  //DOC: piperead-wakeup

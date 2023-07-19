@@ -102,8 +102,9 @@ struct vma* alloc_mmap_vma(struct proc *p, int flags, uint64 addr, uint64 sz, in
 {
     struct vma* vma = NULL;
     struct vma* find_vma = find_mmap_vma(p->vma);
-    if (0 == addr) 
+    if (0 == addr && sz < find_vma ->addr) {
         addr = PGROUNDDOWN(find_vma->addr - sz);
+    }
     vma = alloc_vma(p,MMAP,addr,sz,perm,1,NULL);
     if (NULL == vma) 
     {

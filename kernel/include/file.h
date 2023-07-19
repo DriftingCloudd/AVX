@@ -1,6 +1,8 @@
 #ifndef __FILE_H
 #define __FILE_H
 
+#include "fat32.h"
+
 #define O_RDONLY  0x000
 #define O_WRONLY  0x001
 #define O_RDWR    0x002
@@ -31,7 +33,10 @@ struct file {
 // #define	mkdev(m,n)  ((uint)((m)<<16| (n)))
 
 // map major device number to device functions.
+#define DEV_NAME_MAX 12
 struct devsw {
+  char name[DEV_NAME_MAX+1];
+  struct spinlock lk; //added for file_send
   int (*read)(int, uint64, int);
   int (*write)(int, uint64, int);
 };
