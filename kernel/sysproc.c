@@ -477,4 +477,5 @@ uint64 sys_futex(void)
             panic("Futex type not support!\n");
   }
   return 0;
-}
+};
+

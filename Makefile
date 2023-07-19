@@ -43,7 +43,9 @@ OBJS += \
   $K/console.o \
   $K/mmap.o \
   $K/fs.o \
-  $K/vma.o 
+  $K/vma.o \
+  $K/signal.o \
+  $K/syssig.o
 
 
 ifeq ($(platform), qemu)

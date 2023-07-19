@@ -68,7 +68,7 @@ usertrap(void)
   
   if(r_scause() == 8){
     // system call
-    if(p->killed)
+    if(p->killed == SIGTERM)
       exit(-1);
     // sepc points to the ecall instruction,
     // but we want to return to the next instruction.
@@ -84,12 +84,17 @@ usertrap(void)
   else {
     printf("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
-    // trapframedump(p->trapframe);
-    p->killed = 1;
+    trapframedump(p->trapframe);
+    p->killed = SIGTERM;
   }
 
-  if(p->killed)
-    exit(-1);
+  if(p->killed){
+    if(p->killed == SIGTERM){
+      exit(-1);
+    }
+    sighandle();
+  }
+    
 
   // give up the CPU if this is a timer interrupt.
   if(which_dev == 2)
