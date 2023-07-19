@@ -496,4 +496,5 @@ uint64 sys_futex(void)
         default:
             panic("Futex type not support!\n");
   }
+  return 0;
 };

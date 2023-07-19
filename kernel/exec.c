@@ -107,7 +107,14 @@ loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t 
       if(!getphdr&&phdr&&ph.off == 0){ 
         phdr->vaddr = elf->phoff + ph.vaddr;
       }
-      if((sz1 = uvmalloc(pagetable, kpagetable, *sz, PGROUNDUP(ph.vaddr + ph.memsz))) == 0){
+      int perm = 0;
+      if(ph.flags & ELF_PROG_FLAG_EXEC)
+        perm |= PTE_X;
+      if(ph.flags & ELF_PROG_FLAG_WRITE)
+        perm |= PTE_W;
+      if(ph.flags & ELF_PROG_FLAG_READ)
+        perm |= PTE_R;
+      if((sz1 = uvmalloc(pagetable, kpagetable, *sz, PGROUNDUP(ph.vaddr + ph.memsz), perm)) == 0){
         printf("uvmalloc failed\n");
         return -1;
       }
@@ -134,7 +141,7 @@ create_user_stack(uint64 * sz, uint64 * sp, uint64 * stackbase, pagetable_t page
 
   *sz = PGROUNDUP(*sz);
   uint64 sz1;
-  if((sz1 = uvmalloc(pagetable, kpagetable, *sz, *sz + STACK_SIZE)) == 0){
+  if((sz1 = uvmalloc(pagetable, kpagetable, *sz, *sz + STACK_SIZE, PTE_R | PTE_W)) == 0){
     return -1;
   }
   *sz = sz1;

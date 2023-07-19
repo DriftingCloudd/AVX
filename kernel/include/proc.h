@@ -9,6 +9,7 @@
 #include "fat32.h"
 #include "trap.h"
 #include "vma.h"
+#include "signal.h"
 
 // Saved registers for kernel context switches.
 struct context {
@@ -74,7 +75,10 @@ struct proc {
   int ktime;
   int utime;
   uint64 clear_child_tid;
-
+  //signal
+  sigaction sigaction[SIGRTMAX + 1]; // signal action
+  __sigset_t sig_set; // signal mask
+  __sigset_t sig_pending; // pending signal
 };
 
 #define NOFILEMAX(p) (p->filelimit<NOFILE?p->filelimit:NOFILE)

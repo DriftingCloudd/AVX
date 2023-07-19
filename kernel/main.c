@@ -17,9 +17,6 @@
 #include "include/disk.h"
 #include "include/buf.h"
 #ifndef QEMU
-#include "include/sdcard.h"
-#include "include/fpioa.h"
-#include "include/dmac.h"
 #include "include/sd_final.h"
 extern void _start(void);
 #endif

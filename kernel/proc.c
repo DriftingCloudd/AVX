@@ -91,6 +91,9 @@ procinit(void)
       p->tmask = 0;
       p->ktime = 0;
       p->utime = 0;
+      memset(p->sigaction, 0, sizeof(p->sigaction));
+      memset(p->sig_set.__val, 0, sizeof(p->sig_set));
+      memset(p->sig_pending.__val, 0, sizeof(p->sig_pending));
       // Allocate a page for the process's kernel stack.
       // Map it high in memory, followed by an invalid
       // guard page.
@@ -344,7 +347,7 @@ growproc(int n)
 
   sz = p->sz;
   if(n > 0){
-    if((sz = uvmalloc(p->pagetable, p->kpagetable, sz, sz + n)) == 0) {
+    if((sz = uvmalloc(p->pagetable, p->kpagetable, sz, sz + n, PTE_R | PTE_W)) == 0) {
       return -1;
     }
   } else if(n < 0){

@@ -70,5 +70,8 @@
 #define SYS_fstatat     79
 #define SYS_sendfile    71
 #define SYS_fcntl       25
+#define SYS_rt_sigaction 134
+#define SYS_rt_sigprocmask 135
+#define SYS_rt_sigreturn 139
 
 #endif

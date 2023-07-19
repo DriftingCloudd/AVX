@@ -918,7 +918,7 @@ sys_openat()
 uint64
 sys_faccessat(void)
 {
-  int dirfd,mode,flags,devno = -1,emode = R_OK | W_OK | X_OK;
+  int dirfd,mode,flags,emode = R_OK | W_OK | X_OK;
   struct file *fp;
   struct dirent *dp, *ep;
   struct proc *p = myproc();
