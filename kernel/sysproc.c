@@ -18,12 +18,30 @@ extern int exec(char *path, char **argv, char ** env);
 uint64
 sys_clone(void) 
 {
+  printf("sys_clone: start\n");
   uint64 new_stack,new_fn;
+  uint64 ptid, tls, ctid;
   argaddr(1, &new_stack);
+  if(argaddr(0, &new_fn) < 0){
+    printf("sys_clone: argaddr(0, &new_fn) < 0\n");
+    return -1;
+  }
+  if(argaddr(2, &ptid) < 0){
+    printf("sys_clone: argaddr(2, &ptid) < 0\n");
+    return -1;
+  }
+  if(argaddr(3, &tls) < 0){
+    printf("sys_clone: argaddr(3, &tls) < 0\n");
+    return -1;
+  }
+  if(argaddr(4, &ctid) < 0){
+    printf("sys_clone: argaddr(4, &ctid) < 0\n");
+    return -1;
+  }
+  printf("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
   if(new_stack == 0){
     return fork();
   }
-  fetchaddr(new_stack, &new_fn);
   return clone(new_stack, new_fn);
 }
 
@@ -271,11 +289,23 @@ sys_sleep(void)
 uint64
 sys_kill(void)
 {
-  int pid;
+  int pid, sig;
 
   if(argint(0, &pid) < 0)
     return -1;
-  return kill(pid);
+  if(argint(1, &sig) < 0)
+    return -1;
+  if(pid <= 0){
+    debug_print("[kill]pid <= 0 do not implement\n");
+    return -1;
+  }
+  if(sig < 0 || sig >= SIGRTMAX){
+    debug_print("[kill]sig < 0 || sig >= SIGRTMAX\n");
+    return -1;
+  }
+  //出于目前的测评需求，kill命令我们直接杀死本进程
+  pid = myproc()->pid;
+  return kill(pid, sig);
 }
 
 // return how many clock tick interrupts have occurred

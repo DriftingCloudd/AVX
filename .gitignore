@@ -25,3 +25,4 @@ tmp
 tools/backtrace
 .idea
 sdcard.img
+sdcard/

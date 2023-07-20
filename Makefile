@@ -45,7 +45,8 @@ OBJS += \
   $K/fs.o \
   $K/vma.o \
   $K/signal.o \
-  $K/syssig.o
+  $K/syssig.o \
+  $K/bin.o
 
 
 ifeq ($(platform), qemu)
@@ -105,7 +106,7 @@ linker = ./linker/qemu.ld
 endif
 
 # Compile Kernel
-$T/kernel: $(OBJS) $(linker) $U/initcode $U/init_for_test
+$T/kernel: $(OBJS) $(linker) $U/initcode
 	@if [ ! -d "./target" ]; then mkdir target; fi
 	@$(LD) $(LDFLAGS) -T $(linker) -o $T/kernel $(OBJS)
 	@$(OBJDUMP) -S $T/kernel > $T/kernel.asm
@@ -151,13 +152,15 @@ qemu-run:
 	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
+$K/bin.S:$U/initcode $U/init-for-test
+
 $U/initcode: $U/initcode.S
 	$(CC) $(CFLAGS) -march=rv64g -nostdinc -I. -Ikernel -c $U/initcode.S -o $U/initcode.o
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $U/initcode.out $U/initcode.o
 	$(OBJCOPY) -S -O binary $U/initcode.out $U/initcode
 	$(OBJDUMP) -S $U/initcode.o > $U/initcode.asm
 
-$U/init_for_test: $U/init-for-test.S
+$U/init-for-test: $U/init-for-test.S
 	$(CC) $(CFLAGS) -march=rv64g -nostdinc -I. -Ikernel -c $U/init-for-test.S -o $U/init-for-test.o
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0 -o $U/init-for-test.out $U/init-for-test.o
 	$(OBJCOPY) -S -O binary $U/init-for-test.out $U/init-for-test

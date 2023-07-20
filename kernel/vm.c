@@ -247,15 +247,20 @@ void
 uvminit(pagetable_t pagetable, pagetable_t kpagetable, uchar *src, uint sz)
 {
   char *mem;
-
-  if(sz >= PGSIZE)
-    panic("inituvm: more than a page");
+  uint64 i;
+  for(i = 0; i + PGSIZE < sz; i+=PGSIZE){
+    mem = kalloc();
+    // printf("[uvminit]kalloc: %p\n", mem);
+    memset(mem, 0, PGSIZE);
+    mappages(pagetable, i, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X|PTE_U);
+    mappages(kpagetable, i, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X);
+    memmove(mem, src + i, PGSIZE);
+  }
   mem = kalloc();
-  // printf("[uvminit]kalloc: %p\n", mem);
-  memset(mem, 0, PGSIZE);
-  mappages(pagetable, 0, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X|PTE_U);
-  mappages(kpagetable, 0, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X);
-  memmove(mem, src, sz);
+  mappages(pagetable, i, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X|PTE_U);
+  mappages(kpagetable, i, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X);
+  memmove(mem, src + i, sz % PGSIZE);
+  printf("uvminit done sz:%d\n", sz);
   // for (int i = 0; i < sz; i ++) {
   //   printf("[uvminit]mem: %p, %x\n", mem + i, mem[i]);
   // }

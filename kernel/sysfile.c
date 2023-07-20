@@ -893,6 +893,7 @@ sys_openat()
   char path[FAT32_MAX_FILENAME];
   int dirfd,flags,mode,fd;
   struct file *f,*dirf;
+  dirf = NULL;
   struct dirent *dp = NULL,*ep;
   argfd(0,&dirfd,&dirf);
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {

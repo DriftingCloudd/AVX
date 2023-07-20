@@ -8,7 +8,7 @@
 #define SYS_wait         3
 #define SYS_pipe         4
 #define SYS_read        63
-#define SYS_kill         6
+#define SYS_kill         129
 #define SYS_exec         7
 #define SYS_execve     221
 #define SYS_fstat       80

@@ -10,6 +10,7 @@ struct sysinfo;
 int fork(void);
 int exit(int) __attribute__((noreturn));
 int wait(int*);
+int wait4(int, int*, int);
 int pipe(int*);
 int write(int fd, const void *buf, int len);
 int read(int fd, void *buf, int len);

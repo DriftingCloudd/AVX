@@ -21,28 +21,28 @@
 static int
 loadseg(pagetable_t pagetable, uint64 va, struct dirent *ep, uint offset, uint sz)
 {
-  uint i, n;
+  uint i = 0, n;
   uint64 pa;
   uint64 va_off = 0;
   if((va % PGSIZE) != 0){
     va_off = va % PGSIZE;
     va = va - va_off;
-  }
-
-  for(i = 0; i < sz; ){
     pa = walkaddr(pagetable, va);
     if(pa == NULL)
       panic("loadseg: address should exist");
-    if(va_off != 0 && i == 0){
-      n = PGSIZE - va_off;
-      if(eread(ep, 0, (uint64)(pa + va_off), offset, n) != n){
-        printf("loadseg: read error\n");
-        return -1;
-      }
-      i += n;
-      va += PGSIZE;
-      continue;
+    n = PGSIZE - va_off;
+    if(eread(ep, 0, (uint64)(pa + va_off), offset, n) != n){
+      printf("loadseg: read error\n");
+      return -1;
     }
+    i += n;
+    va += PGSIZE;
+  }
+
+  for( ; i < sz; ){
+    pa = walkaddr(pagetable, va);
+    if(pa == NULL)
+      panic("loadseg: address should exist");
     if(sz - i < PGSIZE)
       n = sz - i;
     else
