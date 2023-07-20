@@ -6,13 +6,14 @@
 #include "include/spinlock.h"
 #include "include/proc.h"
 #include "include/intr.h"
-#include "include/kalloc.h"
+#include "include/kmalloc.h"
 #include "include/printf.h"
 #include "include/string.h"
 #include "include/fat32.h"
 #include "include/file.h"
 #include "include/trap.h"
 #include "include/vm.h"
+#include "include/kalloc.h"
 #include "include/vma.h"
 
 
@@ -202,7 +203,7 @@ found:
 
   p->kstack = VKSTACK;
 
-  p->exec_close = kalloc();
+  p->exec_close = kmalloc(NOFILE * sizeof(int));
   for (int fd = 0; fd < NOFILE; fd++)
     p->exec_close[fd] = 0;
 

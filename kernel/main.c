@@ -14,6 +14,7 @@
 #include "include/proc.h"
 #include "include/plic.h"
 #include "include/vm.h"
+#include "include/kmalloc.h"
 #include "include/disk.h"
 #include "include/buf.h"
 #include "include/sysinfo.h"
@@ -51,6 +52,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     printf("hart %d enter main()...\n", hartid);
     #endif
     kinit();         // physical page allocator
+    kmallocinit();
     kvminit();       // create kernel page table
     kvminithart();   // turn on paging
     timerinit();     // init a lock for timer
