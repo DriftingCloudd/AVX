@@ -544,3 +544,25 @@ uint64 sys_futex(void)
   return 0;
 };
 
+uint64
+sys_gettid(void)
+{
+  struct proc *p = myproc();
+  uint64 addr = p->clear_child_tid;
+  int tid;
+  if (addr)
+  {
+    if (either_copyin(&tid, 1, addr, sizeof(tid)) < 0)
+    {
+      return -1;
+    }
+    return tid;
+  }
+  else
+  {
+    return p->pid;
+  }
+  
+  
+}
+

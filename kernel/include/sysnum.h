@@ -60,7 +60,6 @@
 #define SYS_set_tid_address 96
 #define SYS_clock_gettime   113
 #define SYS_futex       98
-#define SYS_set_tid_address 96
 #define SYS_utimensat   88
 #define SYS_syslog      116
 #define SYS_writev      66
@@ -77,5 +76,7 @@
 #define SYS_ppoll       73
 #define SYS_getpgid     155
 #define SYS_setpgid     154
+#define SYS_tgkill      178
+#define SYS_gettid      178
 
 #endif
