@@ -902,6 +902,23 @@ clone(uint64 new_stack, uint64 new_fn)
     release(&np->lock);
     return -1;
   }
+
+  struct vma *nvma = NULL;
+  if (NULL == (nvma = vma_copy(p,np->vma))) {
+    printf("clone failed\n");
+    return -1;
+  }
+  np ->vma = nvma;
+  nvma = nvma->next;
+  // TODO: thread create
+  while (nvma != p->vma) {
+    if (vma_map(p->pagetable,np->pagetable,nvma) < 0) {
+      printf("clone: vma deep mapping failed\n");
+      return -1;
+    }
+    nvma = nvma->next;
+  }
+
   np->sz = p->sz;
 
   np->parent = p;
