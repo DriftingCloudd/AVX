@@ -5,6 +5,6 @@
 
 void 			kmallocinit(void);
 void*           kmalloc(uint size);
-void            kfree(void *addr);
+void            kmfree(void *addr);
 
 #endif
