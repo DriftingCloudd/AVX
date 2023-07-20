@@ -366,7 +366,7 @@ fork(void)
   struct vma *nvma = vma_copy(np,p->vma);
   if (NULL != nvma) {
       nvma = nvma->next;
-    while (nvma != p->vma) {
+    while (nvma != np->vma) {
       if (vma_map(p->pagetable,np->pagetable,nvma) < 0) {
         printf("clone: vma deep mapping failed\n");
         return -1;
@@ -935,7 +935,7 @@ clone(uint64 new_stack, uint64 new_fn)
   struct vma *nvma = vma_copy(np,p->vma);
   if (NULL != nvma) {
       nvma = nvma->next;
-    while (nvma != p->vma) {
+    while (nvma != np->vma) {
       if (vma_map(p->pagetable,np->pagetable,nvma) < 0) {
         printf("clone: vma deep mapping failed\n");
         return -1;

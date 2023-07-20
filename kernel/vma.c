@@ -144,6 +144,8 @@ struct vma* vma_copy(struct proc *np, struct vma *head)
         pre_vma = pre_vma->next;
     }
 
+    return new_vma;
+
 failure:
     np ->vma = NULL;
     // TODO free_vma_list
