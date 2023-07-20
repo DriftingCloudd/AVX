@@ -244,7 +244,7 @@ sys_brk(void)
       return -1;
     else return myproc()->sz;
   }
-  return -1;
+  return 0;
 }
 
 uint64
