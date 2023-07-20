@@ -45,7 +45,8 @@ OBJS += \
   $K/fs.o \
   $K/vma.o \
   $K/signal.o \
-  $K/syssig.o
+  $K/syssig.o \
+  $K/kmalloc.o \
 
 
 ifeq ($(platform), qemu)
