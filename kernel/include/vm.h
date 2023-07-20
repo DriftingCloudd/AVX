@@ -35,4 +35,5 @@ void            vmprint(pagetable_t pagetable);
 uint64          uvmalloc1(pagetable_t pagetable, uint64 start, uint64 end, int perm);
 uint64          uvmdealloc1(pagetable_t pagetable, uint64 start, uint64 end);
 uint64          experm(pagetable_t pagetable, uint64 va,uint64 perm);
+pte_t *         walk(pagetable_t pagetable, uint64 va, int alloc);
 #endif 
