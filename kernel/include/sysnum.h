@@ -76,7 +76,7 @@
 #define SYS_ppoll       73
 #define SYS_getpgid     155
 #define SYS_setpgid     154
-#define SYS_tgkill      178
+#define SYS_tgkill      131
 #define SYS_gettid      178
 
 #endif

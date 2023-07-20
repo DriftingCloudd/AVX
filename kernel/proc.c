@@ -739,6 +739,26 @@ kill(int pid, int sig)
   return -1;
 }
 
+static int cmp_parent(int pid,int sid){
+  struct proc* p;
+  for(p = proc;p < &proc[NPROC];p++){
+    if(p->pid == sid) break;
+  }
+  while(p){
+    p = p->parent;
+    if(!p)break;
+    if(p->pid == pid) return 1;
+  }
+  return 0;
+}
+
+int
+tgkill(int tid, int pid, int sig)
+{
+  if(!cmp_parent(pid,tid)) return -1;
+  else return kill(tid,sig);
+} 
+
 // Copy to either a user address, or kernel address,
 // depending on usr_dst.
 // Returns 0 on success, -1 on error.

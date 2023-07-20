@@ -3,7 +3,7 @@
 #include "include/syscall.h"
 #include "include/vm.h"
 #include "include/signal.h"
-
+#include "include/proc.h"
 /**
 * syscall rt_sigaction将会调用此函数
 * @param signum 信号编号
@@ -98,13 +98,11 @@ sys_rt_sigreturn(void){
  * @return tgkill返回值
 */
 uint64 sys_tgkill(void){
-  int sig;
-  int tid;
-  int pid;
-  argint(0,&pid);
-  argint(1,&tid);
-  argint(2,&sig);
-  //TODO: tgkill to finish
-//   return tgkill(pid,tid,sig);
-	return 0;
+	int sig;
+	int tid;
+	int pid;
+	argint(0,&pid);
+	argint(1,&tid);
+	argint(2,&sig);
+	return tgkill(tid,pid,sig);
 }
