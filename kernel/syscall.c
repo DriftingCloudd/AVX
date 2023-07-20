@@ -163,6 +163,8 @@ extern uint64 sys_rt_sigprocmask(void);
 extern uint64 sys_ppoll();
 extern uint64 sys_getpgid();
 extern uint64 sys_setpgid();
+extern uint64 sys_tgkill();
+extern uint64 sys_gettid();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -236,6 +238,8 @@ static uint64 (*syscalls[])(void) = {
   [SYS_ppoll]       sys_ppoll,
   [SYS_getpgid]      sys_getpgid,
   [SYS_setpgid]     sys_setpgid,
+  [SYS_tgkill]      sys_tgkill,
+  [SYS_gettid]      sys_gettid,
 };
 
 static char *sysnames[] = {
@@ -309,6 +313,8 @@ static char *sysnames[] = {
   [SYS_ppoll]       "ppoll",
   [SYS_getpgid]      "getpgid",
   [SYS_setpgid]      "setpgid",
+  [SYS_tgkill]      "tgkill",
+  [SYS_gettid]      "gettid",
 };
 
 void

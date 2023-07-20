@@ -90,3 +90,21 @@ sys_rt_sigreturn(void){
 
     return 0;
 }
+
+/**
+ * @param pid 
+ * @param tid
+ * @param sig
+ * @return tgkill返回值
+*/
+uint64 sys_tgkill(void){
+  int sig;
+  int tid;
+  int pid;
+  argint(0,&pid);
+  argint(1,&tid);
+  argint(2,&sig);
+  //TODO: tgkill to finish
+//   return tgkill(pid,tid,sig);
+	return 0;
+}
