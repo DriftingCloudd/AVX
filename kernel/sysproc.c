@@ -566,3 +566,9 @@ sys_gettid(void)
   
 }
 
+//TODO
+uint64 sys_umask(void)
+{
+  return 0;
+}
+
