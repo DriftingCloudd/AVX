@@ -258,6 +258,7 @@ clean:
 	$T/* \
 	$U/initcode $U/initcode.out \
 	$U/init-for-test $U/init-for-test.out \
+	$U/busybox_test.bin \
 	$U/*.bin \
 	$K/kernel \
 	.gdbinit \
