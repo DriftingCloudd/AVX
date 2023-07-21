@@ -173,6 +173,7 @@ extern uint64 sys_gettid();
 extern uint64 sys_umask();
 extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
+extern uint64 sys_statfs();
 
 
 static uint64 (*syscalls[])(void) = {
@@ -252,6 +253,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_umask]       sys_umask,
   [SYS_rt_sigtimedwait] sys_rt_sigtimedwait,
   [SYS_prlimit64]   sys_prlimit64,
+  [SYS_statfs]      sys_statfs,
 };
 
 static char *sysnames[] = {
@@ -330,6 +332,7 @@ static char *sysnames[] = {
   [SYS_umask]       "umask",
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_prlimit64]   "prlimit64",
+  [SYS_statfs]      "statfs",
 };
 
 void

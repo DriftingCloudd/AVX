@@ -81,5 +81,6 @@
 #define SYS_umask       166
 #define SYS_rt_sigtimedwait 137
 #define SYS_prlimit64   261
+#define SYS_statfs      43
 
 #endif

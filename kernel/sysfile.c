@@ -1099,6 +1099,39 @@ sys_mmap()
 }
 
 uint64
+sys_statfs()
+{
+  char path[FAT32_MAX_PATH];
+  uint64 addr;
+  if (argstr(0,path,FAT32_MAX_PATH) < 0 || argaddr(1,&addr) < 0) {
+    return -1;
+  }
+  statfs stat;
+  if (0 == strncmp(path,"/proc",5)) {
+    stat.f_type = PROC_SUPER_MAGIC;
+    stat.f_fsid[0] = 0;
+    stat.f_fsid[1] = 1;
+  } else if (0 == strncmp(path,"tmp",3)) {
+    stat.f_type = TMPFS_MAGIC;
+    stat.f_fsid[0] = 0;
+    stat.f_fsid[1] = 2;
+  } 
+  stat.f_bsize = 512;
+  stat.f_blocks = 4;
+  stat.f_bfree = 4;
+  stat.f_bavail = 4;
+  stat.f_files = 4;
+  stat.f_namelen = 64;
+  stat.f_frsize = 32;
+  stat.f_flags = 0;
+  if (either_copyout(1,addr,(void*)&stat,sizeof(stat)) < 0) {
+    return -1;
+  }
+
+  return 0;
+}
+
+uint64
 sys_munmap()
 {
   uint64 start,len;
