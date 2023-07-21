@@ -78,5 +78,6 @@
 #define SYS_setpgid     154
 #define SYS_tgkill      131
 #define SYS_gettid      178
+#define SYS_umask       166
 
 #endif

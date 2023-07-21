@@ -5,7 +5,7 @@ lmbench_all lat_syscall -P 1 read
 lmbench_all lat_syscall -P 1 write
 busybox mkdir -p /var/tmp
 busybox touch /var/tmp/lmbench
-lmbench_all lat_syscall -P 1 stat /var/tmp/lmbench
+lmbench_all lat_syscall -P 1 stat /var/tmp/lmbenccdh
 lmbench_all lat_syscall -P 1 fstat /var/tmp/lmbench
 lmbench_all lat_syscall -P 1 open /var/tmp/lmbench
 lmbench_all lat_select -n 100 -P 1 file
