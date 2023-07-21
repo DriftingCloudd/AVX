@@ -81,8 +81,8 @@ int fat32_init()
     printf("[fat32_init] enter!\n");
     #endif
     #ifdef visionfive
-    //struct buf *b = bread(0, 8192);
-    struct buf *b = bread(0, 2048);
+    struct buf *b = bread(0, 8192);
+    // struct buf *b = bread(0, 2048);
     #else
     struct buf *b = bread(0, 0);
     #endif
