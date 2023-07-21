@@ -79,5 +79,7 @@
 #define SYS_tgkill      131
 #define SYS_gettid      178
 #define SYS_umask       166
+#define SYS_rt_sigtimedwait 137
+#define SYS_prlimit64   261
 
 #endif

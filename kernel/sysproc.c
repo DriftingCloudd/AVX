@@ -46,6 +46,12 @@ sys_clone(void)
 }
 
 uint64
+sys_prlimit64()
+{
+  return 0;
+}
+
+uint64
 sys_wait4() 
 {
   uint64 addr;

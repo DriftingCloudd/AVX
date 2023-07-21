@@ -1,0 +1,24 @@
+./runtest.exe -w entry-static.exe fdopen(panic virtio_dist_intr status lseek出现问题)
+./runtest.exe -w entry-static.exe fscanf (同上错误)
+./runtest.exe -w entry-static.exe fwscanf (error)
+./runtest.exe -w entry-static.exe pthread_cancel_points
+./runtest.exe -w entry-static.exe pthread_cancel
+./runtest.exe -w entry-static.exe pthread_cond
+./runtest.exe -w entry-static.exe pthread_tsd
+./runtest.exe -w entry-static.exe socket(网络系统调用没写)
+./runtest.exe -w entry-static.exe stat(同上错误)
+./runtest.exe -w entry-static.exe ungetc(同上)
+./runtest.exe -w entry-static.exe utime(时间实现有问题)
+./runtest.exe -w entry-static.exe daemon_failure(返回参数有问题)
+./runtest.exe -w entry-static.exe fflush_exit(virtio错误)
+./runtest.exe -w entry-static.exe ftello_unflushed_append(virtio错误)
+./runtest.exe -w entry-static.exe pthread_robust_detach
+./runtest.exe -w entry-static.exe pthread_cancel_sem_wait
+./runtest.exe -w entry-static.exe pthread_cond_smasher
+./runtest.exe -w entry-static.exe pthread_condattr_setclock
+./runtest.exe -w entry-static.exe pthread_exit_cancel
+./runtest.exe -w entry-static.exe pthread_once_deadlock
+./runtest.exe -w entry-static.exe pthread_rwlock_ebusy
+./runtest.exe -w entry-static.exe rlimit_open_files(dup 返回值错了)
+./runtest.exe -w entry-static.exe statvfs(syscall 43)
+./runtest.exe -w entry-static.exe syscall_sign_extend(openat一些文件有问题)
