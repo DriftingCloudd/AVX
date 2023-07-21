@@ -107,13 +107,23 @@ sys_mkdirat(void)
   //下面的写法目前是和mkdir一样的，但是注意，我们的参数path是第1个，而mkdir的path是第0个
   char path[FAT32_MAX_PATH];
   struct dirent *ep;
-  if(argstr(1, path, FAT32_MAX_PATH) < 0 || (ep = create(path, T_DIR, 0)) == 0){
+  int mode;
+  if(argstr(1, path, FAT32_MAX_PATH) < 0 || argint(2, &mode) < 0){
     return -1;
   }
+  // printf("path: %s, mode: %d\n", path, mode);
+  if (strlen(path) == 1)
+  {
+    return 0;
+  }
   
+  if((ep = create(path, T_DIR, 0)) == 0)
+  {
+    return -1;
+  }
   eunlock(ep);
   eput(ep);
-  printf("arrive2\n");
+  // printf("arrive2\n");
   return 0;
 }
 
@@ -356,7 +366,7 @@ static struct dirent*
 create(char *path, short type, int mode)
 {
   struct dirent *ep, *dp;
-  printf("%s\n", path);
+  // printf("path:%s\n", path);
   char name[FAT32_MAX_FILENAME + 1];
   char pname[FAT32_MAX_FILENAME + 1];
   if (type == T_DIR) {
@@ -370,6 +380,8 @@ create(char *path, short type, int mode)
   if((dp = enameparent(path, name)) == NULL)
     {
       get_parent_name(path, pname, name);
+      // printf("name:%s\n", name);
+      // printf("pname:%s\n", pname);
       dp = create(pname, T_DIR, O_RDWR);
       if(dp == NULL)
       {
@@ -393,13 +405,14 @@ create(char *path, short type, int mode)
     eunlock(dp);
     eput(ep);
     eput(dp);
+    // printf("here1!\n");
     return NULL;
   }
 
   eunlock(dp);
   eput(dp);
-
   elock(ep);
+  // printf("here2!\n");
   return ep;
 }
 
