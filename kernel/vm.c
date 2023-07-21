@@ -103,8 +103,10 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
     if(*pte & PTE_V) {
       pagetable = (pagetable_t)PTE2PA(*pte);
     } else {
-      if(!alloc || (pagetable = (pde_t*)kalloc()) == NULL)
+      if(!alloc || (pagetable = (pde_t*)kalloc()) == NULL){
+        // printf("walk: not valid\n");
         return NULL;
+      }
       memset(pagetable, 0, PGSIZE);
       *pte = PA2PTE(pagetable) | PTE_V;
     }
@@ -121,16 +123,25 @@ walkaddr(pagetable_t pagetable, uint64 va)
   pte_t *pte;
   uint64 pa;
 
-  if(va >= MAXVA)
+  if(va >= MAXVA){
+    debug_print("walkaddr: va >= MAXVA\n");
     return NULL;
+  }
+    
 
   pte = walk(pagetable, va, 0);
-  if(pte == 0)
+  if(pte == 0){
+    // printf("walkaddr: pte == 0\n");
     return NULL;
-  if((*pte & PTE_V) == 0)
+  }
+  if((*pte & PTE_V) == 0){
+    debug_print("walkaddr: *pte & PTE_V == 0\n");
     return NULL;
-  if((*pte & PTE_U) == 0)
+  }
+  if((*pte & PTE_U) == 0){
+    debug_print("walkaddr: *pte & PTE_U == 0\n");
     return NULL;
+  }
   pa = PTE2PA(*pte);
   return pa;
 }
@@ -495,8 +506,10 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
   while(len > 0){
     va0 = PGROUNDDOWN(srcva);
     pa0 = walkaddr(pagetable, va0);
-    if(pa0 == NULL)
+    if(pa0 == NULL){
+      debug_print("copyin: pa0 is NULL\n");
       return -1;
+    }
     n = PGSIZE - (srcva - va0);
     if(n > len)
       n = len;

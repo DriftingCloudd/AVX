@@ -14,6 +14,11 @@
 #include "include/string.h"
 
 #define STACK_SIZE 36*PGSIZE
+enum redir{
+  REDIR_OUT,
+  REDIR_APPEND,
+};
+extern uint64 open(char* path, int omode);
 
 // va must be page-aligned
 // and the pages from va to va+sz must already be mapped.
@@ -227,9 +232,10 @@ int exec(char *path, char **argv, char ** env)
 
   kpagetable = create_kpagetable(p);
   if(kpagetable == 0){
+    debug_print("[exec]create_kpagetable failed\n");
     return -1;
   }
-
+  // printf("coming 1\n");
   if((ep = ename(path)) == NULL) {
     #ifdef DEBUG
     printf("[exec] %s not found\n", path);
@@ -262,7 +268,6 @@ int exec(char *path, char **argv, char ** env)
     goto bad;
   }
   //printf("[exec] stackbase: %p stacktop: %p\n", stackbase, sz);
-  int is_mount = strncmp(path, "/mount", 5)==0 || strncmp(path, "/umount", 6)==0; 
 
   //下面开始处理environment的问题
   uint64 envp[MAXARG+1];
@@ -271,6 +276,10 @@ int exec(char *path, char **argv, char ** env)
     printf("user_stack_push_str failed 1\n");
     goto bad;
   }
+  // if((sp = user_stack_push_str(pagetable, envp, "PATH=/", sp, stackbase)) == -1){
+  //   printf("user_stack_push_str failed 2\n");
+  //   goto bad;
+  // }
 
   //添加随机数
   uint64 random[2] = { 0xcde142a16cb93072, 0x128a39c127d8bbf2 };
@@ -292,10 +301,27 @@ int exec(char *path, char **argv, char ** env)
   alloc_aux(aux,AT_SECURE, 0);
   alloc_aux(aux,AT_EGID, 0);		
   alloc_aux(aux,AT_RANDOM, sp);
-
+  // printf("coming 2\n");
   // Push argument strings, prepare rest of stack in ustack.
   ustack[0] = 0;
+  int redirection = -1;
+  int jump = 0;
+  char * redir_file = 0;
   for(argc = 0; argv[argc]; argc++) {
+    if(strlen(argv[argc]) == 1 && strncmp(argv[argc], ">", 1) == 0){
+      // printf("redirection 1 %s\n", argv[argc]);
+      redirection = REDIR_OUT;
+      continue;
+    }else if(strlen(argv[argc]) == 2 && strncmp(argv[argc], ">>", 2) == 0){
+      // printf("redirection 2\n");
+      redirection = REDIR_APPEND;
+      continue;
+    }
+    if(redirection != -1 && jump == 0){
+      redir_file = argv[argc];
+      jump = 1;
+      continue;
+    }
     if(argc >= MAXARG)
       goto bad;
     if((sp = user_stack_push_str(pagetable, ustack, argv[argc], sp, stackbase)) == -1){
@@ -317,11 +343,7 @@ int exec(char *path, char **argv, char ** env)
     printf("loadaux failed\n");
     goto bad;
   }
-  if(is_mount){
-    memmove(ustack + sizeof(uint64*), ustack, (argc+1)*sizeof(uint64));
-    ustack[0] = 0;
-    argc++;
-  }
+
   argc = envp[0];
   if(argc){
     sp -= (argc+1) * sizeof(uint64);
@@ -375,13 +397,28 @@ int exec(char *path, char **argv, char ** env)
       p->exec_close[fd] = 0;
     }
   }
+  //处理重定向
+  if(redirection != -1){
+    fileclose(p->ofile[1]);
+    p->ofile[1] = 0;
+    int fd = 0;
+    if(redirection == REDIR_OUT){
+      fd = open(redir_file, O_WRONLY | O_CREATE);
+    }else if(redirection == REDIR_APPEND){
+      fd = open(redir_file, O_WRONLY | O_CREATE | O_APPEND);
+    }
+    if(fd != 1){
+      debug_print("[exec]:fd != 1\n");
+      goto bad;
+    }
+    p->exec_close[1] = 1;
+  }
 
   proc_freepagetable(oldpagetable, oldsz);
   w_satp(MAKE_SATP(p->kpagetable));
   sfence_vma();
   kvmfree(oldkpagetable, 0);
-  if(is_mount)
-    return sp;
+
   return argc; // this ends up in a0, the first argument to main(argc, argv)
 
  bad:

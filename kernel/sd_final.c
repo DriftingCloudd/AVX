@@ -39,7 +39,7 @@ static volatile uint32 card_int;
 static uint32 SDIO_WaitEvent(SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 {
 	uint32 ret = 0;
-	printf("%d", arg);
+	// printf("%d", arg);
 	switch (event) {
 		case SDIO_START_COMMAND:
 			sstate.cstate = SDIO_STATE_CMD_WAIT;
@@ -450,7 +450,7 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 			SD_IRQHandler(SDMMC);
 		}
 	}
-	printf("tt: %d\n", tt);
+	// printf("tt: %d\n", tt);
 	return 0;
 	
 }
