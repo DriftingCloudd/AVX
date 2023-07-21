@@ -362,6 +362,35 @@ fork(void)
     release(&np->lock);
     return -1;
   }
+
+  struct vma *nvma = vma_copy(np,p->vma);
+  if (NULL != nvma) {
+      nvma = nvma->next;
+    while (nvma != np->vma) {
+      if (vma_map(p->pagetable,np->pagetable,nvma) < 0) {
+        printf("clone: vma deep mapping failed\n");
+        return -1;
+      }
+      nvma = nvma->next;
+   }
+  }
+  /*
+  if (NULL == (nvma = vma_copy(p,np->vma))) {
+    printf("clone failed\n");
+    return -1;
+  }
+  np ->vma = nvma;
+  nvma = nvma->next;
+  while (nvma != p->vma) {
+    if (vma_map(p->pagetable,np->pagetable,nvma) < 0) {
+      printf("clone: vma deep mapping failed\n");
+      return -1;
+    }
+    nvma = nvma->next;
+  }
+  */
+
+
   np->sz = p->sz;
 
   np->parent = p;
@@ -603,8 +632,10 @@ sched(void)
 
   if(!holding(&p->lock))
     panic("sched p->lock");
-  if(mycpu()->noff != 1)
+  if(mycpu()->noff != 1){
+    printf("noff:%d\n", mycpu()->noff);
     panic("sched locks");
+  }
   if(p->state == RUNNING)
     panic("sched running");
   if(intr_get())
@@ -922,6 +953,19 @@ clone(uint64 new_stack, uint64 new_fn)
     release(&np->lock);
     return -1;
   }
+
+  struct vma *nvma = vma_copy(np,p->vma);
+  if (NULL != nvma) {
+      nvma = nvma->next;
+    while (nvma != np->vma) {
+      if (vma_map(p->pagetable,np->pagetable,nvma) < 0) {
+        printf("clone: vma deep mapping failed\n");
+        return -1;
+      }
+      nvma = nvma->next;
+   }
+  }
+
   np->sz = p->sz;
 
   np->parent = p;

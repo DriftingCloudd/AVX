@@ -120,7 +120,7 @@ kernel-qemu: $(OBJS) $(linker) $U/initcode $U/init_for_test
 build-grading: kernel-qemu
 	@$(OBJCOPY) kernel-qemu --strip-all -O binary kernel-qemu.bin
 
-build: $T/kernel userprogs
+build: userprogs $T/kernel
 	@$(OBJCOPY) $T/kernel --strip-all -O binary $(image)
 
 image = $T/kernel.bin
@@ -212,6 +212,7 @@ UPROGS=\
 	$U/_usertests\
 	$U/_strace\
 	$U/_mv\
+	$U/_busybox_test\
 	# $U/_myDup3\
 
 	# $U/_forktest\
@@ -221,6 +222,7 @@ UPROGS=\
 	# $U/_zombie\
 
 userprogs: $(UPROGS)
+	@$(OBJCOPY) -S -O binary $U/_busybox_test $U/busybox_test.bin
 
 dst=/mnt
 
@@ -255,6 +257,7 @@ clean:
 	$T/* \
 	$U/initcode $U/initcode.out \
 	$U/init-for-test $U/init-for-test.out \
+	$U/*.bin \
 	$K/kernel \
 	.gdbinit \
 	$U/usys.S \

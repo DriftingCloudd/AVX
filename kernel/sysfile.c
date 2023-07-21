@@ -1236,6 +1236,9 @@ sys_sendfile(void)
   {
     return -1;
   }
-  
+  printf("pid: %d out_type:%d in_type:%d\n",myproc()->pid, fout->type,fin->type);
+  if(fin->type == FD_ENTRY){
+    printf("in name : %s\n",fin->ep->filename);
+  }
   return file_send(fin,fout,offset,count);
 }

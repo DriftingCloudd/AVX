@@ -116,3 +116,79 @@ struct vma* alloc_mmap_vma(struct proc *p, int flags, uint64 addr, uint64 sz, in
     
     return vma;
 }
+
+struct vma* vma_copy(struct proc *np, struct vma *head)
+{
+    struct vma *new_vma = (struct vma*)kalloc();
+    if (NULL == new_vma) {
+        debug_print("vma copy failed\n");
+        goto failure;
+    }
+    new_vma->next = new_vma->prev = new_vma;
+    new_vma->type = NONE;
+    np->vma = new_vma;
+
+    struct vma *pre_vma = head->next;
+    struct vma *nvma = NULL;
+    while (pre_vma != head) {
+        nvma = (struct vma*)kalloc();  // TODO: fix this
+        if (NULL == nvma) {
+            goto failure;
+        }
+        memmove(nvma,pre_vma,sizeof(struct vma));
+        nvma->next = nvma->prev = NULL;
+        nvma->prev = new_vma->prev;
+        nvma->next = new_vma;
+        new_vma->prev->next = nvma;
+        new_vma->prev = nvma;
+        pre_vma = pre_vma->next;
+    }
+
+    return new_vma;
+
+failure:
+    np ->vma = NULL;
+    // TODO free_vma_list
+    return NULL;
+}
+
+int vma_map(pagetable_t old,pagetable_t new,struct vma *vma) 
+{
+  uint64 start = vma->addr;
+  pte_t *pte;
+  uint64 pa;
+  char *mem;
+  long flags;
+  
+  while (start < vma->end) {
+    if((pte = walk(old, start, 0)) == NULL)
+    {
+      panic("uvmcopy: pte should exist");
+    }
+    if((*pte & PTE_V) == 0)
+    {
+      panic("uvmcopy: page not present");
+    }
+    pa = PTE2PA(*pte);
+    flags = PTE_FLAGS(*pte);
+    mem = (char *)kalloc();
+    
+    if (NULL == mem)
+        goto failure2;
+    memmove(mem,(char *)pa,PGSIZE);
+
+    if (mappages(new,start,PGSIZE,(uint64)mem,flags) != 0) {
+        kfree(mem);
+        goto failure2;
+    }
+
+    start += PGSIZE;
+  }
+
+  pa = walkaddr(new,vma->addr);
+  return 0;
+
+failure2:
+    vmunmap(new,vma->addr,(start - vma->addr) / PGSIZE, 1);
+    return -1;
+}
