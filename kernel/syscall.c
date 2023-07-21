@@ -170,6 +170,7 @@ extern uint64 sys_getpgid();
 extern uint64 sys_setpgid();
 extern uint64 sys_tgkill();
 extern uint64 sys_gettid();
+extern uint64 sys_umask();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -245,6 +246,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_setpgid]     sys_setpgid,
   [SYS_tgkill]      sys_tgkill,
   [SYS_gettid]      sys_gettid,
+  [SYS_umask]       sys_umask,
 };
 
 static char *sysnames[] = {
@@ -320,6 +322,7 @@ static char *sysnames[] = {
   [SYS_setpgid]      "setpgid",
   [SYS_tgkill]      "tgkill",
   [SYS_gettid]      "gettid",
+  [SYS_umask]       "umask",
 };
 
 void
