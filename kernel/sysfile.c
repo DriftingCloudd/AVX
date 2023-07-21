@@ -75,7 +75,7 @@ fdalloc(struct file *f)
   int fd;
   struct proc *p = myproc();
 
-  for(fd = 0; fd < NOFILE; fd++){
+  for(fd = 0; fd < NOFILEMAX(p); fd++){
     if(p->ofile[fd] == 0){
       p->ofile[fd] = f;
       return fd;
@@ -135,7 +135,7 @@ sys_dup(void)
   if(argfd(0, 0, &f) < 0)
     return -1;
   if((fd=fdalloc(f)) < 0)
-    return -1;
+    return -24;
   filedup(f);
   return fd;
 }
@@ -961,7 +961,7 @@ sys_openat()
 
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
-    if ((flags & O_CREATE) || strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
+    if ((flags & O_CREATE) || strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
       ep = new_create(dp,path,T_FILE,flags);
       if (NULL == ep) {
         // 创建不了dirent

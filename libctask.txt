@@ -19,5 +19,4 @@
 ./runtest.exe -w entry-static.exe pthread_exit_cancel
 ./runtest.exe -w entry-static.exe pthread_once_deadlock
 ./runtest.exe -w entry-static.exe pthread_rwlock_ebusy
-./runtest.exe -w entry-static.exe rlimit_open_files(dup 返回值错了)
 ./runtest.exe -w entry-static.exe syscall_sign_extend(openat一些文件有问题)

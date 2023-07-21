@@ -82,6 +82,11 @@ struct proc {
   __sigset_t sig_pending; // pending signal
 };
 
+typedef struct rlimit {
+  uint64 rlim_cur;
+  uint64 rlim_max;
+}rlimit;
+
 #define NOFILEMAX(p) (p->filelimit<NOFILE?p->filelimit:NOFILE)
 
 void            cpuinit(void);

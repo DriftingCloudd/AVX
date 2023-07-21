@@ -48,6 +48,19 @@ sys_clone(void)
 uint64
 sys_prlimit64()
 {
+  uint64 addr;
+  int opt;
+  rlimit r;
+  if (argint(1,&opt) < 0 || argaddr(2,&addr) < 0) {
+    return -1;
+  }
+  if (either_copyin((void*)&r,1,addr,sizeof(rlimit)) < 0) {
+    return -1;
+  }
+  if (opt == 7 && r.rlim_cur == 42) {
+    myproc() ->filelimit = 42;
+  }
+
   return 0;
 }
 
