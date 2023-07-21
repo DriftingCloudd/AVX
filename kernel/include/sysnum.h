@@ -79,5 +79,6 @@
 #define SYS_tgkill      131
 #define SYS_gettid      178
 #define SYS_umask       166
+#define SYS_readlinkat  78
 
 #endif

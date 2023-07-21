@@ -786,8 +786,10 @@ static int cmp_parent(int pid,int sid){
 int
 tgkill(int tid, int pid, int sig)
 {
-  if(!cmp_parent(pid,tid)) return -1;
-  else return kill(tid,sig);
+  // if(!cmp_parent(pid,tid)) {printf("pid:%d, tid:%d\n");return -1;}
+  // else return kill(tid,sig);
+  printf("tgkill:%d %d %d\n", tid, pid, sig);
+  kill(tid, sig);
 } 
 
 // Copy to either a user address, or kernel address,
