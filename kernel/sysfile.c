@@ -367,15 +367,11 @@ create(char *path, short type, int mode)
 }
 
 uint64
-sys_open(void)
+open(char* path, int omode)
 {
-  char path[FAT32_MAX_PATH];
-  int fd, omode;
+  int fd;
   struct file *f;
   struct dirent *ep;
-
-  if(argstr(0, path, FAT32_MAX_PATH) < 0 || argint(1, &omode) < 0)
-    return -1;
 
   if(omode & O_CREATE){
     ep = create(path, T_FILE, omode);
@@ -414,8 +410,19 @@ sys_open(void)
   f->writable = (omode & O_WRONLY) || (omode & O_RDWR);
 
   eunlock(ep);
-
   return fd;
+}
+
+uint64
+sys_open(void)
+{
+  char path[FAT32_MAX_PATH];
+  int omode;
+
+  if(argstr(0, path, FAT32_MAX_PATH) < 0 || argint(1, &omode) < 0)
+    return -1;
+
+  return open(path, omode);
 }
 
 uint64
@@ -1236,9 +1243,9 @@ sys_sendfile(void)
   {
     return -1;
   }
-  printf("pid: %d out_type:%d in_type:%d\n",myproc()->pid, fout->type,fin->type);
+  debug_print("pid: %d out_type:%d in_type:%d\n",myproc()->pid, fout->type,fin->type);
   if(fin->type == FD_ENTRY){
-    printf("in name : %s\n",fin->ep->filename);
+    debug_print("in name : %s\n",fin->ep->filename);
   }
   return file_send(fin,fout,offset,count);
 }

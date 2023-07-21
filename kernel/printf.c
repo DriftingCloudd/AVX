@@ -66,6 +66,7 @@ printptr(uint64 x)
 void
 debug_print(char *fmt, ...)
 {
+#ifdef DEBUG
   va_list ap;
   int i, c;
   int locking;
@@ -117,6 +118,7 @@ debug_print(char *fmt, ...)
   }
   if(locking)
     release(&pr.lock);
+#endif
 }
 
 // Print to the console. only understands %d, %x, %p, %s.

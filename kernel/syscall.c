@@ -24,9 +24,10 @@ fetchaddr(uint64 addr, uint64 *ip)
   if(copyin2((char *)ip, addr, sizeof(*ip)) != 0)
     return -1;
   */
-  if (copyin(p->pagetable,(char *)ip,addr,sizeof(*ip)) != 0)
+  if (copyin(p->pagetable,(char *)ip,addr,sizeof(*ip)) != 0){
+    printf("fetchaddr: copyin failed\n");
     return -1;
-
+  }
   return 0;
 }
 
