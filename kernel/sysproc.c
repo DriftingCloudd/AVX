@@ -472,10 +472,10 @@ sys_uname(void)
   return copyout2(addr, (char*) &utsname, sizeof(UtsName));
   */
   struct utsname *uts = (struct utsname*)addr;
-  const char *sysname = "xv6-vf2";
+  const char *sysname = "rv6";
   const char *nodename = "none";
-  const char *release = "0.1";
-  const char *version = "0.1";
+  const char *release = "5.0";
+  const char *version = __DATE__" "__TIME__;
   const char *machine = "QEMU";
   const char *domain = "none";
   if (either_copyout(1,(uint64)uts->sysname,(void*)sysname,sizeof(sysname)) < 0) {
@@ -573,6 +573,8 @@ sys_gettid(void)
   
   
 }
+
+
 
 //TODO
 uint64 sys_umask(void)
