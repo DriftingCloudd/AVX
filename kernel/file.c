@@ -425,11 +425,11 @@ uint64 file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n)
   }else{
     off = fin->off;
   }
-  if(fileillegal(fin)||fileillegal(fout)){
-      return -1;
-  }
-  fileiolock(fin);
-  fileiolock(fout);
+  // if(fileillegal(fin)||fileillegal(fout)){
+  //     return -1;
+  // }
+  // fileiolock(fin);
+  // fileiolock(fout);
   while(n){
     char buf[512];
     // rlen = MIN(n,512);
@@ -441,22 +441,28 @@ uint64 file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n)
     {
       rlen = n;
     }
-    
-    
+    if(fin->type != FD_PIPE)
+      fileiolock(fin);
     rlen = fileinput(fin,0,(uint64)&buf,rlen,off);
+    if(fin->type != FD_PIPE)
+      fileiounlock(fin);
     printf("[filesend] send rlen %p\n",rlen);
     off += rlen;
     n -= rlen;
     if(!rlen){
       break;
     }
+    if(fout->type != FD_PIPE)
+      fileiolock(fout);
     wlen = fileoutput(fout,0,(uint64)&buf,rlen,fout->off);
+    if(fout->type != FD_PIPE)  
+      fileiounlock(fout);
     printf("[filesend] send wlen:%p\n",rlen,wlen);
     fout->off += wlen;
     ret += wlen;
   }
-  fileiounlock(fout);
-  fileiounlock(fin);
+  // fileiounlock(fout);
+  // fileiounlock(fin);
   //printf("[filesend]after send fout off:%p\n",fout->off);
   if(addr){
     if(either_copyout(1,addr,&off,sizeof(uint64))<0){

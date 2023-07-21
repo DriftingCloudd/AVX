@@ -18,9 +18,9 @@ push_off(void)
   //printf("\e[32mpush_off()\e[0m: cpuid(): %d\n", cpuid());
   if(mycpu()->noff == 0)
     mycpu()->intena = old;
-  //printstring("push_off noff++ noff:\n");
-  //printint(mycpu()->noff, 10, 1);
-  //consputc('\n');
+  // printstring("push_off noff++ noff:\n");
+  // printint(mycpu()->noff, 10, 1);
+  // consputc('\n');
   mycpu()->noff += 1;
 }
 
@@ -37,9 +37,12 @@ pop_off(void)
     //consputc('P');
     panic("pop_off");
   }
-  //printf("c->noff: %d\n", c->noff);
-  //printf("c: %x\n", c);
-  //printstring("pop_off noff--\n");
+  // printf("c->noff: %d\n", c->noff);
+  // printf("c: %x\n", c);
+  // printstring("pop_off noff--\n");
+  // printstring("pop_off noff-- noff:\n");
+  // printint(mycpu()->noff, 10, 1);
+  // consputc('\n');
   c->noff -= 1;
   if(c->noff == 0 && c->intena)
     intr_on();

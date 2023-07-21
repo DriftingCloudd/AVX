@@ -24,6 +24,14 @@ void
 acquire(struct spinlock *lk)
 {
   push_off(); // disable interrupts to avoid deadlock.
+  // if(!(lk->name[0] == 'k' && lk->name[1] == 'm' && lk->name[2] == 'e' && lk->name[3] == 'm')
+  // && !(lk->name[0] == 'p' && lk->name[1] == 'r' && lk->name[2] == 'o' && lk->name[3] == 'c')
+  // && !(lk->name[0] == 'c' && lk->name[1] == 'o' && lk->name[2] == 'n' && lk->name[3] == 's')&&
+  // !(lk->name[0] == 't' && lk->name[1] == 'i' && lk->name[2] == 'm' && lk->name[3] == 'e')){
+  //   printstring("acquire:");
+  //   printstring(lk->name);
+  //   printstring("\n");
+  // }
   if(holding(lk))
     panic("acquire");
 
@@ -70,6 +78,14 @@ release(struct spinlock *lk)
   //   amoswap.w zero, zero, (s1)
   __sync_lock_release(&lk->locked);
 
+  // if(!(lk->name[0] == 'k' && lk->name[1] == 'm' && lk->name[2] == 'e' && lk->name[3] == 'm')
+  // && !(lk->name[0] == 'p' && lk->name[1] == 'r' && lk->name[2] == 'o' && lk->name[3] == 'c')
+  // && !(lk->name[0] == 'c' && lk->name[1] == 'o' && lk->name[2] == 'n' && lk->name[3] == 's')&&
+  // !(lk->name[0] == 't' && lk->name[1] == 'i' && lk->name[2] == 'm' && lk->name[3] == 'e')){
+  //   printstring("release:");
+  //   printstring(lk->name);
+  //   printstring("\n");
+  // }
   pop_off();
 }
 

@@ -26,3 +26,4 @@ tools/backtrace
 .idea
 sdcard.img
 sdcard/
+test.txt

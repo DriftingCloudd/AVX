@@ -6,6 +6,10 @@ typedef struct{
 static longtest busybox[];
 
 void test_busybox(){
+	dev(2,1,0);
+	dup(0);
+	dup(0);
+	printf("busybox test\n");
   int i,status;
 //   printf("latency measurements\n");
   for(i = 0; busybox[i].name[1] ; i++){
@@ -13,6 +17,7 @@ void test_busybox(){
     int pid = fork();
     if(pid==0){
       exec("busybox",busybox[i].name);
+	  exit(0);
     }
     wait4(pid, &status, 0);
     if(status==0){
@@ -21,6 +26,7 @@ void test_busybox(){
       printf("testcase busybox %d fail\n",i);
     }
   }
+  exit(0);
 }
 
 static longtest busybox[] = {
@@ -85,6 +91,10 @@ static longtest busybox[] = {
 
 int main(int argc, char ** argv)
 {
+	dev(2,1,0);
+	dup(0);
+	dup(0);
+	printf("busybox test\n");
     test_busybox();
     exit(0);
 }
