@@ -97,7 +97,7 @@ int fat32_init()
     }
     // struct buf *b = bread(0, 2048);
     #else
-    struct buf *b = bread(0, 0);
+    b = bread(0, 0);
     #endif
     if (strncmp((char const*)(b->data + 82), "FAT32", 5))
         panic("not FAT32 volume");

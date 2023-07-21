@@ -4,8 +4,8 @@
     .global initcodesize
 initcode:
     #.incbin "./xv6-user/initcode"
-    .incbin "./xv6-user/init-for-test"
-    #.incbin "./xv6-user/busybox_test.bin"
+    # .incbin "./xv6-user/init-for-test"
+    .incbin "./xv6-user/busybox_test.bin"
 codeend:
 
 initcodesize:

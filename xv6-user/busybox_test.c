@@ -4,30 +4,46 @@ typedef struct{
   char* name[20];
 }longtest;
 static longtest busybox[];
+static longtest echo_message[];
+static longtest time_test[];
 
 void test_busybox(){
 	dev(2,1,0);
 	dup(0);
 	dup(0);
-	printf("busybox test\n");
-  int i,status;
-//   printf("latency measurements\n");
-  for(i = 0; busybox[i].name[1] ; i++){
-    if(!busybox[i].valid)continue;
-    int pid = fork();
-    if(pid==0){
-      exec("busybox",busybox[i].name);
-	  exit(0);
-    }
-    wait4(pid, &status, 0);
-    if(status==0){
-      printf("testcase busybox %d success\n",i);
-    }else{
-      printf("testcase busybox %d fail\n",i);
-    }
-  }
-  exit(0);
+
+	int status,pid = fork();
+	if(pid == 0){
+		exec("time-test",time_test[0].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
+	printf("run busybox_testcode.sh\n");
+	int i;
+	for(i = 0; busybox[i].name[1] ; i++){
+		if(!busybox[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("busybox",busybox[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+		if(status==0){
+			printf("testcase busybox %d success\n",i);
+		}else{
+			printf("testcase busybox %d fail\n",i);
+		}
+	}
+	exit(0);
 }
+static longtest time_test[] = {
+	{1, {"time-test",0}},
+};
+
+static longtest echo_message[] = {
+	{1, {"busybox", "echo", "run busybox_testcode.sh", 0}},
+	{0, {0, 0}},
+};
 
 static longtest busybox[] = {
 	{ 1 , {"busybox" ,"echo", "#### independent command test" ,  0	}},
@@ -88,13 +104,3 @@ static longtest busybox[] = {
 	{ 0 , { 0 , 0				}},
 };
 
-
-int main(int argc, char ** argv)
-{
-	dev(2,1,0);
-	dup(0);
-	dup(0);
-	printf("busybox test\n");
-    test_busybox();
-    exit(0);
-}

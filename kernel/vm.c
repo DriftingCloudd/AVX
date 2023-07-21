@@ -272,7 +272,7 @@ uvminit(pagetable_t pagetable, pagetable_t kpagetable, uchar *src, uint sz)
   mappages(pagetable, i, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X|PTE_U);
   mappages(kpagetable, i, PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_X);
   memmove(mem, src + i, sz % PGSIZE);
-  printf("uvminit done sz:%d\n", sz);
+  debug_print("uvminit done sz:%d\n", sz);
   // for (int i = 0; i < sz; i ++) {
   //   printf("[uvminit]mem: %p, %x\n", mem + i, mem[i]);
   // }
