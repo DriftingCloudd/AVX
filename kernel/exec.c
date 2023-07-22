@@ -227,6 +227,7 @@ int exec(char *path, char **argv, char ** env)
 
   kpagetable = create_kpagetable(p);
   if(kpagetable == 0){
+    debug_print("[exec]create_kpagetable failed\n");
     return -1;
   }
 
@@ -382,6 +383,9 @@ int exec(char *path, char **argv, char ** env)
   kvmfree(oldkpagetable, 0);
   if(is_mount)
     return sp;
+  if(argc == -1) {
+    debug_print("[exec] argc == -1\n");
+  }
   return argc; // this ends up in a0, the first argument to main(argc, argv)
 
  bad:

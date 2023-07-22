@@ -90,14 +90,17 @@ sys_exec(void)
   uint64 uargv, uarg;
 
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || argaddr(1, &uargv) < 0){
+    debug_print("arg error\n");
     return -1;
   }
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
+      debug_print("[exec] too many arguments\n");
       goto bad;
     }
     if(fetchaddr(uargv+sizeof(uint64)*i, (uint64*)&uarg) < 0){
+      debug_print("[exec] fetchaddr error i:%d uargv:%p\n", i, uargv + i);
       goto bad;
     }
     if(uarg == 0){
@@ -105,10 +108,14 @@ sys_exec(void)
       break;
     }
     argv[i] = kalloc();
-    if(argv[i] == 0)
+    if(argv[i] == 0){
+      debug_print("[exec] kalloc error\n");
       goto bad;
-    if(fetchstr(uarg, argv[i], PGSIZE) < 0)
+    }
+    if(fetchstr(uarg, argv[i], PGSIZE) < 0){
+      debug_print("[exec] fetchstr error\n");
       goto bad;
+    }
   }
 
   int ret = exec(path, argv, 0);
@@ -119,6 +126,7 @@ sys_exec(void)
   return ret;
 
  bad:
+  debug_print("[sys_exec]: bad\n");
   for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
     kfree(argv[i]);
   return -1;
