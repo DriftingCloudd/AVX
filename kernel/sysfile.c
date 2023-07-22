@@ -1014,6 +1014,9 @@ sys_openat()
   }
   struct proc *p = myproc();
   p->exec_close[fd] = 0;
+  if (strncmp(path,"/dev/zero",9) == 0) {
+    strncpy(f->ep->filename,"zero",4);
+  }
   
   return fd;
 }

@@ -172,8 +172,13 @@ fileread(struct file *f, uint64 addr, int n)
         break;
     case FD_ENTRY:
         elock(f->ep);
-          if((r = eread(f->ep, 1, addr, f->off, n)) > 0)
-            f->off += r;
+        if (0 == strncmp(f->ep->filename,"zero",4)) {
+          r = 1;
+          char tmp = 0;
+          either_copyout(1,addr,(void *)&tmp,sizeof(char));
+        }
+        else if((r = eread(f->ep, 1, addr, f->off, n)) > 0)
+          f->off += r;
         eunlock(f->ep);
         break;
     default:
