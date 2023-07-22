@@ -18,27 +18,27 @@ extern int exec(char *path, char **argv, char ** env);
 uint64
 sys_clone(void) 
 {
-  printf("sys_clone: start\n");
+  debug_print("sys_clone: start\n");
   uint64 new_stack,new_fn;
   uint64 ptid, tls, ctid;
   argaddr(1, &new_stack);
   if(argaddr(0, &new_fn) < 0){
-    printf("sys_clone: argaddr(0, &new_fn) < 0\n");
+    debug_print("sys_clone: argaddr(0, &new_fn) < 0\n");
     return -1;
   }
   if(argaddr(2, &ptid) < 0){
-    printf("sys_clone: argaddr(2, &ptid) < 0\n");
+    debug_print("sys_clone: argaddr(2, &ptid) < 0\n");
     return -1;
   }
   if(argaddr(3, &tls) < 0){
-    printf("sys_clone: argaddr(3, &tls) < 0\n");
+    debug_print("sys_clone: argaddr(3, &tls) < 0\n");
     return -1;
   }
   if(argaddr(4, &ctid) < 0){
-    printf("sys_clone: argaddr(4, &ctid) < 0\n");
+    debug_print("sys_clone: argaddr(4, &ctid) < 0\n");
     return -1;
   }
-  printf("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
+  debug_print("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
   if(new_stack == 0){
     return fork();
   }

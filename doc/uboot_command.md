@@ -17,9 +17,7 @@ setenv variable
 
 saveenv保存环境变量
 
-setenv ipaddr 192.168.120.230;setenv serveraddr 192.168.120.10;
-tftpboot 0x80300000 sdcard.img.gz;unzip 0x80300000 0x90000000 0x40000000;mmc write 0x90000000 0 8192
-tftpboot 0x80200000 os.bin;go 0x80200000
+setenv ipaddr 192.168.120.230;setenv serveraddr 192.168.120.10;tftpboot 0x80300000 sdcard.img.gz;unzip 0x80300000 0x90000000 0x40000000;mmc write 0x90000000 0 8192;tftpboot 0x80200000 os.bin;go 0x80200000
 
 bootp 0x80300000 sdcard.img.gz;unzip 0x80300000 0x90000000 0x40000000;mmc write 0x90000000 0 8192
 bootp 0x80200000 
