@@ -180,6 +180,20 @@ sys_read(void)
 }
 
 uint64
+sys_pread(void)
+{
+  struct file *f;
+  int off,count;
+  uint64 p;
+  if (argfd(0,0,&f) < 0 || argaddr(1,&p) < 0 || argint(2,&count) < 0 || argint(3,&off) < 0) {
+    return -1;
+  }
+  fileseek(f,off,SEEK_SET);
+
+  return fileread(f,p,count);
+}
+
+uint64
 sys_write(void)
 {
   struct file *f;
