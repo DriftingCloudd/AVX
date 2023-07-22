@@ -331,7 +331,7 @@ get_next_dirent(struct file *f, uint64 addr, int n)
 }
 
 uint64
-fileseek(struct file *f, uint64 offset, int whence)
+fileseek(struct file *f, int offset, int whence)
 {
   uint64 ret = -1;
   if (f->type == FD_ENTRY) {

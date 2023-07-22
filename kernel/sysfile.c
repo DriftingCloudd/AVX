@@ -709,10 +709,10 @@ uint64
 sys_lseek(void)
 {
   struct file *f;
-  uint64 offset;
+  int offset;
   int fd,whence;
 
-  if (argfd(0,&fd,&f) < 0 || argaddr(1,&offset) < 0 || argint(2,&whence) < 0) 
+  if (argfd(0,&fd,&f) < 0 || argint(1,&offset) < 0 || argint(2,&whence) < 0) 
     return -1;
 
   return fileseek(f,offset,whence);

@@ -68,7 +68,7 @@ int             filestat(struct file*, uint64 addr);
 int             filewrite(struct file*, uint64, int n);
 int             dirnext(struct file *f, uint64 addr);
 int             get_next_dirent(struct file *f, uint64 addr, int n);
-uint64          fileseek(struct file *f, uint64 offset, int whence);
+uint64          fileseek(struct file *f, int offset, int whence);
 
 struct file*    findfile(char* path);
 uint64          file_send(struct file* fin,struct file* fout,uint64 addr,uint64 n);
