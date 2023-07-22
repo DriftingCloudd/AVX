@@ -8,8 +8,8 @@
 #include "include/proc.h"
 #include "include/error.h"
 #include "include/fat32.h"
+#include "include/printf.h"
 
-int tcntt = 0;
 
 static int
 argfd(int n, int *pfd, struct file **pf)
@@ -38,17 +38,15 @@ sys_clock_gettime(void)
     return -1;
 
   uint64 ticks = r_time();
-  if (tcntt == 1) {
-	ticks += 10 * (uint64)CLK_FREQ;
-  } else if (tcntt == 2) {
-	ticks += 20 * (uint64)CLK_FREQ;
-  }
+
+  debug_print("ticks: %p\n", ticks);
   struct timespec2 t;
   if (tid == 0)
   {
-	tcntt++;
     t.tv_sec = ticks / CLK_FREQ;
-    t.tv_nsec = ticks / CLK_FREQ * 1000000000;
+    t.tv_nsec = ticks * 1000000000 / CLK_FREQ;
+	debug_print("t.tv_sec: %p\n", t.tv_sec);
+	debug_print("t.tv_nsec: %p\n", t.tv_nsec);
   }
   if (either_copyout(1,addr,(char*)&t,sizeof(struct timespec2)) < 0)
     return -1;

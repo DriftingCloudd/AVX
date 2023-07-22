@@ -304,11 +304,20 @@ userinit(void)
   // allocate one user page and copy init's instructions
   // and data into it.
   uvminit(p->pagetable , p->kpagetable, initcode, initcodesize);
-  p->sz = PGSIZE;
+  p->sz = initcodesize;
+  p->sz = PGROUNDUP(p->sz);
+  uint64 sz1;
+  uint64 stacksize = 2 * PGSIZE;
+  if((sz1 = uvmalloc(p->pagetable, p->kpagetable, p->sz, p->sz + stacksize, PTE_R | PTE_W)) == 0){
+    panic("userinit: out of memory");
+  }
+  p->sz = sz1;
+  // uvmclear(p->pagetable, p->sz - stacksize);
+  p->trapframe->sp = p->sz; // user stack pointer
 
   // prepare for the very first "return" from kernel to user.
   p->trapframe->epc = 0x0;      // user program counter
-  p->trapframe->sp = PGSIZE;  // user stack pointer
+  
 
   safestrcpy(p->name, "initcode", sizeof(p->name));
 
@@ -786,8 +795,10 @@ static int cmp_parent(int pid,int sid){
 int
 tgkill(int tid, int pid, int sig)
 {
-  if(!cmp_parent(pid,tid)) return -1;
-  else return kill(tid,sig);
+  // if(!cmp_parent(pid,tid)) {printf("pid:%d, tid:%d\n");return -1;}
+  // else return kill(tid,sig);
+  printf("tgkill:%d %d %d\n", tid, pid, sig);
+  kill(tid, sig);
 } 
 
 // Copy to either a user address, or kernel address,

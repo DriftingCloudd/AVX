@@ -90,17 +90,17 @@ sys_exec(void)
   uint64 uargv, uarg;
 
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || argaddr(1, &uargv) < 0){
-    debug_print("arg error\n");
+    debug_print("[sys_exec] fetch arg error\n");
     return -1;
   }
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
-      debug_print("[exec] too many arguments\n");
+      debug_print("[sys_exec] too many arguments\n");
       goto bad;
     }
     if(fetchaddr(uargv+sizeof(uint64)*i, (uint64*)&uarg) < 0){
-      debug_print("[exec] fetchaddr error i:%d uargv:%p\n", i, uargv + i);
+      debug_print("[sys_exec] fetch %d addr error uargv:%p\n", i, uargv);
       goto bad;
     }
     if(uarg == 0){
@@ -108,15 +108,13 @@ sys_exec(void)
       break;
     }
     argv[i] = kalloc();
-    if(argv[i] == 0){
-      debug_print("[exec] kalloc error\n");
+    if(argv[i] == 0)
       goto bad;
-    }
     if(fetchstr(uarg, argv[i], PGSIZE) < 0){
-      debug_print("[exec] fetchstr error\n");
       goto bad;
     }
   }
+
 
   int ret = exec(path, argv, 0);
 
@@ -491,10 +489,10 @@ sys_uname(void)
   return copyout2(addr, (char*) &utsname, sizeof(UtsName));
   */
   struct utsname *uts = (struct utsname*)addr;
-  const char *sysname = "xv6-vf2";
+  const char *sysname = "rv6";
   const char *nodename = "none";
-  const char *release = "0.1";
-  const char *version = "0.1";
+  const char *release = "5.0";
+  const char *version = __DATE__" "__TIME__;
   const char *machine = "QEMU";
   const char *domain = "none";
   if (either_copyout(1,(uint64)uts->sysname,(void*)sysname,sizeof(sysname)) < 0) {
@@ -592,6 +590,8 @@ sys_gettid(void)
   
   
 }
+
+
 
 //TODO
 uint64 sys_umask(void)
