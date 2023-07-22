@@ -27,3 +27,6 @@ tools/backtrace
 sdcard.img
 sdcard/
 test.txt
+image/
+os.bin
+xv6-user/busybox_test.bin

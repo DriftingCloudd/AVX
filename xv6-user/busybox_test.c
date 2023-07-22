@@ -35,16 +35,24 @@ void test_busybox(){
 			// printf("testcase busybox %d fail\n",i);
 		}
 	}
+	/**
+	 * run iozone_testcode.sh
+	 */
+	
+	printf("run iozone_testcode.sh\n");
+
+
+	/**
+	 * run libctest_testcode.sh
+	 */
+	printf("run libctest_testcode.sh\n");
+
 	exit(0);
 }
 static longtest time_test[] = {
 	{1, {"time-test",0}},
 };
 
-static longtest echo_message[] = {
-	{1, {"busybox", "echo", "run busybox_testcode.sh", 0}},
-	{0, {0, 0}},
-};
 
 static longtest busybox[] = {
 	{ 1 , {"busybox" ,"echo", "#### independent command test" ,  0	}},
@@ -105,3 +113,6 @@ static longtest busybox[] = {
 	{ 0 , { 0 , 0				}},
 };
 
+static longtest libctest[] = {
+	{}
+}
