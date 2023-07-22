@@ -108,9 +108,12 @@ sys_exec(void)
       break;
     }
     argv[i] = kalloc();
-    if(argv[i] == 0)
+    if(argv[i] == 0){
+      debug_print("[sys_exec] kalloc error\n");
       goto bad;
+    }
     if(fetchstr(uarg, argv[i], PGSIZE) < 0){
+      debug_print("[sys_exec] fetchstr error\n");
       goto bad;
     }
   }
