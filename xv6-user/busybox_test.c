@@ -113,6 +113,3 @@ static longtest busybox[] = {
 	{ 0 , { 0 , 0				}},
 };
 
-static longtest libctest[] = {
-	{}
-}

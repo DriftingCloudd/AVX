@@ -1303,14 +1303,18 @@ sys_sendfile(void)
 uint64
 sys_readlinkat(void)
 {
-  struct file *f;
-  int bufsiz;
+  struct file *fp;
+  int bufsiz, fd;
   uint64 addr2;
   char path[FAT32_MAX_PATH];
+  if (argfd(0,&fd,&fp) < 0 && fd != AT_FDCWD)
+    return -24;  // 打开文件太多
+
   if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
   {
     return -1;
   }
+  printf("openlinkat param path: %s, param bufsiz: %d", path, bufsiz);
   int copy_size;
   if (bufsiz < strlen(path))
   {
@@ -1322,7 +1326,11 @@ sys_readlinkat(void)
   }
   // printf("arrive!\n");
   
-  either_copyout(1, bufsiz, (void *)addr2, copy_size);
+  if(either_copyout(1, (void *)addr2, (void *)path, copy_size) < 0)
+  {
+    printf("copy error!\n");
+  }
+
   
   return copy_size;
   // return 0;
