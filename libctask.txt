@@ -6,7 +6,6 @@
 ./runtest.exe -w entry-static.exe stat(同上错误)
 ./runtest.exe -w entry-static.exe utime(时间实现有问题)
 ./runtest.exe -w entry-static.exe daemon_failure(返回参数有问题)
-./runtest.exe -w entry-static.exe ftello_unflushed_append(virtio错误)
 ./runtest.exe -w entry-static.exe pthread_robust_detach
 ./runtest.exe -w entry-static.exe pthread_cancel_sem_wait
 ./runtest.exe -w entry-static.exe pthread_cond_smasher
