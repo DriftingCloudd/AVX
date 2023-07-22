@@ -39,7 +39,7 @@ static volatile uint32 card_int;
 static uint32 SDIO_WaitEvent(SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 {
 	uint32 ret = 0;
-	printf("%d", arg);
+	// printf("%d", arg);
 	switch (event) {
 		case SDIO_START_COMMAND:
 			sstate.cstate = SDIO_STATE_CMD_WAIT;
@@ -53,7 +53,7 @@ static uint32 SDIO_WaitEvent(SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 			while (*((volatile enum SDIO_STATE *) &sstate.cstate) == SDIO_STATE_CMD_WAIT) {
 				// __WFI();
 				wait_for_sdio_irq(pSDMMC);
-				printf("WFI\n");
+				debug_print("WFI\n");
 			}
 			ret = sstate.carg;
 			break;
@@ -62,7 +62,7 @@ static uint32 SDIO_WaitEvent(SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 			while (*((volatile enum SDIO_STATE *) &sstate.dstate) == SDIO_STATE_DATA_WAIT) {
 				// __WFI();
 				wait_for_sdio_irq(pSDMMC);
-				printf("WFI\n");
+				debug_print("WFI\n");
 			}
 			ret = sstate.darg;
 			break;
@@ -137,7 +137,7 @@ int platform_init(SDMMC_T *pSDMMC){
 	/* reset all blocks */
 	pSDMMC->CTRL = MCI_CTRL_RESET | MCI_CTRL_FIFO_RESET | MCI_CTRL_DMA_RESET;
 	while (pSDMMC->CTRL & (MCI_CTRL_RESET | MCI_CTRL_FIFO_RESET | MCI_CTRL_DMA_RESET)) {
-		printf("ctrl:%p\n", pSDMMC->CTRL);
+		debug_print("ctrl:%p\n", pSDMMC->CTRL);
 	}
 
 	/* Clear the interrupts for the host controller */
@@ -337,30 +337,30 @@ uint32 SD_Card_Init(SDMMC_T *pSDMMC, uint32 freq)
 	/* Set Clock to 400KHz */
 	SD_SetCardType(pSDMMC, 0);
 	SD_SetClock(pSDMMC, 200000000, freq);
-	printf("arrive a0\n");
+	debug_print("arrive a0\n");
 	sdioif->wait_evt(pSDMMC, SDIO_WAIT_DELAY, 100); /* Wait for card to wake up */
 
-	printf("arrive a\n");
-	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
-	printf("responese: %p\n", pSDMMC->RESP0);
+	debug_print("arrive a\n");
+	debug_print("RINTSTS: %p\n",pSDMMC->RINTSTS);
+	debug_print("responese: %p\n", pSDMMC->RESP0);
 	SD_Send_Command(pSDMMC, CMD5, 0);
 	// if (ret) return ret;
 	val = sdioif->response[0];
-	printf("response: %p\n", val);
-	printf("arrive b\n");
+	debug_print("response: %p\n", val);
+	debug_print("arrive b\n");
 
-	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
+	debug_print("RINTSTS: %p\n",pSDMMC->RINTSTS);
 	SD_Send_Command(pSDMMC, CMD0, 0);
 	// if (ret) return ret;
 	val = sdioif->response[0];
-	printf("response: %p\n", val);
+	debug_print("response: %p\n", val);
 
-	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
+	debug_print("RINTSTS: %p\n",pSDMMC->RINTSTS);
 
 	SD_Send_Command(pSDMMC, CMD8, 0x1aa);
 	val = sdioif->response[0];
-	printf("response: %p\n", val);
-	printf("arrive c\n");
+	debug_print("response: %p\n", val);
+	debug_print("arrive c\n");
 
 
 	do
@@ -370,23 +370,23 @@ uint32 SD_Card_Init(SDMMC_T *pSDMMC, uint32 freq)
 		val = sdioif->response[0];
 	} while ((val & 0x80000000) == 0);
 	
-	printf("response: %p\n", val);
-	printf("arrive d\n");
+	debug_print("response: %p\n", val);
+	debug_print("arrive d\n");
 
 	SD_Send_Command(pSDMMC, CMD2, 0);
-	printf("response3: %p\n", sdioif->response[3]);
-	printf("response3: %p\n", sdioif->response[2]);
-	printf("response3: %p\n", sdioif->response[1]);
-	printf("response3: %p\n", sdioif->response[0]);
-	printf("arrive e\n");
+	debug_print("response3: %p\n", sdioif->response[3]);
+	debug_print("response3: %p\n", sdioif->response[2]);
+	debug_print("response3: %p\n", sdioif->response[1]);
+	debug_print("response3: %p\n", sdioif->response[0]);
+	debug_print("arrive e\n");
 
 	SD_Send_Command(pSDMMC, CMD3, 0);
 	val = sdioif->response[0];
-	printf("response: %p\n", val);
-	printf("arrive e\n");
+	debug_print("response: %p\n", val);
+	debug_print("arrive e\n");
 	
 	rca = (val & 0xffff0000);
-	printf("rca: %p\n", rca);
+	debug_print("rca: %p\n", rca);
 
 	SD_SetClock(pSDMMC, 200000000, 25000000);
 	return rca;
@@ -398,11 +398,11 @@ int SD_Card_SetBlockSize(SDMMC_T *pSDMMC, uint32 blkSize, uint32 rca)
 	uint32 val;
 	SD_Send_Command(pSDMMC, CMD7, rca);
 	val = sdioif->response[0];
-	printf("response: %p\n", val);
+	debug_print("response: %p\n", val);
 
 	SD_Send_Command(pSDMMC, CMD16, blkSize);
 	val = sdioif->response[0];
-	printf("response: %p\n", val);
+	debug_print("response: %p\n", val);
 
 	pSDMMC->BLKSIZ = 512;
 	return 0;
@@ -450,7 +450,7 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 			SD_IRQHandler(SDMMC);
 		}
 	}
-	printf("tt: %d\n", tt);
+	// printf("tt: %d\n", tt);
 	return 0;
 	
 }
@@ -523,7 +523,7 @@ void sd_init()
 
     SD_Card_SetBlockSize(SDMMC, 512, rca);
 
-    printf("FIFOTH: %p\n", SDMMC->FIFOTH);
+    debug_print("FIFOTH: %p\n", SDMMC->FIFOTH);
 	
 	uint32 fifoth_t = SDMMC->FIFOTH;
 
@@ -531,19 +531,19 @@ void sd_init()
 
 	SDMMC->FIFOTH = ((fifoth_t & 0xf0000000) | ((fifo_depth / 2 - 1) << 16) | (fifo_depth / 2));
 
-	printf("FIFOTH: %p\n", SDMMC->FIFOTH);
+	debug_print("FIFOTH: %p\n", SDMMC->FIFOTH);
 
-	printf("HCON: %p\n", SDMMC->HCON);
+	debug_print("HCON: %p\n", SDMMC->HCON);
 
 	/* Enable the SDIO Card Interrupt */
 	// if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
 	// 	printf("DBG: Enabled interrupt for function 1\r\n");
 	// }
 	
-	printf("Card interface enabled use AT commands!\r\n");
+	debug_print("Card interface enabled use AT commands!\r\n");
 
 	#ifdef debug
-	printf("sd_init\n");
+	debug_print("sd_init\n");
 	#endif
 }
 

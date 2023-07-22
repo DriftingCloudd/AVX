@@ -18,27 +18,27 @@ extern int exec(char *path, char **argv, char ** env);
 uint64
 sys_clone(void) 
 {
-  printf("sys_clone: start\n");
+  debug_print("sys_clone: start\n");
   uint64 new_stack,new_fn;
   uint64 ptid, tls, ctid;
   argaddr(1, &new_stack);
   if(argaddr(0, &new_fn) < 0){
-    printf("sys_clone: argaddr(0, &new_fn) < 0\n");
+    debug_print("sys_clone: argaddr(0, &new_fn) < 0\n");
     return -1;
   }
   if(argaddr(2, &ptid) < 0){
-    printf("sys_clone: argaddr(2, &ptid) < 0\n");
+    debug_print("sys_clone: argaddr(2, &ptid) < 0\n");
     return -1;
   }
   if(argaddr(3, &tls) < 0){
-    printf("sys_clone: argaddr(3, &tls) < 0\n");
+    debug_print("sys_clone: argaddr(3, &tls) < 0\n");
     return -1;
   }
   if(argaddr(4, &ctid) < 0){
-    printf("sys_clone: argaddr(4, &ctid) < 0\n");
+    debug_print("sys_clone: argaddr(4, &ctid) < 0\n");
     return -1;
   }
-  printf("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
+  debug_print("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
   if(new_stack == 0){
     return fork();
   }
@@ -90,14 +90,17 @@ sys_exec(void)
   uint64 uargv, uarg;
 
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || argaddr(1, &uargv) < 0){
+    debug_print("[sys_exec] fetch arg error\n");
     return -1;
   }
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
+      debug_print("[sys_exec] too many arguments\n");
       goto bad;
     }
     if(fetchaddr(uargv+sizeof(uint64)*i, (uint64*)&uarg) < 0){
+      debug_print("[sys_exec] fetch %d addr error uargv:%p\n", i, uargv);
       goto bad;
     }
     if(uarg == 0){
@@ -105,11 +108,16 @@ sys_exec(void)
       break;
     }
     argv[i] = kalloc();
-    if(argv[i] == 0)
+    if(argv[i] == 0){
+      debug_print("[sys_exec] kalloc error\n");
       goto bad;
-    if(fetchstr(uarg, argv[i], PGSIZE) < 0)
+    }
+    if(fetchstr(uarg, argv[i], PGSIZE) < 0){
+      debug_print("[sys_exec] fetchstr error\n");
       goto bad;
+    }
   }
+
 
   int ret = exec(path, argv, 0);
 
@@ -119,6 +127,7 @@ sys_exec(void)
   return ret;
 
  bad:
+  debug_print("[sys_exec]: bad\n");
   for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
     kfree(argv[i]);
   return -1;
@@ -483,10 +492,10 @@ sys_uname(void)
   return copyout2(addr, (char*) &utsname, sizeof(UtsName));
   */
   struct utsname *uts = (struct utsname*)addr;
-  const char *sysname = "xv6-vf2";
+  const char *sysname = "rv6";
   const char *nodename = "none";
-  const char *release = "0.1";
-  const char *version = "0.1";
+  const char *release = "5.0";
+  const char *version = __DATE__" "__TIME__;
   const char *machine = "QEMU";
   const char *domain = "none";
   if (either_copyout(1,(uint64)uts->sysname,(void*)sysname,sizeof(sysname)) < 0) {
@@ -584,6 +593,8 @@ sys_gettid(void)
   
   
 }
+
+
 
 //TODO
 uint64 sys_umask(void)

@@ -19,7 +19,33 @@ start:
         li a0, 0
         li a7, SYS_dup
         ecall	# dup(0);  // stderr
-        
+//运行time_test
+	li a7, SYS_fork
+	ecall
+	bne a0, zero, after_time_test
+	la a0, time_test
+	la a1, argv_time_test
+	li a7, SYS_exec
+	ecall
+after_time_test:
+	li a0, 0
+	li a7, SYS_wait
+	ecall
+
+//输出echo "run busybox_testcode.sh"
+//echo_run_busybox_testcode
+	li a7, SYS_fork
+	ecall
+	bne a0, zero, after_echo_run_busybox_testcode
+	la a0, busybox
+	la a1, argv_echo_run_busybox_testcode
+	li a7, SYS_exec
+	ecall
+after_echo_run_busybox_testcode:
+	li a0, 0
+	li a7, SYS_wait
+	ecall
+
 	li a7, SYS_fork
 	ecall
 	bne a0, zero, after_0
@@ -689,8 +715,26 @@ program_exit:
         ecall
         jal program_exit
 
+time_test:
+	.string "/time-test\0"
+argv_time_test:
+	.dword time_test
+	.dword 0
+
+#echo "run busybox_testcode.sh"
+param_busybox_testcode0:
+	.string "echo\0"
+param_busybox_testcode1:
+	.string "busybox_testcode.sh\0"
+
+argv_echo_run_busybox_testcode:
+	.dword busybox
+	.dword param_busybox_testcode0
+	.dword param_busybox_testcode1
+	.dword 0
+
 busybox:
-        .string "/busybox\0"
+    .string "/busybox\0"
 param00:
 	.string "echo\0"
 param01:

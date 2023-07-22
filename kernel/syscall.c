@@ -24,9 +24,10 @@ fetchaddr(uint64 addr, uint64 *ip)
   if(copyin2((char *)ip, addr, sizeof(*ip)) != 0)
     return -1;
   */
-  if (copyin(p->pagetable,(char *)ip,addr,sizeof(*ip)) != 0)
+  if (copyin(p->pagetable,(char *)ip,addr,sizeof(*ip)) != 0){
+    printf("fetchaddr: copyin failed\n");
     return -1;
-
+  }
   return 0;
 }
 
@@ -171,6 +172,7 @@ extern uint64 sys_setpgid();
 extern uint64 sys_tgkill();
 extern uint64 sys_gettid();
 extern uint64 sys_umask();
+extern uint64 sys_readlinkat();
 extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
@@ -251,6 +253,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_tgkill]      sys_tgkill,
   [SYS_gettid]      sys_gettid,
   [SYS_umask]       sys_umask,
+  [SYS_readlinkat]  sys_readlinkat,
   [SYS_rt_sigtimedwait] sys_rt_sigtimedwait,
   [SYS_prlimit64]   sys_prlimit64,
   [SYS_statfs]      sys_statfs,
@@ -330,6 +333,7 @@ static char *sysnames[] = {
   [SYS_tgkill]      "tgkill",
   [SYS_gettid]      "gettid",
   [SYS_umask]       "umask",
+  [SYS_readlinkat]  "readlinkat",
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_prlimit64]   "prlimit64",
   [SYS_statfs]      "statfs",

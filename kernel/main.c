@@ -46,9 +46,9 @@ main(unsigned long hartid, unsigned long dtb_pa)
     cpuinit();
     consoleinit();
     printfinit();   // init a lock for printf 
-    print_logo();
     #ifdef DEBUG
-    printf("hart %d enter main()...\n", hartid);
+    print_logo();
+    debug_print("hart %d enter main()...\n", hartid);
     #endif
     kinit();         // physical page allocator
     kvminit();       // create kernel page table
@@ -63,7 +63,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     initlogbuffer();
     fileinit();      // file table
     userinit();      // first user process
-    printf("hart %d init done\n", hartid);
+    debug_print("hart %d init done\n", hartid);
     
     for(int i = 0; i < NCPU; i++) {
       if(i == hartid)
@@ -85,12 +85,12 @@ main(unsigned long hartid, unsigned long dtb_pa)
       ;
     __sync_synchronize();
     #ifdef DEBUG
-    printf("hart %d enter main()...\n", hartid);
+    debug_print("hart %d enter main()...\n", hartid);
     #endif
     kvminithart();
     trapinithart();
     plicinithart();  // ask PLIC for device interrupts
-    printf("hart 1 init done\n");
+    debug_print("hart 1 init done\n");
   }
   scheduler();
 }
