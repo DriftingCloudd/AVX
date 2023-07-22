@@ -1335,3 +1335,14 @@ sys_readlinkat(void)
   return copy_size;
   // return 0;
 }
+
+uint64
+sys_sync(void)
+{
+  return 0;
+}
+
+sys_ftruncate(void)
+{
+  
+}

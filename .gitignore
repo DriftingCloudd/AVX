@@ -30,6 +30,3 @@ test.txt
 image/
 os.bin
 xv6-user/busybox_test.bin
-busybox
-lmbench_all
-lmbench_testcode.sh

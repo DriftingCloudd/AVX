@@ -80,5 +80,7 @@
 #define SYS_gettid      178
 #define SYS_umask       166
 #define SYS_readlinkat  78
+#define SYS_sync        81
+#define SYS_ftruncate   46
 
 #endif
