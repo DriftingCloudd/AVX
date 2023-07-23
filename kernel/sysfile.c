@@ -22,6 +22,7 @@
 #include "include/vm.h"
 #include "include/mmap.h"
 #include "include/sysinfo.h"
+#include "include/fat32.h"
 
 
 char syslogbuffer[1024];
@@ -1361,6 +1362,7 @@ sys_ftruncate(void)
     return -1;
   }
   
+  etruncate(fp->ep, len);
 
   return 0;  
 }

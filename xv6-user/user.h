@@ -35,6 +35,7 @@ int remove(char *filename);
 int trace(int mask);
 int sysinfo(struct sysinfo *);
 int rename(char *old, char *new);
+int ftruncate(int fd, int len);
 
 // ulib.c
 int stat(const char*, struct stat*);
