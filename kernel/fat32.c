@@ -739,12 +739,20 @@ void kstat(struct dirent *de, struct kstat *kst)
     kst->st_ino = 0;
     kst->st_mode = 0;
     kst->st_nlink = 1;
-    kst->st_size = de->file_size;
-    kst->st_atime_sec = 0;
-    kst->st_ctime_sec = 0;
-    kst->st_mtime_sec = 0;
     kst->st_uid = 0;
     kst->st_gid = 0;
+    kst->st_rdev = 0;
+    kst->__pad = 0;
+    kst->st_size = de->file_size;
+    kst->st_blksize = 512;
+    kst->__pad2 = 0;
+    kst->st_blocks = 0;
+    kst->st_atime_sec = 0;
+    kst->st_atime_nsec = 0;
+    kst->st_mtime_sec = 0;
+    kst->st_mtime_nsec = 0;
+    kst->st_ctime_sec = 0;
+    kst->st_ctime_nsec = 0;
 }
 
 static int hashpath(char* name){

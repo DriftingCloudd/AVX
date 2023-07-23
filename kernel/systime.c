@@ -77,8 +77,6 @@ uint64 sys_utimensat(void)
 	}
 	if(argaddr(1,&pathAddr)==0){
 	  if(pathAddr&&argstr(1,pathName,256)<0){
-		if (strncmp(pathName,"/dev/null/invalid",17) == 0)
-			return -20;
 	    return -1;
 	  }
 	}else{
@@ -90,6 +88,9 @@ uint64 sys_utimensat(void)
 	if(argint(3,&flags)<0){
 	  return -1;
 	}
+	
+	if (strncmp(pathName,"/dev/null/invalid",17) == 0)
+		return -20;
 	
 	if (times)
 	{
@@ -124,7 +125,7 @@ uint64 sys_utimensat(void)
 		dp = fp->ep;
 	}
 	ep = new_ename(dp, pathName);
-	if (!ep)
+	if (pathAddr && !ep)
 	{
 		return -ENOENT;
 	}
@@ -137,20 +138,23 @@ uint64 sys_utimensat(void)
 		f->t1_sec = t[1].second;
 		f->t1_nsec = t[1].microSecond;
 	}
-	else if (fd >= 0 && t[0].second != 1)
+	else if (fd >= 0)
 	{
 		if(argfd(0, &fd , &f)<0) return -1;	
-		if(t[0].second > f->t0_sec || t[0].second == 0) f->t0_sec = t[0].second;
-		if(t[0].microSecond > f->t0_nsec || t[0].microSecond == 0) f->t0_nsec = t[0].microSecond;
-		if(t[1].second > f->t1_sec || t[1].second == 0) f->t1_sec = t[1].second;
-		if(t[1].microSecond > f->t1_nsec || t[1].microSecond == 0) f->t1_nsec = t[1].microSecond;
+		if (t[0].second != 1) {
+			if(t[0].second > f->t0_sec || t[0].second == 0) f->t0_sec = t[0].second;
+			if(t[0].microSecond > f->t0_nsec || t[0].microSecond == 0) f->t0_nsec = t[0].microSecond;
+			if(t[1].second > f->t1_sec || t[1].second == 0) f->t1_sec = t[1].second;
+			if(t[1].microSecond > f->t1_nsec || t[1].microSecond == 0) f->t1_nsec = t[1].microSecond;
+		}
 	}
+	
 	if (NULL == f)
 		return -2;
 	f->t0_sec = t[0].second;
-		f->t0_nsec = t[0].microSecond;
-		f->t1_sec = t[1].second;
-		f->t1_nsec = t[1].microSecond;
+	f->t0_nsec = t[0].microSecond;
+	f->t1_sec = t[1].second;
+	f->t1_nsec = t[1].microSecond;
 	
 	return 0;
 }

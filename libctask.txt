@@ -3,7 +3,6 @@
 ./runtest.exe -w entry-static.exe pthread_cond
 ./runtest.exe -w entry-static.exe pthread_tsd
 ./runtest.exe -w entry-static.exe socket(网络系统调用没写)
-./runtest.exe -w entry-static.exe stat(同上错误)
 ./runtest.exe -w entry-static.exe utime(时间实现有问题)
 ./runtest.exe -w entry-static.exe daemon_failure(返回参数有问题)
 ./runtest.exe -w entry-static.exe pthread_robust_detach
