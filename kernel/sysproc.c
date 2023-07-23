@@ -280,7 +280,7 @@ sys_brk(void)
 
   if(argaddr(0, &n) < 0)
     return -1;
-  // debug_print("sys_brk n = %p\n", n);
+  debug_print("sys_brk n = %d\n", n);
   addr = myproc()->sz;
   if (n == 0)
   {

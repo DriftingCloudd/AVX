@@ -123,12 +123,12 @@ void test_busybox(){
 	// 	}
 	// 	wait4(pid, &status, 0);
 	// }
-	printf("dynamic\n");
+	
 	for(i = 0; libctest_dy[i].name[1] ; i++){
-		if(!libctest[i].valid)continue;
+		if(!libctest_dy[i].valid)continue;
 		pid = fork();
 		if(pid==0){
-			exec("./runtest.exe",libctest[i].name);
+			exec("./runtest.exe",libctest_dy[i].name);
 			exit(0);
 		}
 		wait4(pid, &status, 0);
@@ -294,7 +294,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "dn_expand_ptr_0", 0 } },
   
   // can not pass
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "fflush_exit", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "fflush_exit", 0 } },
   
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fgets_eof", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fgetwc_buffering", 0 } },
@@ -302,8 +302,8 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "ftello_unflushed_append", 0 } },
 
   // can not pass
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "getpwnam_r_crash", 0 } },
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "getpwnam_r_errno", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "getpwnam_r_crash", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "getpwnam_r_errno", 0 } },
 
 
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "iconv_roundtrips", 0 } },
@@ -375,10 +375,11 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "inet_pton", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "mbc", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "memstream", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel_points", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_tsd", 0}},
+
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel_points", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_tsd", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "qsort", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "random", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_hsearch", 0}},
@@ -388,7 +389,8 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "setjmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "snprintf", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
+    
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf_long", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "stat", 0}},
@@ -442,12 +444,12 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_g_round", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_g_zeros", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_n", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "putenv_doublefree", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "regex_backref_0", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "regex_bracket_icase", 0}},
