@@ -986,6 +986,9 @@ sys_openat()
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
   } 
+  if (0 == strncmp(path,"/dev/null",9)) {
+    return -24;
+  }
   flags |= O_RDWR;
 
   if (dirf && FD_ENTRY == dirf->type) {
