@@ -418,7 +418,7 @@ int exec(char *path, char **argv, char ** env)
   w_satp(MAKE_SATP(p->kpagetable));
   sfence_vma();
   kvmfree(oldkpagetable, 0);
-
+  
   return argc; // this ends up in a0, the first argument to main(argc, argv)
 
  bad:

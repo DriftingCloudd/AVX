@@ -106,3 +106,9 @@ uint64 sys_tgkill(void){
 	argint(2,&sig);
 	return tgkill(tid,pid,sig);
 }
+
+uint64
+sys_rt_sigtimedwait()
+{
+	return 0;
+}

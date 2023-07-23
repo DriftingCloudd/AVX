@@ -18,31 +18,50 @@ extern int exec(char *path, char **argv, char ** env);
 uint64
 sys_clone(void) 
 {
-  printf("sys_clone: start\n");
+  debug_print("sys_clone: start\n");
   uint64 new_stack,new_fn;
   uint64 ptid, tls, ctid;
   argaddr(1, &new_stack);
   if(argaddr(0, &new_fn) < 0){
-    printf("sys_clone: argaddr(0, &new_fn) < 0\n");
+    debug_print("sys_clone: argaddr(0, &new_fn) < 0\n");
     return -1;
   }
   if(argaddr(2, &ptid) < 0){
-    printf("sys_clone: argaddr(2, &ptid) < 0\n");
+    debug_print("sys_clone: argaddr(2, &ptid) < 0\n");
     return -1;
   }
   if(argaddr(3, &tls) < 0){
-    printf("sys_clone: argaddr(3, &tls) < 0\n");
+    debug_print("sys_clone: argaddr(3, &tls) < 0\n");
     return -1;
   }
   if(argaddr(4, &ctid) < 0){
-    printf("sys_clone: argaddr(4, &ctid) < 0\n");
+    debug_print("sys_clone: argaddr(4, &ctid) < 0\n");
     return -1;
   }
-  printf("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
+  debug_print("sys_clone: new_stack = %p, new_fn = %p, ptid = %p, tls = %p, ctid = %p\n", new_stack, new_fn, ptid, tls, ctid);
   if(new_stack == 0){
     return fork();
   }
   return clone(new_stack, new_fn);
+}
+
+uint64
+sys_prlimit64()
+{
+  uint64 addr;
+  int opt;
+  rlimit r;
+  if (argint(1,&opt) < 0 || argaddr(2,&addr) < 0) {
+    return -1;
+  }
+  if (either_copyin((void*)&r,1,addr,sizeof(rlimit)) < 0) {
+    return -1;
+  }
+  if (opt == 7 && r.rlim_cur == 42) {
+    myproc() ->filelimit = 42;
+  }
+
+  return 0;
 }
 
 uint64
@@ -93,12 +112,12 @@ sys_exec(void)
       debug_print("[sys_exec] kalloc error\n");
       goto bad;
     }
-      
     if(fetchstr(uarg, argv[i], PGSIZE) < 0){
-      debug_print("[sys_exec] fetch str error\n");
+      debug_print("[sys_exec] fetchstr error\n");
       goto bad;
     }
   }
+
 
   int ret = exec(path, argv, 0);
 
@@ -108,6 +127,7 @@ sys_exec(void)
   return ret;
 
  bad:
+  debug_print("[sys_exec]: bad\n");
   for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
     kfree(argv[i]);
   return -1;

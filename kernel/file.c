@@ -340,11 +340,9 @@ fileseek(struct file *f, uint64 offset, int whence)
         ret = offset;
         f ->off = offset;
     } else if (whence == SEEK_CUR) {
-        f ->off += offset;
-        ret = f ->off;
+        ret = (f->off += offset);
     } else if (whence == SEEK_END) {
-      f ->off = f ->ep ->file_size + offset;
-      ret = f ->off;
+        ret = f->off = f->ep->file_size + offset;
     }
     eunlock(f->ep);
   } else if (f->type == FD_PIPE) {

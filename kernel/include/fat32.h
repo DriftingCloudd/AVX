@@ -32,6 +32,9 @@
 #define S_IFCHR				0020000		// character device
 #define S_IFIFO				0010000		// FIFO
 
+#define PROC_SUPER_MAGIC      0x9fa0
+#define TMPFS_MAGIC           0x01021994
+
 struct dirent {
     char  filename[FAT32_MAX_FILENAME + 1];
     uint8   attribute;
@@ -90,7 +93,20 @@ struct dirent *lookup_path(char *path, int parent, char *name);
 struct dirent *new_lookup_path(struct dirent *env, char *path, int parent, char *name);
 
 
-
+typedef struct statfs {
+    int64 f_type;
+    int64 f_bsize;
+    uint64 f_blocks;
+    uint64 f_bfree;
+    uint64 f_bavail;
+    int64 f_files;
+    int64 f_ffree;
+    int f_fsid[2];
+    int64 f_namelen;
+    int64 f_frsize;
+    int64 f_flags;
+    int64 f_spare[4];
+}statfs;
 
 // 用于sys_dirent64的返回结果，需要先得到dirent，然后再把信息放到这个结构体上面返回。
 struct dirent64 {

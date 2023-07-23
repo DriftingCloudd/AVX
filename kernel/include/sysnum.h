@@ -83,5 +83,8 @@
 #define SYS_sync        81
 #define SYS_fsync        82
 #define SYS_ftruncate   46
+#define SYS_rt_sigtimedwait 137
+#define SYS_prlimit64   261
+#define SYS_statfs      43
 
 #endif
