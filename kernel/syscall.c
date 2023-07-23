@@ -174,6 +174,7 @@ extern uint64 sys_gettid();
 extern uint64 sys_umask();
 extern uint64 sys_readlinkat();
 extern uint64 sys_sync();
+extern uint64 sys_fsync();
 extern uint64 sys_ftruncate();
 
 static uint64 (*syscalls[])(void) = {
@@ -253,6 +254,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_umask]       sys_umask,
   [SYS_readlinkat]  sys_readlinkat,
   [SYS_sync]        sys_sync,
+  [SYS_fsync]        sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
 };
 
@@ -332,6 +334,7 @@ static char *sysnames[] = {
   [SYS_umask]       "umask",
   [SYS_readlinkat]  "readlinkat",
   [SYS_sync]        "sync",
+  [SYS_fsync]       "fsync",
   [SYS_ftruncate]   "ftruncate",
 };
 

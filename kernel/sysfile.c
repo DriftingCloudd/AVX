@@ -1342,7 +1342,25 @@ sys_sync(void)
   return 0;
 }
 
+uint64
+sys_fsync(void)
+{
+  return 0;
+}
+
+uint64
 sys_ftruncate(void)
 {
+  struct file *fp;
+  int len, fd;
+  if (argfd(0,&fd,&fp) < 0 && fd != AT_FDCWD)
+    return -24;  // 打开文件太多
+
+  if (argint(1, &len) < 0)
+  {
+    return -1;
+  }
   
+
+  return 0;  
 }
