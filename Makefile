@@ -146,7 +146,7 @@ gdb-client:
 
 all:
 	@make build platform=qemu mode=release
-	@cp target/kernel.bin os.bin
+	@cp target/kernel kernel-qemu
 
 qemu-run:
 	@make build platform=qemu
