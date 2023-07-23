@@ -302,16 +302,13 @@ uvmalloc1(pagetable_t pagetable, uint64 start, uint64 end, int perm)
   return 0;
 }
 
-// Deallocate user pages to bring the process size from oldsz to
-// newsz.  oldsz and newsz need not be page-aligned, nor does newsz
-// need to be less than oldsz.  oldsz can be larger than the actual
-// process size.  Returns the new process size.
+
 uint64
 uvmdealloc1(pagetable_t pagetable, uint64 start, uint64 end)
 {
   
   if(start>=end)return -1;
-  if(PGROUNDUP(start) < PGROUNDUP(end)){
+  if(PGROUNDUP(start) <= PGROUNDUP(end)){
     int npages = (PGROUNDUP(end) - PGROUNDUP(start)) / PGSIZE;
     vmunmap(pagetable, PGROUNDUP(start), npages, 1);
   }

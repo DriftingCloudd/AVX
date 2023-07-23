@@ -146,6 +146,7 @@ sys_execve(void)
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || argaddr(1, &uargv) < 0 || argaddr(2, &uenv)){
     return -1;
   }
+  debug_print("[sys_execve] path:%s, uargv:%p, uenv:%p\n", path, uargv, uenv);
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
@@ -602,3 +603,9 @@ uint64 sys_umask(void)
   return 0;
 }
 
+
+
+uint64
+sys_mprotect(){
+  return 0;
+}

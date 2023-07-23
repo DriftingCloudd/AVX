@@ -42,8 +42,8 @@ struct proghdr {
 #define ELF_PROG_INTERP         3
 #define ELF_PROG_PHDR           6
 #define ELF_PROG_TLS            7
-#define ELF_GNU_STACK           1685382481
-#define ELF_GNU_RELRO           1685382482
+#define ELF_GNU_STACK           0x6474e551
+#define ELF_GNU_RELRO           0x6474e552
 
 // Flag bits for Proghdr flags
 #define ELF_PROG_FLAG_EXEC      1
