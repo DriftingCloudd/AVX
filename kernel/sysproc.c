@@ -292,6 +292,21 @@ sys_brk(void)
     else return myproc()->sz;
   }
   return 0;
+
+  // int n;
+  // uint64 addr;
+  // if(argint(0, &n) < 0)
+  //   return -1;
+  // addr = myproc()->sz;
+  // if (n == 0)
+  // {
+  //   return addr;
+  // }
+  // if (growproc(n) < 0)
+  // {
+  //   return -1;
+  // }
+  // return myproc()->sz;
 }
 
 uint64
