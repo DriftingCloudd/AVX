@@ -223,15 +223,17 @@ freeproc(struct proc *p)
 {
   if(p->trapframe)
     kfree((void*)p->trapframe);
-  if(p->ofile)
-    kfree((void*)p->exec_close);
+
+  kfree((void*)p->exec_close);
   p->trapframe = 0;
   if (p->kpagetable) {
     kvmfree(p->kpagetable, 1);
   }
   p->kpagetable = 0;
-  if(p->pagetable)
+  if(p->pagetable){
+    free_vma_list(p);
     proc_freepagetable(p->pagetable, p->sz);
+  }
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
@@ -798,7 +800,7 @@ tgkill(int tid, int pid, int sig)
   // if(!cmp_parent(pid,tid)) {printf("pid:%d, tid:%d\n");return -1;}
   // else return kill(tid,sig);
   printf("tgkill:%d %d %d\n", tid, pid, sig);
-  kill(tid, sig);
+  return kill(tid, sig);
 } 
 
 // Copy to either a user address, or kernel address,

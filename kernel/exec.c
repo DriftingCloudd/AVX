@@ -12,6 +12,10 @@
 #include "include/vm.h"
 #include "include/printf.h"
 #include "include/string.h"
+#include "include/mmap.h"
+
+#define min(x, y) ((x) < (y) ? (x) : (y))
+#define max(x, y) ((x) > (y) ? (x) : (y))
 
 #define STACK_SIZE 36*PGSIZE
 enum redir{
@@ -20,7 +24,7 @@ enum redir{
 };
 extern uint64 open(char* path, int omode);
 
-// va must be page-aligned
+
 // and the pages from va to va+sz must already be mapped.
 // Returns 0 on success, -1 on failure.
 static int
@@ -99,7 +103,7 @@ stackdisplay(pagetable_t pagetable,uint64 sp,uint64 sz)
 
 //加载elf文件，成功返回0，失败返回-1
 uint64
-loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t pagetable, pagetable_t kpagetable,uint64 * sz){
+loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t pagetable, pagetable_t kpagetable,uint64 * sz, int *is_dynamic){
   uint64 sz1;
   int i,off;
   struct proghdr ph;
@@ -143,12 +147,76 @@ loadelf(struct elfhdr* elf, struct dirent* ep, struct proghdr* phdr,pagetable_t 
         getphdr = 1;
         *phdr = ph;
       }
+    }else if(ph.type == ELF_PROG_INTERP){
+      *is_dynamic = 1;
     }else{
       //printf("ph.type: %d ph.type != ELF_PROG_LOAD\n", ph.type);
     }
   }
   // debug_print("loadelf success\n");
   return 0;
+}
+
+uint64
+get_total_mapping_size(struct elfhdr* interp_elf_ex, struct dirent* interpreter){
+  uint64 min_addr = -1;
+  uint64 max_addr = 0;
+  int is_true = 0;
+  struct proghdr ph;
+  for(uint i = 0, off = interp_elf_ex->phoff; i < interp_elf_ex->phnum; i++, off += sizeof(struct proghdr)){
+    if(eread(interpreter, 0, (uint64)&ph, off, sizeof(struct proghdr)) != sizeof(struct proghdr)){
+      debug_print("[get_total_mapping_size]eread failed\n");
+      return -1;
+    }
+    if(ph.type == ELF_PROG_LOAD){
+      min_addr = min(min_addr, PGROUNDDOWN(ph.vaddr));
+      max_addr = max(max_addr, ph.vaddr + ph.memsz);
+      is_true = 1;
+    }
+  }
+  return is_true ? (max_addr - min_addr) : 0;
+}
+
+
+uint64
+load_elf_interp(pagetable_t pagetable, struct elfhdr* interp_elf_ex, struct dirent* interpreter){
+  uint64 total_size = 0;
+  uint64 start_addr = 0;
+  struct proghdr ph;
+  /*----------------------获取总共需要的内存大小--------------------*/
+  total_size = get_total_mapping_size(interp_elf_ex, interpreter);
+  if(total_size == 0){
+    debug_print("[load_elf_interp]get_total_mapping_size failed\n");
+    return -1;
+  }
+  /*----------------------分配总共需要的内存大小--------------------*/
+  start_addr = mmap(0, total_size, PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+  if(start_addr == -1){
+    debug_print("[load_elf_interp]mmap failed\n");
+    return -1;
+  }
+  /*----------------------加载elf文件--------------------*/
+  for(uint i = 0, off = interp_elf_ex->phoff; i < interp_elf_ex->phnum; i++, off += sizeof(struct proghdr)){
+    if(eread(interpreter, 0, (uint64)&ph, off, sizeof(struct proghdr)) != sizeof(struct proghdr)){
+      debug_print("[load_elf_interp]eread failed\n");
+      return -1;
+    }
+    if(ph.type == ELF_PROG_LOAD){
+      if(ph.memsz < ph.filesz){
+        debug_print("[load_elf_interp]ph.memsz < ph.filesz\n");
+        return -1;
+      }
+      if(ph.vaddr + ph.memsz < ph.vaddr){
+        debug_print("[load_elf_interp]ph.vaddr + ph.memsz < ph.vaddr\n");
+        return -1;
+      }
+      if(loadseg(pagetable, start_addr + ph.vaddr, interpreter, ph.off, ph.filesz) < 0){
+        debug_print("[load_elf_interp]loadseg failed\n");
+        return -1;
+      }
+    }
+  }
+  return start_addr;
 }
 
 int
@@ -228,7 +296,17 @@ int exec(char *path, char **argv, char ** env)
   struct proghdr ph;
   pagetable_t pagetable = 0, oldpagetable;
   pagetable_t kpagetable = 0, oldkpagetable;
+  struct dirent *interpreter = NULL;
+  struct elfhdr interpreter_elf;
+  uint64 interp_start_addr = 0;
+  uint64 program_entry = 0;
+  int is_dynamic = 0;
   struct proc *p = myproc();
+  free_vma_list(p);
+  vma_init(p);
+
+  oldpagetable = p->pagetable;
+  oldkpagetable = p->kpagetable;
 
   kpagetable = create_kpagetable(p);
   if(kpagetable == 0){
@@ -252,11 +330,43 @@ int exec(char *path, char **argv, char ** env)
   if((pagetable = proc_pagetable(p)) == NULL)
     goto bad;
 
+
+  //此处修改是为了mmap映射动态链接时更方便
+  p->pagetable = pagetable;
+
   // Load program into memory.
-  if(loadelf(&elf, ep, &ph, pagetable, kpagetable, &sz) < 0){
+  if(loadelf(&elf, ep, &ph, pagetable, kpagetable, &sz, &is_dynamic) < 0){
     printf("loadelf failed\n");
     goto bad;
   }
+/* -------------------动态链接-------------------------------------------*/
+  //动态链接目前默认处理/libc.so
+  
+  if(is_dynamic){
+
+    if((interpreter = ename("/libc.so")) == NULL){
+      debug_print("interpreter not found\n");
+      goto bad;
+    }
+
+    elock(interpreter);
+    if(readelfhdr(interpreter, &interpreter_elf) < 0){
+      debug_print("readelfhdr failed\n");
+      goto bad;
+    }
+
+    interp_start_addr = load_elf_interp(pagetable, &interpreter_elf, interpreter);
+    program_entry = interp_start_addr + interpreter_elf.entry;
+    debug_print("interp_start_addr:%p program_entry:%p\n", interp_start_addr, program_entry);
+
+    eunlock(interpreter);
+    eput(interpreter);
+    interpreter = NULL;
+  }else{
+    program_entry = elf.entry;
+  }
+
+/*--------------------动态链接结束---------------------------------------*/
   eunlock(ep);
   eput(ep);
   ep = 0;
@@ -269,7 +379,8 @@ int exec(char *path, char **argv, char ** env)
   }
   //printf("[exec] stackbase: %p stacktop: %p\n", stackbase, sz);
 
-  //下面开始处理environment的问题
+
+/*--------------------开始处理environment---------------------------------------*/
   uint64 envp[MAXARG+1];
   envp[0] = 0;
   if((sp = user_stack_push_str(pagetable, envp, "LD_LIBRARY_PATH=/", sp, stackbase)) == -1){
@@ -290,16 +401,18 @@ int exec(char *path, char **argv, char ** env)
   }
 
   uint64 aux[MAXARG*2+3] = {0,0,0};
+  alloc_aux(aux, AT_HWCAP, 0);
   alloc_aux(aux,AT_PAGESZ,PGSIZE);
   alloc_aux(aux,AT_PHDR, ph.vaddr);
   alloc_aux(aux,AT_PHENT, elf.phentsize);
   alloc_aux(aux,AT_PHNUM, elf.phnum);
+  alloc_aux(aux, AT_BASE, interp_start_addr);
+  alloc_aux(aux,AT_ENTRY, elf.entry);
   alloc_aux(aux,AT_UID, 0);
   alloc_aux(aux,AT_EUID, 0);
   alloc_aux(aux,AT_GID, 0);
   alloc_aux(aux,AT_EGID, 0);
-  alloc_aux(aux,AT_SECURE, 0);
-  alloc_aux(aux,AT_EGID, 0);		
+  alloc_aux(aux,AT_SECURE, 0);	
   alloc_aux(aux,AT_RANDOM, sp);
   // printf("coming 2\n");
   // Push argument strings, prepare rest of stack in ustack.
@@ -380,12 +493,11 @@ int exec(char *path, char **argv, char ** env)
   safestrcpy(p->name, last, sizeof(p->name));
     
   // Commit to the user image.
-  oldpagetable = p->pagetable;
-  oldkpagetable = p->kpagetable;
+  
   p->pagetable = pagetable;
   p->kpagetable = kpagetable;
   p->sz = sz;
-  p->trapframe->epc = elf.entry;  // initial program counter = main
+  p->trapframe->epc = program_entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
   
   // maybe it's wrong
@@ -429,6 +541,10 @@ int exec(char *path, char **argv, char ** env)
     proc_freepagetable(pagetable, sz);
   if(kpagetable)
     kvmfree(kpagetable, 0);
+  if(interpreter){
+    eunlock(interpreter);
+    eput(interpreter);
+  }
   if(ep){
     eunlock(ep);
     eput(ep);
