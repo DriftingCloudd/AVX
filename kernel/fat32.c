@@ -743,6 +743,8 @@ void kstat(struct dirent *de, struct kstat *kst)
     kst->st_atime_sec = 0;
     kst->st_ctime_sec = 0;
     kst->st_mtime_sec = 0;
+    kst->st_uid = 0;
+    kst->st_gid = 0;
 }
 
 static int hashpath(char* name){
