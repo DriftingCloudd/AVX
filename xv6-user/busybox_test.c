@@ -22,26 +22,26 @@ void test_busybox(){
 	wait4(pid, &status, 0);
 	printf("run busybox_testcode.sh\n");
 	int i;
-	// for(i = 0; busybox[i].name[1] ; i++){
-	// 	if(!busybox[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("busybox",busybox[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// 	if(status==0){
-	// 		printf("testcase busybox %d success\n",i);
-	// 	}else{
-	// 		printf("testcase busybox %d success\n",i);
-	// 		// printf("testcase busybox %d fail\n",i);
-	// 	}
-	// }
+	for(i = 0; busybox[i].name[1] ; i++){
+		if(!busybox[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("busybox",busybox[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+		if(status==0){
+			printf("testcase busybox %d success\n",i);
+		}else{
+			printf("testcase busybox %d success\n",i);
+			// printf("testcase busybox %d fail\n",i);
+		}
+	}
 	/**
 	 * run iozone_testcode.sh
 	 */
 	
-	// printf("run iozone_testcode.sh\n");
+	printf("run iozone_testcode.sh\n");
 	
 	// printf("iozone automatic measurements\n");
 	// pid = fork();
@@ -114,15 +114,15 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	// for(i = 0; libctest[i].name[1] ; i++){
-	// 	if(!libctest[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest[i].name[1] ; i++){
+		if(!libctest[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 	
 	for(i = 0; libctest_dy[i].name[1] ; i++){
 		if(!libctest_dy[i].valid)continue;
