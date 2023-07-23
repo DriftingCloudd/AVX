@@ -12,6 +12,7 @@
 #include "include/printf.h"
 #include "include/uname.h"
 #include "include/futex.h"
+#include "include/mmap.h"
 
 extern int exec(char *path, char **argv, char ** env);
 
@@ -607,5 +608,24 @@ uint64 sys_umask(void)
 
 uint64
 sys_mprotect(){
+  uint64 addr,len;
+  int prot;
+  if (argaddr(0,&addr) < 0 || argaddr(1,&len) < 0 || argint(2,&prot) < 0) 
+    return -1;
+  struct proc *p = myproc();
+  int perm = PTE_U | PTE_A | PTE_D;
+  if (prot & PROT_READ)
+    perm |= PTE_R;
+  if (prot & PROT_WRITE)
+    perm |= PTE_W;
+  if (prot & PROT_EXEC)
+    perm |= (PTE_X | PTE_A);
+  int page_n = PGROUNDUP(len) >> PGSHIFT;
+  uint64 va = addr;
+  for (int i = 0; i < page_n; i++) {
+    experm(p->pagetable,va,perm);  // TODO:错误处理
+    va += PGSIZE;
+  }
+
   return 0;
 }
