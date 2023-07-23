@@ -98,13 +98,11 @@ uint64 sys_utimensat(void)
 		{
 			return -1;
 		}
-		else
-		{
-			t[0].second = p->utime;
-			t[0].microSecond = p->utime;
-			t[1].second = p->utime;
-			t[1].microSecond = p->utime;
-		}	
+	} else {
+		t[0].second = p->utime;
+		t[0].microSecond = p->utime;
+		t[1].second = p->utime;
+		t[1].microSecond = p->utime;
 	}
 	
 	if(pathName[0] == '/')	//指定了绝对路径，忽略fd
@@ -151,10 +149,6 @@ uint64 sys_utimensat(void)
 	
 	if (NULL == f)
 		return -2;
-	f->t0_sec = t[0].second;
-	f->t0_nsec = t[0].microSecond;
-	f->t1_sec = t[1].second;
-	f->t1_nsec = t[1].microSecond;
 	
 	return 0;
 }
