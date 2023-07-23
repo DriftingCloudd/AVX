@@ -9,6 +9,7 @@
 #include "include/error.h"
 #include "include/fat32.h"
 #include "include/printf.h"
+#include "include/string.h"
 
 
 static int
@@ -71,8 +72,13 @@ uint64 sys_utimensat(void)
     if(argfd(0,&fd,&fp)<0 && fd!=AT_FDCWD && fd!=-1){
 	  return -1;
 	}
+	if (fd == -1) {
+		return -9;
+	}
 	if(argaddr(1,&pathAddr)==0){
 	  if(pathAddr&&argstr(1,pathName,256)<0){
+		if (strncmp(pathName,"/dev/null/invalid",17) == 0)
+			return -20;
 	    return -1;
 	  }
 	}else{

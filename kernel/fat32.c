@@ -761,7 +761,10 @@ static int hashpath(char* name){
 void ekstat(struct dirent *de, struct kstat *st)
 {
     st->st_dev = 0;
-    st->st_size = de->file_size;
+    if (NULL != de)
+        st->st_size = de->file_size;
+    else
+        st->st_size = 0;
     st->st_blksize = 512; // Maybe it's right
     st->st_blocks = (st->st_size + st->st_blksize - 1) / st->st_blksize;
     st->st_atime_nsec = 0;
@@ -772,11 +775,20 @@ void ekstat(struct dirent *de, struct kstat *st)
     st->st_mtime_sec = 0;
     st->st_uid = 0;
     st->st_gid = 0;
-    st->st_rdev = de->dev;
+    if (NULL != de)
+        st->st_rdev = de->dev;
+    else
+        st->st_rdev = 0;
     st->st_nlink = 1;
-    st->st_ino = hashpath(de->filename);
+    if (NULL != de)
+        st->st_ino = hashpath(de->filename);
+    else
+        st->st_ino = 0;
     st->st_mode = 0;
-    st->st_mode = (de->attribute & ATTR_DIRECTORY) ? S_IFDIR : S_IFREG;
+    if (NULL != de)
+        st->st_mode = (de->attribute & ATTR_DIRECTORY) ? S_IFDIR : S_IFREG;
+    else
+        st->st_mode = S_IFCHR;
     st->st_mode |= 0x1ff;
 }
 

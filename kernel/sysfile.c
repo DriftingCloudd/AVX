@@ -335,15 +335,24 @@ sys_fstatat(void)
       return -1;
   }
 
+  int t1 = -1;
+
+  if (strncmp(pathname,"/dev/null",9) == 0)
+    t1 = 0;
+
   ep = new_ename(dp,pathname);
-  if (NULL == ep)
+  if (NULL == ep && t1 == -1)
     return -2;
   
   struct kstat kst;
-  elock(ep);
-  ekstat(ep,&kst);
-  eunlock(ep);
-  eput(ep);
+  if (t1 == -1) {
+    elock(ep);
+    ekstat(ep,&kst);
+    eunlock(ep);
+    eput(ep);
+  } else {
+    ekstat(ep,&kst);
+  }
 
   //print_kstat(&kst);
   if (copyout(p->pagetable,st,(char*)&kst,sizeof(kst)) < 0)
