@@ -37,6 +37,7 @@ void
 main(unsigned long hartid, unsigned long dtb_pa)
 {
   inithartid(hartid);
+  printf("hello world!\n");
   #ifdef QEMU
   if (first == 0) {
   #else

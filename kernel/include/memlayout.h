@@ -76,7 +76,7 @@
 
 // #define PHYSTOP                 0x240000000
 // #define PHYSTOP                 0x80a00000
-#define PHYSTOP                 0x88a00000
+#define PHYSTOP                 0x86a00000
 
 // map the trampoline page to the highest address,
 // in both user and kernel space.
