@@ -25,6 +25,8 @@ struct timespec2 {
 	long tv_nsec;	// nanoseconds
 };
 
+typedef struct timespec2 timespec_t;
+
 void timerinit();
 void set_next_timeout();
 void timer_tick();

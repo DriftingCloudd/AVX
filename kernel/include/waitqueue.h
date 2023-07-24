@@ -7,6 +7,7 @@
 #include "sched.h"
 #include "error.h"
 #include "proc.h"
+#include "printf.h"
 
 
 struct wq_entry {
@@ -33,20 +34,19 @@ static inline void __add_to_waitqueue(wq_t *self, wq_entry_t *entry) {
 static inline void __rm_from_waitqueue(wq_t *self, wq_entry_t *entry) {
     list_del_init(&entry->head);
 }
-extern int kprintf(const char *format, ...);
-extern void wake_up_process(proc_t *p);
+extern int printf(const char *format, ...);
 extern void wake_up_process_locked(proc_t *p);
 
 static void auto_remove_callback(wq_t *wq, wq_entry_t *entry) {
     proc_t *p = entry->private_p;
     if (list_empty(&entry->head)) {
-        kprintf("bad1\n");
+        printf("bad1\n");
         for(;;);
     }
     __rm_from_waitqueue(wq, entry);
     acquire(&p->lock);
     if(entry->private_p->state == RUNNING) {
-        kprintf("bad2\n");
+        printf("bad2\n");
         for(;;);
     }
     wake_up_process_locked(p);
@@ -55,7 +55,7 @@ static void auto_remove_callback(wq_t *wq, wq_entry_t *entry) {
 
 #define INIT_WAIT_QUEUE(name) {.wq_lock=INIT_SPINLOCK((name).wq_lock), .head=LIST_HEAD_INIT((name).head)}
 #define WAIT_QUEUE_INIT(name) wq_t name = INIT_WAIT_QUEUE(name)
-#define DECLARE_WQ_ENTRY(name) wq_entry_t name = {.private=current, .head=LIST_HEAD_INIT((name).head), .func=auto_remove_callback}
+#define DECLARE_WQ_ENTRY(name) wq_entry_t name = {.private_p=myproc(), .head=LIST_HEAD_INIT((name).head), .func=auto_remove_callback}
 
 
 #define __wait_event_timeout(wq, condition, interruptible, locked, timeout) ({ \
@@ -63,7 +63,7 @@ static void auto_remove_callback(wq_t *wq, wq_entry_t *entry) {
     int __ret = timeout;                                        \
                                                                 \
     DECLARE_WQ_ENTRY(__entry);                                  \
-    proc_t *p = current;                                        \
+    proc_t *p = myproc();                                        \
     if (!(locked))                                              \
         acquire(&(wq)->wq_lock);                                \
                                                                 \
@@ -75,7 +75,7 @@ static void auto_remove_callback(wq_t *wq, wq_entry_t *entry) {
             goto out;                                           \
         }                                                       \
         p->wait_channel = (wq);                                 \
-        p->__state = SLEEPING;                                  \
+        p->state = SLEEPING;                                  \
         if (list_empty(&__entry.head))                          \
             __add_to_waitqueue(wq, &__entry);                   \
         release(&(wq)->wq_lock);                                \
@@ -101,7 +101,7 @@ static void auto_remove_callback(wq_t *wq, wq_entry_t *entry) {
                                                                 \
                                                                 \
     DECLARE_WQ_ENTRY(__entry);                                  \
-    proc_t *p = current;                                        \
+    proc_t *p = myproc();                                        \
     if (!(locked))                                              \
         acquire(&(wq)->wq_lock);                                \
                                                                 \
@@ -113,7 +113,7 @@ static void auto_remove_callback(wq_t *wq, wq_entry_t *entry) {
             goto out;                                           \
         }                                                       \
         p->wait_channel = (wq);                                 \
-        p->__state = SLEEPING;                                  \
+        p->state = SLEEPING;                                  \
         if (list_empty(&__entry.head))                          \
             __add_to_waitqueue(wq, &__entry);                   \
         release(&(wq)->wq_lock);                                \
