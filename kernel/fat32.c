@@ -1094,7 +1094,7 @@ static void get_parent_name(char *path, char *parent_name, char *name)
     
     for (;cur >= 0; cur--) {
         if (parent_name[cur] == '/') {
-            parent_name[cur] = '0';
+            parent_name[cur] = 0;
             break;
         }
     }
