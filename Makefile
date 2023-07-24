@@ -1,7 +1,7 @@
 platform	:= visionfive
 #platform	:= qemu
-mode := debug
-# mode := release
+# mode := debug
+ mode := release
 K=kernel
 U=xv6-user
 T=target

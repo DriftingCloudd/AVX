@@ -671,6 +671,39 @@ void etrunc(struct dirent *entry)
     entry->dirty = 1;
 }
 
+int etruncate(struct dirent *entry, int len)
+{
+    if (len > entry->file_size)
+    {
+        return -1;
+    }
+    entry->file_size = len;  
+    int clus_num;
+    if (len % fat.byts_per_clus)
+    {
+       clus_num = len / fat.byts_per_clus + 1;
+    }
+    else {
+        clus_num = len / fat.byts_per_clus;
+    }
+     
+    
+    int i = 0;
+    uint32 clus;
+    for (clus = entry->first_clus;i < clus_num && clus >= 2 && clus < FAT32_EOC; ) {
+        uint32 next = read_fat(clus);
+        clus = next;
+    }
+
+    for (; clus >= 2 && clus < FAT32_EOC; ) {
+        uint32 next = read_fat(clus);
+        free_clus(clus);
+        clus = next;
+    }
+
+    return 0;
+}
+
 void elock(struct dirent *entry)
 {
     if (entry == 0 || entry->ref < 1)

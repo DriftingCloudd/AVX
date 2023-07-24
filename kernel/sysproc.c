@@ -13,6 +13,7 @@
 #include "include/uname.h"
 #include "include/futex.h"
 #include "include/mmap.h"
+#include "include/rusage.h"
 
 extern int exec(char *path, char **argv, char ** env);
 
@@ -263,7 +264,7 @@ sys_sbrk(void)
 {
   int addr;
   int n;
-
+  // printf("sbrk param n: %d\n", n);
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
@@ -293,6 +294,21 @@ sys_brk(void)
     else return myproc()->sz;
   }
   return 0;
+
+  // int n;
+  // uint64 addr;
+  // if(argint(0, &n) < 0)
+  //   return -1;
+  // addr = myproc()->sz;
+  // if (n == 0)
+  // {
+  //   return addr;
+  // }
+  // if (growproc(n) < 0)
+  // {
+  //   return -1;
+  // }
+  // return myproc()->sz;
 }
 
 uint64
@@ -300,7 +316,7 @@ sys_sleep(void)
 {
   int n;
   uint ticks0;
-
+  
   if(argint(0, &n) < 0)
     return -1;
   acquire(&tickslock);
@@ -536,41 +552,41 @@ uint64 sys_futex(void)
 {
   int futex_op, val, val3, userVal;
   
-  uint64 uaddr, timeout, uaddr2;
-  struct proc *p = myproc();
-  TimeSpec t;
-  if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
-		return -1;
-  futex_op &= (FUTEX_PRIVATE_FLAG - 1);
-  switch (futex_op)
-  {
-        case FUTEX_WAIT:
-            copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
-            if (timeout) {
-                if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
-                    panic("copy time error!\n");
-                }
-            }
-            // printf("val: %d\n", userVal);
-            if (userVal != val) {
-                return -1;
-            }
-            // TODO
-            // futexWait(uaddr, myThread(), timeout ? &t : 0);
-            break;
-        case FUTEX_WAKE:
-            // printf("val: %d\n", val);
-            // TODO
-            // futexWake(uaddr, val);
-            break;
-        case FUTEX_REQUEUE:
-            // printf("val: %d\n", val);
-            // TODO
-            // futexRequeue(uaddr, val, uaddr2);
-            break;
-        default:
-            panic("Futex type not support!\n");
-  }
+  // uint64 uaddr, timeout, uaddr2;
+  // struct proc *p = myproc();
+  // TimeSpec t;
+  // if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
+	// 	return -1;
+  // futex_op &= (FUTEX_PRIVATE_FLAG - 1);
+  // switch (futex_op)
+  // {
+  //       case FUTEX_WAIT:
+  //           copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
+  //           if (timeout) {
+  //               if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
+  //                   panic("copy time error!\n");
+  //               }
+  //           }
+  //           // printf("val: %d\n", userVal);
+  //           if (userVal != val) {
+  //               return -1;
+  //           }
+  //           // TODO
+  //           // futexWait(uaddr, myThread(), timeout ? &t : 0);
+  //           break;
+  //       case FUTEX_WAKE:
+  //           // printf("val: %d\n", val);
+  //           // TODO
+  //           // futexWake(uaddr, val);
+  //           break;
+  //       case FUTEX_REQUEUE:
+  //           // printf("val: %d\n", val);
+  //           // TODO
+  //           // futexRequeue(uaddr, val, uaddr2);
+  //           break;
+  //       default:
+  //           panic("Futex type not support!\n");
+  // }
   return 0;
 };
 
@@ -627,5 +643,53 @@ sys_mprotect(){
     va += PGSIZE;
   }
 
+  return 0;
+}
+
+//TODO 
+// 该系统调用用于向内核提供对于起始地址为addr，长度为length的内存空间的操作建议或者指示
+// 主要用于提高系统性能
+uint64
+sys_madvise(void)
+{
+  return 0;
+}
+
+uint64
+sys_getrusage(void)
+{
+  int who;
+  uint64 addr;
+  struct rusage rs;
+  struct proc* p = myproc();
+
+  if (argint(0, &who) < 0)
+  {
+    return -1;
+  }
+
+  if (argaddr(1, &addr) < 0)
+  {
+    return -1;
+  }
+  
+  rs = (struct rusage){
+    .ru_utime = p->utime,
+    .ru_stime = p->ktime,
+  };
+
+  switch (who)
+  {
+  case RUSAGE_SELF:
+		case RUSAGE_THREAD:
+			rs.ru_nvcsw = p->vsw;
+			rs.ru_nivcsw = p->ivsw;
+      break;
+    default:
+      break;
+  }
+  if(either_copyout(1,addr,&rs,sizeof(rs))<0){
+    return -1;
+  }
   return 0;
 }

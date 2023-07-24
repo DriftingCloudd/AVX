@@ -22,6 +22,7 @@
 #include "include/vm.h"
 #include "include/mmap.h"
 #include "include/sysinfo.h"
+#include "include/fat32.h"
 
 
 char syslogbuffer[1024];
@@ -1367,6 +1368,58 @@ sys_sendfile(void)
     debug_print("in name : %s\n",fin->ep->filename);
   }
   return file_send(fin,fout,offset,count);
+}
+
+
+
+uint64
+sys_sync(void)
+{
+
+  int bufsiz;
+  uint64 addr2;
+  char path[FAT32_MAX_PATH];
+  if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
+  {
+    return -1;
+  }
+  int copy_size;
+  if (bufsiz < strlen(path))
+  {
+    copy_size = bufsiz;
+  }
+  else
+  {
+    copy_size = strlen(path);
+  }
+  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
+  either_copyout(1, addr2, "/", 1);
+  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
+  return 0;
+}
+
+uint64
+sys_fsync(void)
+{
+  return 0;
+}
+
+uint64
+sys_ftruncate(void)
+{
+  struct file *fp;
+  int len, fd;
+  if (argfd(0,&fd,&fp) < 0 && fd != AT_FDCWD)
+    return -24;  // 打开文件太多
+
+  if (argint(1, &len) < 0)
+  {
+    return -1;
+  }
+  
+  etruncate(fp->ep, len);
+
+  return 0;  
 }
 
 uint64
