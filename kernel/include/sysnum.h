@@ -88,4 +88,5 @@
 #define SYS_statfs      43
 #define SYS_pread       67
 #define SYS_mprotect    226
+#define SYS_madvise     233
 #endif
