@@ -173,6 +173,9 @@ extern uint64 sys_tgkill();
 extern uint64 sys_gettid();
 extern uint64 sys_umask();
 extern uint64 sys_readlinkat();
+extern uint64 sys_sync();
+extern uint64 sys_fsync();
+extern uint64 sys_ftruncate();
 extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
@@ -260,6 +263,9 @@ static uint64 (*syscalls[])(void) = {
   [SYS_statfs]      sys_statfs,
   [SYS_pread]       sys_pread,
   [SYS_mprotect]    sys_mprotect,
+  [SYS_sync]        sys_sync,
+  [SYS_fsync]       sys_fsync,
+  [SYS_ftruncate]   sys_ftruncate,
 };
 
 static char *sysnames[] = {
@@ -342,6 +348,9 @@ static char *sysnames[] = {
   [SYS_statfs]      "statfs",
   [SYS_pread]       "pread",
   [SYS_mprotect]    "mprotect",
+  [SYS_sync]        "sync",
+  [SYS_fsync]       "fsync",
+  [SYS_ftruncate]   "ftruncate",
 };
 
 void
@@ -356,8 +365,8 @@ syscall(void)
       debug_print("pid %d: %s\n", p->pid, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
-    if(num != SYS_read && num != SYS_write && num != SYS_writev)
-      debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
+    // if(num != SYS_read && num != SYS_write && num != SYS_writev)
+    //   debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }

@@ -46,6 +46,7 @@ struct dirent {
     // uint16  last_write_time;
     // uint16  last_write_date;
     uint32  file_size;
+    
 
     uint32  cur_clus;
     uint    clus_cnt;
@@ -70,6 +71,8 @@ struct dirent*  ealloc(struct dirent *dp, char *name, int attr);
 struct dirent*  edup(struct dirent *entry);
 void            eupdate(struct dirent *entry);
 void            etrunc(struct dirent *entry);
+void            etrunc(struct dirent *entry);
+int             etruncate(struct dirent *entry, int len);
 void            eremove(struct dirent *entry);
 void            eput(struct dirent *entry);
 void            estat(struct dirent *ep, struct stat *st);
