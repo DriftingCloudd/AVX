@@ -182,6 +182,7 @@ extern uint64 sys_statfs();
 extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
+extern uint64 sys_getrusage();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -269,6 +270,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_ftruncate]   sys_ftruncate,
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
+  [SYS_getrusage]   sys_getrusage,
 };
 
 static char *sysnames[] = {
@@ -355,6 +357,7 @@ static char *sysnames[] = {
   [SYS_fsync]       "fsync",
   [SYS_ftruncate]   "ftruncate",
   [SYS_madvise]     "madvise",
+  [SYS_getrusage]   "getrusage",
 };
 
 void

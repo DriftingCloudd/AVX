@@ -13,6 +13,7 @@
 #include "include/uname.h"
 #include "include/futex.h"
 #include "include/mmap.h"
+#include "include/rusage.h"
 
 extern int exec(char *path, char **argv, char ** env);
 
@@ -651,5 +652,44 @@ sys_mprotect(){
 uint64
 sys_madvise(void)
 {
+  return 0;
+}
+
+uint64
+sys_getrusage(void)
+{
+  int who;
+  uint64 addr;
+  struct rusage rs;
+  struct proc* p = myproc();
+
+  if (argint(0, &who) < 0)
+  {
+    return -1;
+  }
+
+  if (argaddr(1, &addr) < 0)
+  {
+    return -1;
+  }
+  
+  rs = (struct rusage){
+    .ru_utime = p->utime,
+    .ru_stime = p->ktime,
+  };
+
+  switch (who)
+  {
+  case RUSAGE_SELF:
+		case RUSAGE_THREAD:
+			rs.ru_nvcsw = p->vsw;
+			rs.ru_nivcsw = p->ivsw;
+      break;
+    default:
+      break;
+  }
+  if(either_copyout(1,addr,&rs,sizeof(rs))<0){
+    return -1;
+  }
   return 0;
 }

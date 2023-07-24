@@ -89,4 +89,5 @@
 #define SYS_pread       67
 #define SYS_mprotect    226
 #define SYS_madvise     233
+#define SYS_getrusage   165
 #endif
