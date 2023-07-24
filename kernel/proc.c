@@ -184,6 +184,8 @@ found:
   p->uid = 0;
   p->gid = 0;
   p->pgid = 0;
+  p->vsw = 0;
+  p->ivsw = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -712,6 +714,7 @@ sleep(void *chan, struct spinlock *lk)
 
   // Go to sleep.
   p->chan = chan;
+  p->vsw += 1;
   p->state = SLEEPING;
 
   sched();
