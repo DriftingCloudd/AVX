@@ -1341,77 +1341,7 @@ sys_sendfile(void)
   return file_send(fin,fout,offset,count);
 }
 
-uint64
-sys_readlinkat(void)
-{
-  // struct file *fp;
-  // int bufsiz, fd;
-  // uint64 addr2;
-  // char path[FAT32_MAX_PATH];
-  // if (argfd(0,&fd,&fp) < 0 && fd != AT_FDCWD)
-  //   return -24;  // 打开文件太多
 
-  // if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
-  // {
-  //   return -1;
-  // }
-  // printf("readlinkat param path: %s, param bufsiz: %d\n", path, bufsiz);
-  // int copy_size;
-  // if (bufsiz < strlen(path))
-  // {
-  //   copy_size = bufsiz;
-  // }
-  // else
-  // {
-  //   copy_size = strlen(path) + 1;
-  // }
-  // // printf("arrive!\n");
-  
-  // if(either_copyout(1, (void *)addr2, (void *)path, copy_size) < 0)
-  // {
-  //   printf("copy error!\n");
-  // }
-
-  
-  // return copy_size;
-  // return 0;
-  int dirfd;
-  struct file* df;
-  struct dirent *dp = NULL;
-  char pathname[FAT32_MAX_PATH+1];
-  uint64 buf;
-  int bufsz;
-  struct proc *p = myproc();
-
-  if(argint(3,&bufsz)<0){
-    return -1;
-  }
-  if(argaddr(2,&buf)<0){
-    return -1;
-  }
-  if(argstr(1,pathname,FAT32_MAX_PATH+1)<0){
-    return -1;
-  }
-  if(argfd(0,&dirfd,&df)<0){
-    if(dirfd!=AT_FDCWD&&pathname[0]!='/'){
-      return -1;
-    }
-    dp = p->cwd;
-  }else{
-    dp = df->ep;
-  }
-
-  //if(dirfd>=0)print_f_info(df);
-  //printf("[readlinkat] pathname:%s\n",pathname);
-  //printf("[readlinkat] buf:%p bufsz:%p\n",buf,bufsz);
-
-    if(either_copyout(1,buf,myproc()->name,bufsz)<0){
-      return -1;
-    }
-    return 0;
-  
-  //__debug_info("[sys_readlinkat] pathname not matched\n");
-}
 
 uint64
 sys_sync(void)
