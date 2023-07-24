@@ -261,7 +261,7 @@ sys_sbrk(void)
 {
   int addr;
   int n;
-  printf("sbrk param n: %d\n", n);
+  // printf("sbrk param n: %d\n", n);
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
@@ -278,7 +278,7 @@ sys_brk(void)
 
   if(argaddr(0, &n) < 0)
     return -1;
-  printf("brk param n: %d\n", n);
+  // printf("brk param n: %d\n", n);
   // debug_print("sys_brk n = %p\n", n);
   addr = myproc()->sz;
   if (n == 0)
