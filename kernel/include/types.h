@@ -13,6 +13,7 @@ typedef unsigned long uint64;
 typedef long int64;
 typedef unsigned long uintptr_t;
 typedef uint64 pde_t;
+typedef struct proc proc_t;
 
 // #define NULL ((void *)0)
 #define NULL 0

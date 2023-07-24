@@ -46,7 +46,8 @@ OBJS += \
   $K/vma.o \
   $K/signal.o \
   $K/syssig.o \
-  $K/bin.o
+  $K/bin.o \
+  $K/thread_group.o
 
 
 ifeq ($(platform), qemu)
