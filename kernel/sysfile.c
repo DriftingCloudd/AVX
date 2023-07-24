@@ -1421,3 +1421,31 @@ sys_ftruncate(void)
 
   return 0;  
 }
+
+uint64
+sys_readlinkat(void)
+{
+
+  int bufsiz;
+  uint64 addr2;
+  char path[FAT32_MAX_PATH];
+  if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
+  {
+    return -1;
+  }
+  int copy_size;
+  if (bufsiz < strlen(path))
+  {
+    copy_size = bufsiz;
+  }
+  else
+  {
+    copy_size = strlen(path);
+  }
+  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
+  either_copyout(1, addr2, "/", 1);
+  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
+  
+  return copy_size;
+  // return 0;
+}
