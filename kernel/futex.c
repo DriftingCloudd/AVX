@@ -1,6 +1,6 @@
 #include "include/futex.h"
-#include "include/proc.h"
 #include "include/types.h"
+#include "include/proc.h"
 #include "include/timer.h"
 #include "include/thread.h"
 

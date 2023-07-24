@@ -1,9 +1,4 @@
 #include "include/thread.h"
-#include "include/riscv.h"
-#include "include/error.h"
-#include "include/proc.h"
-#include "include/futex.h"
-#include "include/spinlock.h"
 
 Thread threads[THREAD_TOTAL_NUMBER];  // 暂时先定义100个线程？
 

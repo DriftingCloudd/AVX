@@ -1,7 +1,7 @@
 #ifndef _Thread_H_
 #define _Thread_H_
 
-#include "signal.h"
+#include "types.h"
 #include "proc.h"
 #include "fat32.h"
 #include "types.h"
@@ -102,7 +102,7 @@ typedef struct Thread {
     uint64 clearChildTid;
     struct proc* process;
     uint64 robustHeadPointer;
-    bool killed;
+    int killed;
 	//struct SignalContextList waitingSignal;
 } Thread;
 
@@ -114,7 +114,7 @@ uint64 getThreadTopSp(Thread* th);
 
 void threadInit();
 int mainThreadAlloc(Thread **new_thread, uint64 parentId);
-int threadAlloc(Thread **new_thread, Process* process, uint64 userSp);
+int threadAlloc(Thread **new_thread, struct proc* process, uint64 userSp);
 int tid2Thread(uint32 threadId, struct Thread **thread, int checkPerm);
 void threadRun(Thread* thread);
 void threadDestroy(Thread* thread);
