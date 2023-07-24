@@ -358,6 +358,19 @@ static char *sysnames[] = {
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_prlimit64]   "prlimit64",
   [SYS_statfs]      "statfs",
+  // socket syscalls
+  [SYS_socket]      "sys_socket",
+  [SYS_bind]        "sys_bind",
+  [SYS_listen]      "sys_listen",
+  [SYS_accept]      "sys_accept",
+  [SYS_connect]     "sys_connect",
+  [SYS_sendto]      "sys_sendto",
+  [SYS_recvfrom]    "sys_recvfrom",
+  // [SYS_shutdown]    sys_shutdown,
+  [SYS_getsockname] "sys_getsockname",
+  // [SYS_getpeername] sys_getpeername,
+  // [SYS_socketpair]  sys_socketpair,
+  [SYS_setsockopt]  "sys_setsockopt",
 };
 
 void
