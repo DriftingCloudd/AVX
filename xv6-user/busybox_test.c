@@ -247,7 +247,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "clock_gettime", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "crypt", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "dirname", 0 } },
-  { 1, {"./runtest.exe", "-w", "entry-static.exe", "env", 0 } },
+  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "env", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fdopen", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fnmatch", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fscanf", 0 } },

@@ -784,18 +784,18 @@ kill(int pid, int sig)
   return -1;
 }
 
-static int cmp_parent(int pid,int sid){
-  struct proc* p;
-  for(p = proc;p < &proc[NPROC];p++){
-    if(p->pid == sid) break;
-  }
-  while(p){
-    p = p->parent;
-    if(!p)break;
-    if(p->pid == pid) return 1;
-  }
-  return 0;
-}
+// static int cmp_parent(int pid,int sid){
+//   struct proc* p;
+//   for(p = proc;p < &proc[NPROC];p++){
+//     if(p->pid == sid) break;
+//   }
+//   while(p){
+//     p = p->parent;
+//     if(!p)break;
+//     if(p->pid == pid) return 1;
+//   }
+//   return 0;
+// }
 
 int
 tgkill(int tid, int pid, int sig)

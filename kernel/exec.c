@@ -499,7 +499,7 @@ int exec(char *path, char **argv, char ** env)
   p->sz = sz;
   p->trapframe->epc = program_entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
-  
+  debug_print("program entry:%p\n", program_entry);
   // maybe it's wrong
   for (int fd = 0; fd < NOFILEMAX(p); fd++) {
     struct file *f = p -> ofile[fd];
