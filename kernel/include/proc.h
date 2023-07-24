@@ -90,6 +90,7 @@ typedef struct rlimit {
 }rlimit;
 
 #define NOFILEMAX(p) (p->filelimit<NOFILE?p->filelimit:NOFILE)
+#define THREAD_TOTAL_NUMBER 100
 
 void            cpuinit(void);
 void            reg_info(void);
