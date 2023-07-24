@@ -1372,7 +1372,7 @@ sys_sendfile(void)
 uint64
 sys_readlinkat(void)
 {
-  struct file *f;
+
   int bufsiz;
   uint64 addr2;
   char path[FAT32_MAX_PATH];
@@ -1389,9 +1389,9 @@ sys_readlinkat(void)
   {
     copy_size = strlen(path);
   }
-  // printf("arrive!\n");
-  
-  either_copyout(1, bufsiz, (void *)addr2, copy_size);
+  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
+  either_copyout(1, addr2, "/", 1);
+  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
   
   return copy_size;
   // return 0;

@@ -287,7 +287,7 @@ sys_brk(void)
   }
   if (n >= addr)
   {
-    if(growproc(n) < 0)
+    if(growproc(n - addr) < 0)
       return -1;
     else return myproc()->sz;
   }
