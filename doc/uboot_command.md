@@ -22,3 +22,8 @@ setenv ipaddr 192.168.120.230;setenv serveraddr 192.168.120.10;tftpboot 0x803000
 bootp 0x80300000 sdcard.img.gz;unzip 0x80300000 0x90000000 0x40000000;mmc write 0x90000000 0 8192
 bootp 0x80200000 
 go 0x80200000
+
+##########
+apt update && apt install minicom -y && minicom -D /dev/ttyUSB1 -b 115200
+minicom -D /dev/ttyUSB0 -b 115200
+/cg/control off && /cg/control on
