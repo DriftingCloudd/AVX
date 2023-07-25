@@ -46,7 +46,10 @@ OBJS += \
   $K/vma.o \
   $K/signal.o \
   $K/syssig.o \
-  $K/bin.o
+  $K/bin.o \
+  $K/ring_buffer.o \
+  $K/socket.o \
+  $K/syssocket.o
 
 
 ifeq ($(platform), qemu)
@@ -150,7 +153,7 @@ all:
 
 qemu-run:
 	@make build platform=qemu
-	@make fs
+#	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
 $K/bin.S:$U/initcode $U/init-for-test

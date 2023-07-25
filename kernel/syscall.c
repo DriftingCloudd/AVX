@@ -179,6 +179,17 @@ extern uint64 sys_ftruncate();
 extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
+
+// socket syscalls
+extern uint64 sys_socket(void);
+extern uint64 sys_bind(void);
+extern uint64 sys_listen(void);
+extern uint64 sys_accept(void);
+extern uint64 sys_connect(void);
+extern uint64 sys_sendto(void);
+extern uint64 sys_recvfrom(void);
+extern uint64 sys_getsockname(void);
+extern uint64 sys_setsockopt(void);
 extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
@@ -268,6 +279,20 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sync]        sys_sync,
   [SYS_fsync]       sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
+
+  // socket syscalls
+  [SYS_socket]      sys_socket,
+  [SYS_bind]        sys_bind,
+  [SYS_listen]      sys_listen,
+  [SYS_accept]      sys_accept,
+  [SYS_connect]     sys_connect,
+  [SYS_sendto]      sys_sendto,
+  [SYS_recvfrom]    sys_recvfrom,
+  // [SYS_shutdown]    sys_shutdown,
+  [SYS_getsockname] sys_getsockname,
+  // [SYS_getpeername] sys_getpeername,
+  // [SYS_socketpair]  sys_socketpair,
+  [SYS_setsockopt]  sys_setsockopt,
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
   [SYS_getrusage]   sys_getrusage,
@@ -347,15 +372,14 @@ static char *sysnames[] = {
   [SYS_tgkill]      "tgkill",
   [SYS_gettid]      "gettid",
   [SYS_umask]       "umask",
-  [SYS_readlinkat]  "readlinkat",
+  [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_prlimit64]   "prlimit64",
   [SYS_statfs]      "statfs",
   [SYS_pread]       "pread",
   [SYS_mprotect]    "mprotect",
-  [SYS_sync]        "sync",
-  [SYS_fsync]       "fsync",
-  [SYS_ftruncate]   "ftruncate",
+  [SYS_prlimit64]   "prlimit64",
+  [SYS_statfs]      "statfs",
   [SYS_madvise]     "madvise",
   [SYS_getrusage]   "getrusage",
 };
@@ -373,7 +397,7 @@ syscall(void)
     p->trapframe->a0 = syscalls[num]();
     // trace
     // if(num != SYS_read && num != SYS_write && num != SYS_writev)
-    //   debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
+      debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }

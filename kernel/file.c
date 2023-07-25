@@ -3,6 +3,7 @@
 //
 
 
+#include "include/socket.h"
 #include "include/types.h"
 #include "include/riscv.h"
 #include "include/param.h"
@@ -16,6 +17,7 @@
 #include "include/printf.h"
 #include "include/string.h"
 #include "include/vm.h"
+#include "include/memlayout.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -90,6 +92,8 @@ fileclose(struct file *f)
     eput(ff.ep);
   } else if (ff.type == FD_DEVICE) {
 
+  } else if (ff.type == FD_SOCK) {
+    close_socket(ff.sock->socknum);
   }
 }
 
@@ -134,6 +138,7 @@ fileinput(struct file* f, int user, uint64 addr, int n, uint64 off){
     case FD_ENTRY:
         r = eread(f->ep, user, addr, off, n);
         break;
+    case FD_SOCK: // socket io shouldn't be handled here, use socket syscalls instead
     case FD_NONE:
     	return 0;
   }
@@ -153,6 +158,7 @@ fileoutput(struct file* f, int user, uint64 addr, int n, uint64 off){
     case FD_ENTRY:
         r = ewrite(f->ep, user, addr, off, n);
         break;
+    case FD_SOCK: // socket io shouldn't be handled here, use socket syscalls instead
     case FD_NONE:
     	return 0;
   }
@@ -214,11 +220,19 @@ filewrite(struct file *f, uint64 addr, int n)
     ret = devsw[f->major].write(1, addr, n);
   } else if(f->type == FD_ENTRY){
     elock(f->ep);
-    if (ewrite(f->ep, 1, addr, f->off, n) == n) {
-      ret = n;
-      f->off += n;
+    if(addr <= MAXUVA){
+      if((ret = ewrite(f->ep, 0, addr, f->off, n)) == n){
+        f->off += ret;
+      }else{
+        ret = -1;
+      }
     } else {
-      ret = -1;
+      if (ewrite(f->ep, 1, addr, f->off, n) == n) {
+        ret = n;
+        f->off += n;
+      } else {
+        ret = -1;
+      }
     }
     eunlock(f->ep);
   } else {
@@ -401,6 +415,7 @@ void fileiolock(struct file* f){
     case FD_ENTRY:
         elock(f->ep);
         break;
+    case FD_SOCK: // socket io shouldn't be handled here, use socket syscalls instead
     case FD_NONE:
     	return;
   }
@@ -417,6 +432,7 @@ void fileiounlock(struct file* f){
     case FD_ENTRY:
         eunlock(f->ep);
         break;
+    case FD_SOCK: // socket io shouldn't be handled here, use socket syscalls instead
     case FD_NONE:
     	return;
   }
