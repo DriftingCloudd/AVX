@@ -16,6 +16,7 @@
 #include "include/printf.h"
 #include "include/string.h"
 #include "include/vm.h"
+#include "include/memlayout.h"
 
 struct devsw devsw[NDEV];
 struct {
@@ -201,11 +202,19 @@ filewrite(struct file *f, uint64 addr, int n)
     ret = devsw[f->major].write(1, addr, n);
   } else if(f->type == FD_ENTRY){
     elock(f->ep);
-    if (ewrite(f->ep, 1, addr, f->off, n) == n) {
-      ret = n;
-      f->off += n;
+    if(addr <= MAXUVA){
+      if((ret = ewrite(f->ep, 0, addr, f->off, n)) == n){
+        f->off += ret;
+      }else{
+        ret = -1;
+      }
     } else {
-      ret = -1;
+      if (ewrite(f->ep, 1, addr, f->off, n) == n) {
+        ret = n;
+        f->off += n;
+      } else {
+        ret = -1;
+      }
     }
     eunlock(f->ep);
   } else {

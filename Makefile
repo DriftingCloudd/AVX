@@ -150,7 +150,7 @@ all:
 
 qemu-run:
 	@make build platform=qemu
-	@make fs
+#	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
 $K/bin.S:$U/initcode $U/init-for-test

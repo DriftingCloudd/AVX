@@ -351,10 +351,10 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     // if(num != 64 && num != 63)
-    //printf("pid %d: %s\n", p->pid, sysnames[num]);
+      printf("pid %d: %s\n", p->pid, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
-    if(num != SYS_read && num != SYS_write && num != SYS_writev)
+    // if(num != SYS_read && num != SYS_write && num != SYS_writev)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
