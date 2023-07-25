@@ -99,7 +99,7 @@ int do_bind(int sockfd, struct sockaddr *addr, socklen_t addrlen){
 //将socket的状态置为LISTEN
 int do_listen(int sockfd, int backlog){
     struct proc *curr_proc = myproc();
-    if (curr_proc->ofile[sockfd]->sock->type != FD_SOCK) {
+    if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK;
     }
     if (backlog > MAX_WAIT_LIST) {
@@ -117,7 +117,7 @@ int do_listen(int sockfd, int backlog){
 // 并将自己放入其的wait_list中。如果该socket是非阻塞的则直接返回，否则循环等待。
 int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     struct proc *curr_proc = myproc();
-    if (curr_proc->ofile[sockfd]->sock->type != FD_SOCK) {
+    if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK;
     }
     if(addrlen != sizeof(struct sockaddr)) return -EINVAL;
