@@ -3,6 +3,7 @@
 
 #include "ring_buffer.h"
 #include "file.h"
+#include "proc.h"
 #include "error.h"
 
 #define PF_INET 2

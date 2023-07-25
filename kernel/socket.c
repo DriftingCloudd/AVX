@@ -1,6 +1,4 @@
 #include "include/socket.h"
-#include "include/file.h"
-#include "include/proc.h"
 
 
 struct socket sock[MAX_SOCK_NUM + 1]; // 0: unused ; 1~MAX_SOCK_NUM: avaliable
@@ -71,6 +69,13 @@ int do_socket(int domain, int type, int protocol){
     sock_file->readable = 1;
     sock_file->writable = 1;
     sock_file->sock = &sock[i];
+
+    // if (type & SOCK_NONBLOCK) {
+    //     sock[i].type |= SOCK_NONBLOCK;
+    // }
+    if (type & SOCK_CLOEXEC) {
+        myproc()->exec_close[new_fd_num] = 1;
+    }
     
     release(&sock_lock);
     return new_fd_num;
