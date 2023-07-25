@@ -90,7 +90,10 @@ typedef struct rlimit {
 }rlimit;
 
 #define NOFILEMAX(p) (p->filelimit<NOFILE?p->filelimit:NOFILE)
-#define THREAD_TOTAL_NUMBER 100
+#define LOG_PROCESS_NUM 7
+#define THREAD_TOTAL_NUMBER (1 << LOG_PROCESS_NUM)
+#define PROCESS_OFFSET(processId) ((processId) & (THREAD_TOTAL_NUMBER - 1))
+
 
 void            cpuinit(void);
 void            reg_info(void);

@@ -118,6 +118,7 @@ int threadAlloc(Thread **new_thread, struct proc* process, uint64 userSp);
 int tid2Thread(uint32 threadId, struct Thread **thread, int checkPerm);
 void threadRun(Thread* thread);
 void threadDestroy(Thread* thread);
+void wakeup_thread(void *chan);
 
 #define NORMAL         0
 #define KERNEL_GIVE_UP 1
