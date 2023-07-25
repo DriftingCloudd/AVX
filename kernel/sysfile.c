@@ -12,6 +12,7 @@
 #include "include/spinlock.h"
 #include "include/proc.h"
 #include "include/sleeplock.h"
+#include "include/socket.h"
 #include "include/file.h"
 #include "include/pipe.h"
 #include "include/fcntl.h"
@@ -1271,6 +1272,14 @@ sys_fcntl(void)
     p->exec_close[fd] = 1;
 
     return fd;
+  } else if (F_GETFL == cmd) {
+    // handle O_NONBLOCK here; we just need special handling
+    uint64 ret = 0;
+    if (f->type == FD_SOCK) {
+      if (f->sock->type & SOCK_NONBLOCK)
+        ret |= O_NONBLOCK;
+    }
+    return ret;
   }
 
   return 0;
