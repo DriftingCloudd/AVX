@@ -1,32 +1,17 @@
-ash -c exit (ok)
-sh -c exit (ok)
-du (ok)
-ps (ok)
-kill 10 (syscall 129)
-ls (ok)
-touch test.txt(ok)
-echo "hello world" > test.txt (ok)
-cat test.txt (ok)
-cut -c 3 test.txt (ok)
-od test.txt (ok)
-head test.txt (ok)
-tail test.txt (ok)
-hexdump -C test.txt (ok)
-md5sum test.txt (ok)
-echo "ccccccc" >> test.txt (ok)
-echo "bbbbbbb" >> test.txt (ok)
-echo "aaaaaaa" >> test.txt (ok)
-echo "2222222" >> test.txt (ok)
-echo "1111111" >> test.txt (ok)
-echo "bbbbbbb" >> test.txt (ok)
-sort test.txt | ./busybox uniq (ok)
-stat test.txt (ok)
-strings test.txt (ok)
-wc test.txt (ok)
-[ -f test.txt ] (ok)
-more test.txt (ok)
-rm test.txt (ok)
-grep hello busybox_cmd.txt (ok)
-cp busybox_cmd.txt busybox_cmd.bak (ok)
-rm busybox_cmd.bak (ok)
-find -name "busybox_cmd.txt" (ok)
+# libctest-dynamic尚未完成
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dlopen", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel_points", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_tsd", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_init", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_local_exec", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
+// {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "statvfs", 0}},

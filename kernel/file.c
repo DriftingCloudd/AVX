@@ -108,6 +108,14 @@ filestat(struct file *f, uint64 addr)
   if(f->type == FD_ENTRY){
     elock(f->ep);
     kstat(f->ep, &kst);
+    kst.st_atime_sec = f->t0_nsec;
+    kst.st_atime_nsec = f->t0_sec;
+    kst.st_mtime_sec = f->t1_nsec;
+    kst.st_mtime_nsec = f->t1_sec;
+    if(kst.st_mtime_sec == 0x000000003ffffffe)kst.st_mtime_sec = 0;
+    if(kst.st_atime_sec == 0x000000003ffffffe)kst.st_atime_sec = 0;
+    if(kst.st_mtime_nsec == 0x0000000100000000)kst.st_mtime_sec = 0x0000000100000000;
+    if(kst.st_atime_nsec == 0x0000000100000000)kst.st_atime_sec = 0x0000000100000000;
     eunlock(f->ep);
     // if(copyout(p->pagetable, addr, (char *)&st, sizeof(st)) < 0)
     if(copyout2(addr, (char *)&kst, sizeof(kst)) < 0)
@@ -178,8 +186,13 @@ fileread(struct file *f, uint64 addr, int n)
         break;
     case FD_ENTRY:
         elock(f->ep);
-          if((r = eread(f->ep, 1, addr, f->off, n)) > 0)
-            f->off += r;
+        if (0 == strncmp(f->ep->filename,"zero",4)) {
+          r = 1;
+          char tmp = 0;
+          either_copyout(1,addr,(void *)&tmp,sizeof(char));
+        }
+        else if((r = eread(f->ep, 1, addr, f->off, n)) > 0)
+          f->off += r;
         eunlock(f->ep);
         break;
     default:

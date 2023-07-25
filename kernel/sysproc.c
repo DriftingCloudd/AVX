@@ -12,6 +12,8 @@
 #include "include/printf.h"
 #include "include/uname.h"
 #include "include/futex.h"
+#include "include/mmap.h"
+#include "include/rusage.h"
 
 extern int exec(char *path, char **argv, char ** env);
 
@@ -146,6 +148,7 @@ sys_execve(void)
   if(argstr(0, path, FAT32_MAX_PATH) < 0 || argaddr(1, &uargv) < 0 || argaddr(2, &uenv)){
     return -1;
   }
+  debug_print("[sys_execve] path:%s, uargv:%p, uenv:%p\n", path, uargv, uenv);
   memset(argv, 0, sizeof(argv));
   for(i=0;; i++){
     if(i >= NELEM(argv)){
@@ -261,7 +264,7 @@ sys_sbrk(void)
 {
   int addr;
   int n;
-  printf("sbrk param n: %d\n", n);
+  // printf("sbrk param n: %d\n", n);
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
@@ -278,8 +281,7 @@ sys_brk(void)
 
   if(argaddr(0, &n) < 0)
     return -1;
-  printf("brk param n: %d\n", n);
-  // debug_print("sys_brk n = %p\n", n);
+  debug_print("sys_brk n = %d\n", n);
   addr = myproc()->sz;
   if (n == 0)
   {
@@ -287,7 +289,7 @@ sys_brk(void)
   }
   if (n >= addr)
   {
-    if(growproc(n) < 0)
+    if(growproc(n - addr) < 0)
       return -1;
     else return myproc()->sz;
   }
@@ -550,41 +552,41 @@ uint64 sys_futex(void)
 {
   int futex_op, val, val3, userVal;
   
-  uint64 uaddr, timeout, uaddr2;
-  struct proc *p = myproc();
-  TimeSpec t;
-  if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
-		return -1;
-  futex_op &= (FUTEX_PRIVATE_FLAG - 1);
-  switch (futex_op)
-  {
-        case FUTEX_WAIT:
-            copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
-            if (timeout) {
-                if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
-                    panic("copy time error!\n");
-                }
-            }
-            // printf("val: %d\n", userVal);
-            if (userVal != val) {
-                return -1;
-            }
-            // TODO
-            // futexWait(uaddr, myThread(), timeout ? &t : 0);
-            break;
-        case FUTEX_WAKE:
-            // printf("val: %d\n", val);
-            // TODO
-            // futexWake(uaddr, val);
-            break;
-        case FUTEX_REQUEUE:
-            // printf("val: %d\n", val);
-            // TODO
-            // futexRequeue(uaddr, val, uaddr2);
-            break;
-        default:
-            panic("Futex type not support!\n");
-  }
+  // uint64 uaddr, timeout, uaddr2;
+  // struct proc *p = myproc();
+  // TimeSpec t;
+  // if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
+	// 	return -1;
+  // futex_op &= (FUTEX_PRIVATE_FLAG - 1);
+  // switch (futex_op)
+  // {
+  //       case FUTEX_WAIT:
+  //           copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
+  //           if (timeout) {
+  //               if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
+  //                   panic("copy time error!\n");
+  //               }
+  //           }
+  //           // printf("val: %d\n", userVal);
+  //           if (userVal != val) {
+  //               return -1;
+  //           }
+  //           // TODO
+  //           // futexWait(uaddr, myThread(), timeout ? &t : 0);
+  //           break;
+  //       case FUTEX_WAKE:
+  //           // printf("val: %d\n", val);
+  //           // TODO
+  //           // futexWake(uaddr, val);
+  //           break;
+  //       case FUTEX_REQUEUE:
+  //           // printf("val: %d\n", val);
+  //           // TODO
+  //           // futexRequeue(uaddr, val, uaddr2);
+  //           break;
+  //       default:
+  //           panic("Futex type not support!\n");
+  // }
   return 0;
 };
 
@@ -618,3 +620,76 @@ uint64 sys_umask(void)
   return 0;
 }
 
+
+
+uint64
+sys_mprotect(){
+  uint64 addr,len;
+  int prot;
+  if (argaddr(0,&addr) < 0 || argaddr(1,&len) < 0 || argint(2,&prot) < 0) 
+    return -1;
+  struct proc *p = myproc();
+  int perm = PTE_U | PTE_A | PTE_D;
+  if (prot & PROT_READ)
+    perm |= PTE_R;
+  if (prot & PROT_WRITE)
+    perm |= PTE_W;
+  if (prot & PROT_EXEC)
+    perm |= (PTE_X | PTE_A);
+  int page_n = PGROUNDUP(len) >> PGSHIFT;
+  uint64 va = addr;
+  for (int i = 0; i < page_n; i++) {
+    experm(p->pagetable,va,perm);  // TODO:错误处理
+    va += PGSIZE;
+  }
+
+  return 0;
+}
+
+//TODO 
+// 该系统调用用于向内核提供对于起始地址为addr，长度为length的内存空间的操作建议或者指示
+// 主要用于提高系统性能
+uint64
+sys_madvise(void)
+{
+  return 0;
+}
+
+uint64
+sys_getrusage(void)
+{
+  int who;
+  uint64 addr;
+  struct rusage rs;
+  struct proc* p = myproc();
+
+  if (argint(0, &who) < 0)
+  {
+    return -1;
+  }
+
+  if (argaddr(1, &addr) < 0)
+  {
+    return -1;
+  }
+  
+  rs = (struct rusage){
+    .ru_utime = p->utime,
+    .ru_stime = p->ktime,
+  };
+
+  switch (who)
+  {
+  case RUSAGE_SELF:
+		case RUSAGE_THREAD:
+			rs.ru_nvcsw = p->vsw;
+			rs.ru_nivcsw = p->ivsw;
+      break;
+    default:
+      break;
+  }
+  if(either_copyout(1,addr,&rs,sizeof(rs))<0){
+    return -1;
+  }
+  return 0;
+}

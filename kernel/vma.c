@@ -192,3 +192,65 @@ failure2:
     vmunmap(new,vma->addr,(start - vma->addr) / PGSIZE, 1);
     return -1;
 }
+
+int free_vma(struct proc *p, struct vma *del)
+{
+  if(del == NULL)
+  {
+    debug_print("[free_vma] del is nil\n");
+    return 0;
+  }
+  if(del->prev == NULL || del->next == NULL)
+  {
+    debug_print("[free_vma] del is illegal\n");
+    return 0;
+  }
+  
+  struct vma *prev = del->prev;
+  struct vma *next = del->next;
+  prev->next = next;
+  next->prev = prev;
+  del->next = del->prev = NULL;
+  if(uvmdealloc1(p->pagetable, del->addr, del->end) != 0)
+  {
+    debug_print("[free_vma] uvmdealloc fail\n");
+    return 0;
+  }
+  kfree(del);
+  del = NULL;
+  return 1;
+}
+
+int free_vma_list(struct proc *p)
+{
+  struct vma *vma_head = p->vma;
+  if(vma_head == NULL)
+  {
+    return 1;
+  }
+  struct vma *vma = vma_head->next;
+  
+  while(vma != vma_head)
+  {
+    uint64 a;
+    pte_t *pte;
+    for(a = vma->addr; a < vma->end; a += PGSIZE){
+      if((pte = walk(p->pagetable, a, 0)) == 0)
+        continue;
+      if((*pte & PTE_V) == 0)
+        continue;
+      if(PTE_FLAGS(*pte) == PTE_V)
+        continue;
+      uint64 pa = PTE2PA(*pte);
+      //__debug_warn("[free single vma]free:%p\n",pa);
+      kfree((void*)pa);
+      //__debug_warn("[free vma list]free end\n");
+      *pte = 0;
+    }
+    vma = vma->next;
+    kfree(vma->prev);
+  }
+  kfree(vma);
+  p->vma = NULL;
+  return 1;
+}

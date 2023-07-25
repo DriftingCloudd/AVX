@@ -772,10 +772,20 @@ void kstat(struct dirent *de, struct kstat *kst)
     kst->st_ino = 0;
     kst->st_mode = 0;
     kst->st_nlink = 1;
+    kst->st_uid = 0;
+    kst->st_gid = 0;
+    kst->st_rdev = 0;
+    kst->__pad = 0;
     kst->st_size = de->file_size;
+    kst->st_blksize = 512;
+    kst->__pad2 = 0;
+    kst->st_blocks = 0;
     kst->st_atime_sec = 0;
-    kst->st_ctime_sec = 0;
+    kst->st_atime_nsec = 0;
     kst->st_mtime_sec = 0;
+    kst->st_mtime_nsec = 0;
+    kst->st_ctime_sec = 0;
+    kst->st_ctime_nsec = 0;
 }
 
 static int hashpath(char* name){
@@ -794,7 +804,10 @@ static int hashpath(char* name){
 void ekstat(struct dirent *de, struct kstat *st)
 {
     st->st_dev = 0;
-    st->st_size = de->file_size;
+    if (NULL != de)
+        st->st_size = de->file_size;
+    else
+        st->st_size = 0;
     st->st_blksize = 512; // Maybe it's right
     st->st_blocks = (st->st_size + st->st_blksize - 1) / st->st_blksize;
     st->st_atime_nsec = 0;
@@ -805,11 +818,20 @@ void ekstat(struct dirent *de, struct kstat *st)
     st->st_mtime_sec = 0;
     st->st_uid = 0;
     st->st_gid = 0;
-    st->st_rdev = de->dev;
+    if (NULL != de)
+        st->st_rdev = de->dev;
+    else
+        st->st_rdev = 0;
     st->st_nlink = 1;
-    st->st_ino = hashpath(de->filename);
+    if (NULL != de)
+        st->st_ino = hashpath(de->filename);
+    else
+        st->st_ino = 0;
     st->st_mode = 0;
-    st->st_mode = (de->attribute & ATTR_DIRECTORY) ? S_IFDIR : S_IFREG;
+    if (NULL != de)
+        st->st_mode = (de->attribute & ATTR_DIRECTORY) ? S_IFDIR : S_IFREG;
+    else
+        st->st_mode = S_IFCHR;
     st->st_mode |= 0x1ff;
 }
 
@@ -1105,7 +1127,7 @@ static void get_parent_name(char *path, char *parent_name, char *name)
     
     for (;cur >= 0; cur--) {
         if (parent_name[cur] == '/') {
-            parent_name[cur] = '0';
+            parent_name[cur] = 0;
             break;
         }
     }

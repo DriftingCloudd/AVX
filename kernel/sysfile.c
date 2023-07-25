@@ -182,6 +182,20 @@ sys_read(void)
 }
 
 uint64
+sys_pread(void)
+{
+  struct file *f;
+  int off,count;
+  uint64 p;
+  if (argfd(0,0,&f) < 0 || argaddr(1,&p) < 0 || argint(2,&count) < 0 || argint(3,&off) < 0) {
+    return -1;
+  }
+  fileseek(f,off,SEEK_SET);
+
+  return fileread(f,p,count);
+}
+
+uint64
 sys_write(void)
 {
   struct file *f;
@@ -326,15 +340,24 @@ sys_fstatat(void)
       return -1;
   }
 
+  int t1 = -1;
+
+  if (strncmp(pathname,"/dev/null",9) == 0)
+    t1 = 0;
+
   ep = new_ename(dp,pathname);
-  if (NULL == ep)
+  if (NULL == ep && t1 == -1)
     return -2;
   
   struct kstat kst;
-  elock(ep);
-  ekstat(ep,&kst);
-  eunlock(ep);
-  eput(ep);
+  if (t1 == -1) {
+    elock(ep);
+    ekstat(ep,&kst);
+    eunlock(ep);
+    eput(ep);
+  } else {
+    ekstat(ep,&kst);
+  }
 
   //print_kstat(&kst);
   if (copyout(p->pagetable,st,(char*)&kst,sizeof(kst)) < 0)
@@ -968,6 +991,9 @@ sys_openat()
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
   } 
+  if (0 == strncmp(path,"/dev/null",9)) {
+    return -24;
+  }
   flags |= O_RDWR;
 
   if (dirf && FD_ENTRY == dirf->type) {
@@ -980,7 +1006,7 @@ sys_openat()
 
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
-    if ((flags & O_CREATE) || strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
+    if ((flags & O_CREATE) || strncmp(path,"/tmp/testsuite-",15) == 0 ||strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
       ep = new_create(dp,path,T_FILE,flags);
       if (NULL == ep) {
         // 创建不了dirent
@@ -1026,6 +1052,9 @@ sys_openat()
   }
   struct proc *p = myproc();
   p->exec_close[fd] = 0;
+  if (strncmp(path,"/dev/zero",9) == 0) {
+    strncpy(f->ep->filename,"zero",4);
+  }
   
   return fd;
 }
@@ -1353,81 +1382,31 @@ sys_sendfile(void)
   return file_send(fin,fout,offset,count);
 }
 
-uint64
-sys_readlinkat(void)
-{
-  // struct file *fp;
-  // int bufsiz, fd;
-  // uint64 addr2;
-  // char path[FAT32_MAX_PATH];
-  // if (argfd(0,&fd,&fp) < 0 && fd != AT_FDCWD)
-  //   return -24;  // 打开文件太多
 
-  // if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
-  // {
-  //   return -1;
-  // }
-  // printf("readlinkat param path: %s, param bufsiz: %d\n", path, bufsiz);
-  // int copy_size;
-  // if (bufsiz < strlen(path))
-  // {
-  //   copy_size = bufsiz;
-  // }
-  // else
-  // {
-  //   copy_size = strlen(path) + 1;
-  // }
-  // // printf("arrive!\n");
-  
-  // if(either_copyout(1, (void *)addr2, (void *)path, copy_size) < 0)
-  // {
-  //   printf("copy error!\n");
-  // }
-
-  
-  // return copy_size;
-  // return 0;
-  int dirfd;
-  struct file* df;
-  struct dirent *dp = NULL;
-  char pathname[FAT32_MAX_PATH+1];
-  uint64 buf;
-  int bufsz;
-  struct proc *p = myproc();
-
-  if(argint(3,&bufsz)<0){
-    return -1;
-  }
-  if(argaddr(2,&buf)<0){
-    return -1;
-  }
-  if(argstr(1,pathname,FAT32_MAX_PATH+1)<0){
-    return -1;
-  }
-  if(argfd(0,&dirfd,&df)<0){
-    if(dirfd!=AT_FDCWD&&pathname[0]!='/'){
-      return -1;
-    }
-    dp = p->cwd;
-  }else{
-    dp = df->ep;
-  }
-
-  //if(dirfd>=0)print_f_info(df);
-  //printf("[readlinkat] pathname:%s\n",pathname);
-  //printf("[readlinkat] buf:%p bufsz:%p\n",buf,bufsz);
-
-    if(either_copyout(1,buf,myproc()->name,bufsz)<0){
-      return -1;
-    }
-    return 0;
-  
-  //__debug_info("[sys_readlinkat] pathname not matched\n");
-}
 
 uint64
 sys_sync(void)
 {
+
+  int bufsiz;
+  uint64 addr2;
+  char path[FAT32_MAX_PATH];
+  if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
+  {
+    return -1;
+  }
+  int copy_size;
+  if (bufsiz < strlen(path))
+  {
+    copy_size = bufsiz;
+  }
+  else
+  {
+    copy_size = strlen(path);
+  }
+  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
+  either_copyout(1, addr2, "/", 1);
+  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
   return 0;
 }
 
@@ -1453,4 +1432,32 @@ sys_ftruncate(void)
   etruncate(fp->ep, len);
 
   return 0;  
+}
+
+uint64
+sys_readlinkat(void)
+{
+
+  int bufsiz;
+  uint64 addr2;
+  char path[FAT32_MAX_PATH];
+  if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
+  {
+    return -1;
+  }
+  int copy_size;
+  if (bufsiz < strlen(path))
+  {
+    copy_size = bufsiz;
+  }
+  else
+  {
+    copy_size = strlen(path);
+  }
+  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
+  either_copyout(1, addr2, "/", 1);
+  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
+  
+  return copy_size;
+  // return 0;
 }

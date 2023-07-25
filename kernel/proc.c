@@ -184,6 +184,8 @@ found:
   p->uid = 0;
   p->gid = 0;
   p->pgid = 0;
+  p->vsw = 0;
+  p->ivsw = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -223,15 +225,17 @@ freeproc(struct proc *p)
 {
   if(p->trapframe)
     kfree((void*)p->trapframe);
-  if(p->ofile)
-    kfree((void*)p->exec_close);
+
+  kfree((void*)p->exec_close);
   p->trapframe = 0;
   if (p->kpagetable) {
     kvmfree(p->kpagetable, 1);
   }
   p->kpagetable = 0;
-  if(p->pagetable)
+  if(p->pagetable){
+    free_vma_list(p);
     proc_freepagetable(p->pagetable, p->sz);
+  }
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
@@ -710,6 +714,7 @@ sleep(void *chan, struct spinlock *lk)
 
   // Go to sleep.
   p->chan = chan;
+  p->vsw += 1;
   p->state = SLEEPING;
 
   sched();
@@ -779,18 +784,18 @@ kill(int pid, int sig)
   return -1;
 }
 
-static int cmp_parent(int pid,int sid){
-  struct proc* p;
-  for(p = proc;p < &proc[NPROC];p++){
-    if(p->pid == sid) break;
-  }
-  while(p){
-    p = p->parent;
-    if(!p)break;
-    if(p->pid == pid) return 1;
-  }
-  return 0;
-}
+// static int cmp_parent(int pid,int sid){
+//   struct proc* p;
+//   for(p = proc;p < &proc[NPROC];p++){
+//     if(p->pid == sid) break;
+//   }
+//   while(p){
+//     p = p->parent;
+//     if(!p)break;
+//     if(p->pid == pid) return 1;
+//   }
+//   return 0;
+// }
 
 int
 tgkill(int tid, int pid, int sig)
@@ -798,7 +803,7 @@ tgkill(int tid, int pid, int sig)
   // if(!cmp_parent(pid,tid)) {printf("pid:%d, tid:%d\n");return -1;}
   // else return kill(tid,sig);
   printf("tgkill:%d %d %d\n", tid, pid, sig);
-  kill(tid, sig);
+  return kill(tid, sig);
 } 
 
 // Copy to either a user address, or kernel address,

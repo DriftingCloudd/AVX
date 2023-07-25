@@ -190,7 +190,10 @@ extern uint64 sys_sendto(void);
 extern uint64 sys_recvfrom(void);
 extern uint64 sys_getsockname(void);
 extern uint64 sys_setsockopt(void);
-
+extern uint64 sys_pread();
+extern uint64 sys_mprotect();
+extern uint64 sys_madvise();
+extern uint64 sys_getrusage();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -268,6 +271,11 @@ static uint64 (*syscalls[])(void) = {
   [SYS_gettid]      sys_gettid,
   [SYS_umask]       sys_umask,
   [SYS_readlinkat]  sys_readlinkat,
+  [SYS_rt_sigtimedwait] sys_rt_sigtimedwait,
+  [SYS_prlimit64]   sys_prlimit64,
+  [SYS_statfs]      sys_statfs,
+  [SYS_pread]       sys_pread,
+  [SYS_mprotect]    sys_mprotect,
   [SYS_sync]        sys_sync,
   [SYS_fsync]       sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
@@ -285,6 +293,9 @@ static uint64 (*syscalls[])(void) = {
   // [SYS_getpeername] sys_getpeername,
   // [SYS_socketpair]  sys_socketpair,
   [SYS_setsockopt]  sys_setsockopt,
+  [SYS_madvise]     sys_madvise,
+  [SYS_futex]       sys_futex,
+  [SYS_getrusage]   sys_getrusage,
 };
 
 static char *sysnames[] = {
@@ -362,8 +373,15 @@ static char *sysnames[] = {
   [SYS_gettid]      "gettid",
   [SYS_umask]       "umask",
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
+  [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_prlimit64]   "prlimit64",
   [SYS_statfs]      "statfs",
+  [SYS_pread]       "pread",
+  [SYS_mprotect]    "mprotect",
+  [SYS_prlimit64]   "prlimit64",
+  [SYS_statfs]      "statfs",
+  [SYS_madvise]     "madvise",
+  [SYS_getrusage]   "getrusage",
 };
 
 void
@@ -374,8 +392,8 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    // if(num != 64 && num != 63)
-      printf("pid %d: %s\n", p->pid, sysnames[num]);
+    if(num != 64 && num != 63)
+      debug_print("pid %d: %s\n", p->pid, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
     // if(num != SYS_read && num != SYS_write && num != SYS_writev)
