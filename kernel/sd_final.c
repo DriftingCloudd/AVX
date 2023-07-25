@@ -445,7 +445,7 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 			tt++;
 			// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
 			// printf("data %d: %d\n", i, temp_data);
-			for (int j = 0; j < 500; j++)
+			for (int j = 0; j < 100000; j++)
 			{
 				/* code */
 			}

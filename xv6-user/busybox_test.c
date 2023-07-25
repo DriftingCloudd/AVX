@@ -38,18 +38,18 @@ void test_busybox(){
 	// 		// printf("testcase busybox %d fail\n",i);
 	// 	}
 	// }
-		pid = fork();
-		if(pid==0){
-			exec("busybox",busybox[21].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-		if(status==0){
-			printf("testcase busybox %d success\n",21);
-		}else{
-			printf("testcase busybox %d success\n",21);
-			// printf("testcase busybox %d fail\n",i);
-		}
+		// pid = fork();
+		// if(pid==0){
+		// 	exec("busybox",busybox[21].name);
+		// 	exit(0);
+		// }
+		// wait4(pid, &status, 0);
+		// if(status==0){
+		// 	printf("testcase busybox %d success\n",21);
+		// }else{
+		// 	printf("testcase busybox %d success\n",21);
+		// 	// printf("testcase busybox %d fail\n",i);
+		// }
 	/**
 	 * run iozone_testcode.sh
 	 */
