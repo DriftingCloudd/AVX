@@ -119,7 +119,7 @@ sys_sendto(void) {
     size_t len;
     int flags;
     struct sockaddr *dest_addr;
-    socklen_t *addrlen;
+    socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_sendto: argint(0, &sockfd) < 0\n");
         return -1;
@@ -140,11 +140,11 @@ sys_sendto(void) {
         printf("sys_sendto: argaddr(4, (void *)&dest_addr) < 0\n");
         return -1;
     }
-    if (argaddr(5, &addrlen) < 0) {
-        printf("sys_sendto: argaddr(5, &addrlen) < 0\n");
+    if (argint(5, &addrlen) < 0) {
+        printf("sys_sendto: argint(5, &addrlen) < 0\n");
         return -1;
     }
-    return do_sendto(sockfd, buf, len, flags, dest_addr, *addrlen);
+    return do_sendto(sockfd, buf, len, flags, dest_addr, addrlen);
 }
 
 uint64
