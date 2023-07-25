@@ -115,4 +115,7 @@ enum ErrorCode {
 #define	EAFNOSUPPORT	97	/* Address family not supported by protocol */
 #define	EADDRINUSE		98	/* Address already in use */
 
+// socket error
+#define ENOTCONN        107 /* Transport endpoint is not connected */
+#define ECONNREFUSED    111	/* Connection refused */
 #endif

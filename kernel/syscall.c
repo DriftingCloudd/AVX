@@ -183,6 +183,17 @@ extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
 extern uint64 sys_getrusage();
+// socket syscalls
+extern uint64 sys_socket(void);
+extern uint64 sys_bind(void);
+extern uint64 sys_listen(void);
+extern uint64 sys_accept(void);
+extern uint64 sys_connect(void);
+extern uint64 sys_sendto(void);
+extern uint64 sys_recvfrom(void);
+extern uint64 sys_getsockname(void);
+extern uint64 sys_setsockopt(void);
+
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -271,6 +282,20 @@ static uint64 (*syscalls[])(void) = {
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
   [SYS_getrusage]   sys_getrusage,
+
+  // socket syscalls
+  [SYS_socket]      sys_socket,
+  [SYS_bind]        sys_bind,
+  [SYS_listen]      sys_listen,
+  [SYS_accept]      sys_accept,
+  [SYS_connect]     sys_connect,
+  [SYS_sendto]      sys_sendto,
+  [SYS_recvfrom]    sys_recvfrom,
+  // [SYS_shutdown]    sys_shutdown,
+  [SYS_getsockname] sys_getsockname,
+  // [SYS_getpeername] sys_getpeername,
+  // [SYS_socketpair]  sys_socketpair,
+  [SYS_setsockopt]  sys_setsockopt,
 };
 
 static char *sysnames[] = {
@@ -358,6 +383,19 @@ static char *sysnames[] = {
   [SYS_ftruncate]   "ftruncate",
   [SYS_madvise]     "madvise",
   [SYS_getrusage]   "getrusage",
+  // socket syscalls
+  [SYS_socket]      "sys_socket",
+  [SYS_bind]        "sys_bind",
+  [SYS_listen]      "sys_listen",
+  [SYS_accept]      "sys_accept",
+  [SYS_connect]     "sys_connect",
+  [SYS_sendto]      "sys_sendto",
+  [SYS_recvfrom]    "sys_recvfrom",
+  // [SYS_shutdown]    sys_shutdown,
+  [SYS_getsockname] "sys_getsockname",
+  // [SYS_getpeername] sys_getpeername,
+  // [SYS_socketpair]  sys_socketpair,
+  [SYS_setsockopt]  "sys_setsockopt",
 };
 
 void
