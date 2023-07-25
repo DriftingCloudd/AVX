@@ -74,6 +74,7 @@ procinit(void)
       initlock(&p->lock, "proc");
       p->state = UNUSED;
       p->parent = 0;
+      p->main_thread = 0;
       p->chan = 0;
       p->killed = 0;
       p->xstate = 0;
@@ -156,6 +157,63 @@ allocpid() {
   return pid;
 }
 
+static void copycontext(struct proc *p,thread *t) {
+    t->context.ra = p->context.ra;
+    t->context.sp = p->context.sp;
+    t->context.s0 = p->context.s0;
+    t->context.s1 = p->context.s1;
+    t->context.s2 = p->context.s2;
+    t->context.s3 = p->context.s3;
+    t->context.s4 = p->context.s4;
+    t->context.s5 = p->context.s5;
+    t->context.s6 = p->context.s6;
+    t->context.s7 = p->context.s7;
+    t->context.s8 = p->context.s8;
+    t->context.s9 = p->context.s9;
+    t->context.s10 = p->context.s10;
+    t->context.s11 = p->context.s11;
+}
+
+// copy trapframe f2 to trapframe f1
+static void copytrapframe(struct trapframe *f1,struct trapframe *f2) {
+    f1->kernel_satp = f2->kernel_satp;
+    f1->kernel_sp = f2->kernel_sp;
+    f1->kernel_trap = f2->kernel_trap;
+    f1->epc = f2->epc;
+    f1->kernel_hartid = f2->kernel_hartid;
+    f1->ra = f2->ra;
+    f1->sp = f2->sp;
+    f1->gp = f2->gp;
+    f1->tp = f2->tp;
+    f1->t0 = f2->t0;
+    f1->t1 = f2->t1;
+    f1->t2 = f2->t2;
+    f1->s0 = f2->s0;
+    f1->s1 = f2->s1;
+    f1->a0 = f2->a0;
+    f1->a1 = f2->a1;
+    f1->a2 = f2->a2;
+    f1->a3 = f2->a3;
+    f1->a4 = f2->a4;
+    f1->a5 = f2->a5;
+    f1->a6 = f2->a6;
+    f1->a7 = f2->a7;
+    f1->s2 = f2->s2;
+    f1->s3 = f2->s3;
+    f1->s4 = f2->s4;
+    f1->s5 = f2->s5;
+    f1->s6 = f2->s6;
+    f1->s7 = f2->s7;
+    f1->s8 = f2->s8;
+    f1->s9 = f2->s9;
+    f1->s10 = f2->s10;
+    f1->s11 = f2->s11;
+    f1->t3 = f2->t3;
+    f1->t4 = f2->t4;
+    f1->t5 = f2->t5;
+    f1->t6 = f2->t6;
+}
+
 // Look in the process table for an UNUSED proc.
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
@@ -186,6 +244,7 @@ found:
   p->pgid = 0;
   p->vsw = 0;
   p->ivsw = 0;
+  p->main_thread = allocNewThread();
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -213,6 +272,11 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
+  p->main_thread->p = p;
+  copycontext(p,p->main_thread);
+  copytrapframe(p->main_thread->trapframe,p->trapframe);
+  p->main_thread->sz = p->sz;
+  p->main_thread->clear_child_tid = p->clear_child_tid;
 
   return p;
 }
@@ -236,10 +300,13 @@ freeproc(struct proc *p)
     free_vma_list(p);
     proc_freepagetable(p->pagetable, p->sz);
   }
+  // TODO: free threads
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
   p->pid = 0;
+  p->main_thread->state = t_UNUSED;
+  p->main_thread = 0;
   p->parent = 0;
   p->name[0] = 0;
   p->chan = 0;

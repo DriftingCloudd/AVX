@@ -3,6 +3,32 @@
 #include "include/kalloc.h"
 #include "include/vm.h"
 
+int nexttid = 1;
+
+thread threads[THREAD_NUM];
+
+void threadInit() {
+    for (int i = 0; i < THREAD_NUM; i++) {
+        threads[i].state = t_UNUSED;
+    }
+}
+
+thread *allocNewThread() {
+    int i = 0;
+    for (i = 0; i < THREAD_NUM; i++) {
+        if (threads[i].state == t_UNUSED)
+            break;
+    }
+    if (t_UNUSED != threads[i].state) {
+        panic("allocNewThread");
+    }
+    threads[i].state = t_RUNNABLE;
+    threads[i].tid = nexttid++;
+    
+    return &threads[i];
+}
+
+/*
 Thread threads[THREAD_TOTAL_NUMBER];  // 暂时先定义100个线程？
 
 struct ThreadList freeThreads,usedThreads;
@@ -102,3 +128,4 @@ void threadSetup(Thread *t) {
         }
     }
 }
+*/

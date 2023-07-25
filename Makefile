@@ -47,7 +47,6 @@ OBJS += \
   $K/signal.o \
   $K/syssig.o \
   $K/bin.o \
-  $K/futex.o \
   $K/thread.o \
 
 

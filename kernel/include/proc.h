@@ -7,12 +7,13 @@
 #include "spinlock.h"
 #include "file.h"
 #include "fat32.h"
+#include "thread.h"
 #include "trap.h"
 #include "vma.h"
 #include "signal.h"
 
 // Saved registers for kernel context switches.
-struct context {
+typedef struct context {
   uint64 ra;
   uint64 sp;
 
@@ -29,7 +30,7 @@ struct context {
   uint64 s9;
   uint64 s10;
   uint64 s11;
-};
+}context;
 
 // Per-CPU state.
 struct cpu {
@@ -61,6 +62,7 @@ struct proc {
   uint64 filelimit;
 
   // these are private to the process, so p->lock need not be held.
+  thread *main_thread;         // Main thread per process
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
   pagetable_t pagetable;       // User page table
