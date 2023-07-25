@@ -79,6 +79,7 @@ struct proc {
   int utime;
   int vsw;  //volunteer context switch
   int ivsw; //involunteer context switch
+  int thread_num;
   uint64 clear_child_tid;
   //signal
   sigaction sigaction[SIGRTMAX + 1]; // signal action

@@ -20,10 +20,14 @@ thread *allocNewThread() {
             break;
     }
     if (t_UNUSED != threads[i].state) {
-        panic("allocNewThread");
+        panic("allocNewThread: can not find unused thread");
+    }
+    if (NULL == (threads[i].trapframe = (struct trapframe *)kalloc())) {
+        panic("allocNewThread: can not kalloc a page");
     }
     threads[i].state = t_RUNNABLE;
     threads[i].tid = nexttid++;
+    
     
     return &threads[i];
 }

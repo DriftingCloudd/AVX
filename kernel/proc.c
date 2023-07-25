@@ -30,7 +30,7 @@ extern void swtch(struct context*, struct context*);
 static void wakeup1(struct proc *chan);
 static void freeproc(struct proc *p);
 
-
+extern thread threads[];
 extern char trampoline[]; // trampoline.S
 
 void reg_info(void) {
@@ -157,21 +157,21 @@ allocpid() {
   return pid;
 }
 
-static void copycontext(struct proc *p,thread *t) {
-    t->context.ra = p->context.ra;
-    t->context.sp = p->context.sp;
-    t->context.s0 = p->context.s0;
-    t->context.s1 = p->context.s1;
-    t->context.s2 = p->context.s2;
-    t->context.s3 = p->context.s3;
-    t->context.s4 = p->context.s4;
-    t->context.s5 = p->context.s5;
-    t->context.s6 = p->context.s6;
-    t->context.s7 = p->context.s7;
-    t->context.s8 = p->context.s8;
-    t->context.s9 = p->context.s9;
-    t->context.s10 = p->context.s10;
-    t->context.s11 = p->context.s11;
+static void copycontext(context *t1, context *t2) {
+    t1->ra = t2->ra;
+    t1->sp = t2->sp;
+    t1->s0 = t2->s0;
+    t1->s1 = t2->s1;
+    t1->s2 = t2->s2;
+    t1->s3 = t2->s3;
+    t1->s4 = t2->s4;
+    t1->s5 = t2->s5;
+    t1->s6 = t2->s6;
+    t1->s7 = t2->s7;
+    t1->s8 = t2->s8;
+    t1->s9 = t2->s9;
+    t1->s10 = t2->s10;
+    t1->s11 = t2->s11;
 }
 
 // copy trapframe f2 to trapframe f1
@@ -244,7 +244,7 @@ found:
   p->pgid = 0;
   p->vsw = 0;
   p->ivsw = 0;
-  p->main_thread = allocNewThread();
+  p->thread_num = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -260,7 +260,6 @@ found:
     release(&p->lock);
     return NULL;
   }
-
   p->kstack = VKSTACK;
 
   p->exec_close = kalloc();
@@ -272,12 +271,17 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
+  p->main_thread = allocNewThread();
+  p->thread_num++;
   p->main_thread->p = p;
-  copycontext(p,p->main_thread);
+  copycontext(&p->main_thread->context,&p->context);
   copytrapframe(p->main_thread->trapframe,p->trapframe);
   p->main_thread->sz = p->sz;
   p->main_thread->clear_child_tid = p->clear_child_tid;
-
+  p->main_thread->kstack = p->kstack;
+  if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
+    panic("allocproc: map thread trapframe failed");
+  
   return p;
 }
 
@@ -395,6 +399,9 @@ userinit(void)
   p->state = RUNNABLE;
 
   p->tmask = 0;
+
+  copytrapframe(p->main_thread->trapframe,p->trapframe);
+  p->main_thread->state = t_RUNNABLE;
 
   release(&p->lock);
   #ifdef DEBUG
@@ -675,6 +682,22 @@ scheduler(void)
         // to release its lock and then reacquire it
         // before jumping back to us.
         // printf("[scheduler]found runnable proc with pid: %d\n", p->pid);
+        
+        // TODO: 改进线程枚举算法
+        int i = 0;
+        for (i = 0; i < THREAD_NUM; i++) {
+          if (threads[i].state == t_UNUSED)
+            break;
+          if (threads[i].p == p && threads[i].state == t_RUNNABLE)
+            break;
+        }
+        if (threads[i].state == t_UNUSED)  // 剩下线程池里的线程都是没有分配的，说明这个进程的线程都不能跑
+          continue; 
+        // 让threads[i]成为p的主线程
+        p->main_thread = &threads[i];
+        copycontext(&p->context,&p->main_thread->context);
+        copytrapframe(&p->trapframe,&p->main_thread->trapframe);
+        p->main_thread->state = t_RUNNING;
         p->state = RUNNING;
         c->proc = p;
         w_satp(MAKE_SATP(p->kpagetable));
@@ -716,11 +739,13 @@ sched(void)
     printf("noff:%d\n", mycpu()->noff);
     panic("sched locks");
   }
-  if(p->state == RUNNING)
+  if(p->state == RUNNING || p->main_thread->state == t_RUNNING)
     panic("sched running");
   if(intr_get())
     panic("sched interruptible");
 
+  copycontext(&p->context,&p->main_thread->context);  // 将主线程的context拷贝到进程的context中
+  copytrapframe(&p->trapframe,&p->main_thread->trapframe);  // 不知道这里到底要不要加
   intena = mycpu()->intena;
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
@@ -733,6 +758,7 @@ yield(void)
   struct proc *p = myproc();
   acquire(&p->lock);
   p->state = RUNNABLE;
+  p->main_thread->state = t_RUNNABLE;
   sched();
   release(&p->lock);
 }
