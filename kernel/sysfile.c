@@ -999,7 +999,7 @@ sys_openat()
       dp = NULL;
     }
   }
-
+  printf("%s\n", path);
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
     if ((flags & O_CREATE) || strncmp(path,"/tmp/testsuite-",15) == 0 ||strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {

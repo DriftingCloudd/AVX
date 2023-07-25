@@ -1,7 +1,7 @@
 platform	:= visionfive
 #platform	:= qemu
-# mode := debug
- mode := release
+ mode := debug
+# mode := release
 K=kernel
 U=xv6-user
 T=target
@@ -145,7 +145,7 @@ gdb-client:
 	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 all:
-	@make build platform=visionfive mode=release
+	@make build platform=visionfive mode=debug
 	@cp target/kernel.bin os.bin
 
 qemu-run:

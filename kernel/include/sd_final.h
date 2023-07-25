@@ -260,3 +260,4 @@ void SDIO_Setup_Callback(SDMMC_T *pSDMMC,
 void sd_init();
 uint32 sd_read(uint32 *dat, int size, int addr);
 uint32 sd_write(uint32 *dat, int size, int addr);
+void test_sdcard();

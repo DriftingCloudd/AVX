@@ -58,7 +58,9 @@ main(unsigned long hartid, unsigned long dtb_pa)
     procinit();
     plicinit();
     plicinithart();
+    // sd_test();
     disk_init();
+    // test_sdcard();
     binit();         // buffer cache
     initlogbuffer();
     fileinit();      // file table
