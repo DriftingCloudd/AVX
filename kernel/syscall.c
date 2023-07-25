@@ -180,6 +180,17 @@ extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
 
+// socket syscalls
+extern uint64 sys_socket(void);
+extern uint64 sys_bind(void);
+extern uint64 sys_listen(void);
+extern uint64 sys_accept(void);
+extern uint64 sys_connect(void);
+extern uint64 sys_sendto(void);
+extern uint64 sys_recvfrom(void);
+extern uint64 sys_getsockname(void);
+extern uint64 sys_setsockopt(void);
+
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -260,6 +271,20 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sync]        sys_sync,
   [SYS_fsync]       sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
+
+  // socket syscalls
+  [SYS_socket]      sys_socket,
+  [SYS_bind]        sys_bind,
+  [SYS_listen]      sys_listen,
+  [SYS_accept]      sys_accept,
+  [SYS_connect]     sys_connect,
+  [SYS_sendto]      sys_sendto,
+  [SYS_recvfrom]    sys_recvfrom,
+  // [SYS_shutdown]    sys_shutdown,
+  [SYS_getsockname] sys_getsockname,
+  // [SYS_getpeername] sys_getpeername,
+  // [SYS_socketpair]  sys_socketpair,
+  [SYS_setsockopt]  sys_setsockopt,
 };
 
 static char *sysnames[] = {
@@ -336,10 +361,9 @@ static char *sysnames[] = {
   [SYS_tgkill]      "tgkill",
   [SYS_gettid]      "gettid",
   [SYS_umask]       "umask",
-  [SYS_readlinkat]  "readlinkat",
-  [SYS_sync]        "sync",
-  [SYS_fsync]       "fsync",
-  [SYS_ftruncate]   "ftruncate",
+  [SYS_rt_sigtimedwait] "rt_sigtimedwait",
+  [SYS_prlimit64]   "prlimit64",
+  [SYS_statfs]      "statfs",
 };
 
 void
