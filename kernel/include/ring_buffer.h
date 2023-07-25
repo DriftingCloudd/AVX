@@ -14,7 +14,7 @@ struct ring_buffer {
 	int head;		// read from head
 	int tail;		// write from tail
 	// char buf[RING_BUFFER_SIZE + 1]; // left 1 byte
-	char * buf;
+	char buf[RING_BUFFER_SIZE + 1];
 };
 #pragma pack()
 
@@ -26,7 +26,8 @@ int wait_ring_buffer_write(struct ring_buffer *rbuf, time_t final_ticks);
 static inline void init_ring_buffer(struct ring_buffer *rbuf)
 {
 	// there is always one byte which should not be read or written
-	memset(rbuf, 0, sizeof(struct ring_buffer)); /* head = tail = 0 */
+	// memset(rbuf, 0, sizeof(struct ring_buffer)); /* head = tail = 0 */
+	memset(rbuf, 0, RING_BUFFER_SIZE); /* head = tail = 0 */
 	rbuf->size = RING_BUFFER_SIZE;
 	// WH ADD
 	// rbuf->buf = kmalloc(PAGE_SIZE);
