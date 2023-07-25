@@ -76,7 +76,7 @@ uint64
 sys_connect(void) {
     int sockfd;
     struct sockaddr *addr;
-    socklen_t *addrlen;
+    socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_connect: argint(0, &sockfd) < 0\n");
         return -1;
@@ -85,11 +85,11 @@ sys_connect(void) {
         printf("sys_connect: argaddr(1, (void *)&addr) < 0\n");
         return -1;
     }
-    if (argaddr(2, &addrlen) < 0) {
-        printf("sys_connect: argaddr(2, &addrlen) < 0\n");
+    if (argint(2, &addrlen) < 0) {
+        printf("sys_connect: argint(2, &addrlen) < 0\n");
         return -1;
     }
-    return do_connect(sockfd, addr, *addrlen);
+    return do_connect(sockfd, addr, addrlen);
 }
 
 uint64
