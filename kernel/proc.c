@@ -273,6 +273,7 @@ found:
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
   p->main_thread = allocNewThread();
+  copycontext(&p->main_thread->context,&p->context);
   p->thread_num++;
   p->main_thread->p = p;
   p->main_thread->sz = p->sz;
@@ -594,6 +595,7 @@ exit(int status)
 
   p->xstate = status;
   p->state = ZOMBIE;
+  p->main_thread->state = t_ZOMBIE;
 
   release(&original_parent->lock);
 
@@ -695,7 +697,7 @@ scheduler(void)
           continue; 
         // 让threads[i]成为p的主线程
         p->main_thread = &threads[i];
-        // copycontext(&p->context,&p->main_thread->context);
+        copycontext(&p->context,&p->main_thread->context);
         copytrapframe(p->trapframe,p->main_thread->trapframe);
         p->main_thread->state = t_RUNNING;
         p->main_thread->awakeTime = 0;
@@ -705,6 +707,7 @@ scheduler(void)
         w_satp(MAKE_SATP(p->kpagetable));
         sfence_vma();
         swtch(&c->context, &p->context);
+        copycontext(&p->main_thread->context,&p->context);
         w_satp(MAKE_SATP(kernel_pagetable));
         sfence_vma();
         // Process is done running for now.
@@ -1087,7 +1090,7 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   t->clear_child_tid = ctid;
   p->thread_num++;
 
-  return 0;
+  return t->tid;
 }
 
 uint64
