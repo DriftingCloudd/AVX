@@ -275,8 +275,6 @@ found:
   p->main_thread = allocNewThread();
   p->thread_num++;
   p->main_thread->p = p;
-  copycontext(&p->main_thread->context,&p->context);
-  copytrapframe(p->main_thread->trapframe,p->trapframe);
   p->main_thread->sz = p->sz;
   p->main_thread->clear_child_tid = p->clear_child_tid;
   p->main_thread->kstack = p->kstack;
@@ -491,7 +489,7 @@ fork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
-
+  copytrapframe(np->main_thread->trapframe,np->trapframe);
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
@@ -503,6 +501,7 @@ fork(void)
   pid = np->pid;
 
   np->state = RUNNABLE;
+  np->main_thread->state = t_RUNNABLE;
 
   release(&np->lock);
 
@@ -696,7 +695,7 @@ scheduler(void)
           continue; 
         // 让threads[i]成为p的主线程
         p->main_thread = &threads[i];
-        copycontext(&p->context,&p->main_thread->context);
+        // copycontext(&p->context,&p->main_thread->context);
         copytrapframe(p->trapframe,p->main_thread->trapframe);
         p->main_thread->state = t_RUNNING;
         p->main_thread->awakeTime = 0;
@@ -747,8 +746,7 @@ sched(void)
   if(intr_get())
     panic("sched interruptible");
 
-  copycontext(&p->context,&p->main_thread->context);  // 将主线程的context拷贝到进程的context中
-  copytrapframe(p->trapframe,p->main_thread->trapframe);  // 不知道这里到底要不要加
+  copytrapframe(p->main_thread->trapframe,p->trapframe);  
   intena = mycpu()->intena;
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
@@ -771,7 +769,7 @@ yield(void)
 void
 forkret(void)
 {
-  // printf("run in forkret\n");
+  printf("run in forkret\n");
   static int first = 1;
 
   // Still holding p->lock from scheduler.
@@ -812,6 +810,7 @@ sleep(void *chan, struct spinlock *lk)
   p->chan = chan;
   p->vsw += 1;
   p->state = SLEEPING;
+  p->main_thread->state = t_RUNNABLE;
 
   sched();
 
