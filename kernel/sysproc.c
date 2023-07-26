@@ -555,41 +555,37 @@ uint64 sys_futex(void)
 {
   int futex_op, val, val3, userVal;
   
-  // uint64 uaddr, timeout, uaddr2;
-  // struct proc *p = myproc();
-  // TimeSpec t;
-  // if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
-	// 	return -1;
-  // futex_op &= (FUTEX_PRIVATE_FLAG - 1);
-  // switch (futex_op)
-  // {
-  //       case FUTEX_WAIT:
-  //           copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
-  //           if (timeout) {
-  //               if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
-  //                   panic("copy time error!\n");
-  //               }
-  //           }
-  //           // printf("val: %d\n", userVal);
-  //           if (userVal != val) {
-  //               return -1;
-  //           }
-  //           // TODO
-  //           // futexWait(uaddr, myThread(), timeout ? &t : 0);
-  //           break;
-  //       case FUTEX_WAKE:
-  //           // printf("val: %d\n", val);
-  //           // TODO
-  //           // futexWake(uaddr, val);
-  //           break;
-  //       case FUTEX_REQUEUE:
-  //           // printf("val: %d\n", val);
-  //           // TODO
-  //           // futexRequeue(uaddr, val, uaddr2);
-  //           break;
-  //       default:
-  //           panic("Futex type not support!\n");
-  // }
+  uint64 uaddr, timeout, uaddr2;
+  struct proc *p = myproc();
+  TimeSpec2 t;
+  if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
+		return -1;
+  futex_op &= (FUTEX_PRIVATE_FLAG - 1);
+  switch (futex_op)
+  {
+        case FUTEX_WAIT:
+            copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
+            if (timeout) {
+                if (copyin(p->pagetable, (char*)&t, timeout, sizeof(TimeSpec2)) < 0) {
+                    panic("copy time error!\n");
+                }
+            }
+            // printf("val: %d\n", userVal);
+            if (userVal != val) {
+                return -1;
+            }
+
+            futexWait(uaddr,myproc()->main_thread, timeout ? &t : 0);
+            break;
+        case FUTEX_WAKE:
+            futexWake(uaddr, val);
+            break;
+        case FUTEX_REQUEUE:
+            futexRequeue(uaddr, val, uaddr2);
+            break;
+        default:
+            panic("Futex type not support!\n");
+  }
   return 0;
 };
 

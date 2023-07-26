@@ -15,7 +15,8 @@ enum threadState {
     t_SLEEPING,
     t_RUNNABLE,
     t_RUNNING,
-    t_ZOMBIE
+    t_ZOMBIE,
+    t_TIMING,
 };
 
 typedef struct thread {

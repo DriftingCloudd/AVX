@@ -690,7 +690,7 @@ scheduler(void)
         for (i = 0; i < THREAD_NUM; i++) {
           if (threads[i].state == t_UNUSED)
             break;
-          if (threads[i].p == p && (threads[i].state == t_RUNNABLE || (threads[i].state == t_SLEEPING && threads[i].awakeTime < r_time() + (1LL << 35))))
+          if (threads[i].p == p && (threads[i].state == t_RUNNABLE || (threads[i].state == t_TIMING && threads[i].awakeTime < r_time() + (1LL << 35))))
             break;
         }
         if (threads[i].state == t_UNUSED)  // 剩下线程池里的线程都是没有分配的，说明这个进程的线程都不能跑
@@ -1083,6 +1083,8 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   t->trapframe->kernel_sp = p->kstack-PGSIZE * (1 + p->thread_num * 2) + PGSIZE;
   t->trapframe->sp = stackVa;
   copycontext_from_trapframe(&t->context,t->trapframe);
+  t->context.ra = (uint64)forkret;
+  t->context.sp = t->trapframe->kernel_sp;
   if (ptid != 0) {
     if (either_copyout(1,ptid,(void*)&t->tid,sizeof(int)) < 0)
       panic("thread_clone: either_copyout");

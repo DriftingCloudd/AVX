@@ -3,6 +3,7 @@
 #include "include/timer.h"
 #include "include/trap.h"
 #include "include/thread.h"
+#include "include/proc.h"
 
 typedef struct FutexQueue
 {
@@ -21,9 +22,14 @@ void futexWait(uint64 addr, thread* th, TimeSpec2* ts) {
             futexQueue[i].thread = th;
             if (ts) {
                 th->awakeTime = ts->tv_sec * 1000000 + ts->tv_nsec / 1000;
+                th->state = t_TIMING;
+            } else {
+                th->state = t_SLEEPING;
             }
-            th->state = t_SLEEPING;            
+            acquire(&th->p->lock);
+            th->p->state = RUNNABLE;
             sched();
+            release(&th->p->lock);
         }
     }
     panic("No futex Resource!\n");
