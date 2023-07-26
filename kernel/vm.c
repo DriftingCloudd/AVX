@@ -135,7 +135,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
     return NULL;
   }
   if((*pte & PTE_V) == 0){
-    debug_print("walkaddr: *pte & PTE_V == 0\n");
+    debug_print("va :%p walkaddr: *pte & PTE_V == 0\n", va);
     return NULL;
   }
   if((*pte & PTE_U) == 0){

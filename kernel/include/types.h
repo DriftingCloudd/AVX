@@ -50,4 +50,5 @@ typedef uint16 in_port_t;
 typedef uint32 socklen_t;
 typedef uint16 sa_family_t;
 typedef int64 time_t;
+typedef int64 suseconds_t;
 #endif

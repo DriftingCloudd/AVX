@@ -166,6 +166,7 @@ extern uint64 sys_fcntl();
 extern uint64 sys_renameat2();
 extern uint64 sys_rt_sigaction(void);
 extern uint64 sys_rt_sigprocmask(void);
+extern uint64 sys_rt_sigreturn(void);
 extern uint64 sys_ppoll();
 extern uint64 sys_getpgid();
 extern uint64 sys_setpgid();
@@ -179,6 +180,7 @@ extern uint64 sys_ftruncate();
 extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
+extern uint64 sys_setitimer();
 
 // socket syscalls
 extern uint64 sys_socket(void);
@@ -263,6 +265,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_fcntl]       sys_fcntl,
   [SYS_rt_sigaction] sys_rt_sigaction,
   [SYS_rt_sigprocmask] sys_rt_sigprocmask,
+  [SYS_rt_sigreturn]  sys_rt_sigreturn,
   [SYS_renameat2]   sys_renameat2,
   [SYS_ppoll]       sys_ppoll,
   [SYS_getpgid]      sys_getpgid,
@@ -279,6 +282,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sync]        sys_sync,
   [SYS_fsync]       sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
+  [SYS_setitimer]   sys_setitimer,
 
   // socket syscalls
   [SYS_socket]      sys_socket,
@@ -374,6 +378,7 @@ static char *sysnames[] = {
   [SYS_umask]       "umask",
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
   [SYS_rt_sigtimedwait] "rt_sigtimedwait",
+  [SYS_rt_sigreturn]    "rt_sigreturn",
   [SYS_prlimit64]   "prlimit64",
   [SYS_statfs]      "statfs",
   [SYS_pread]       "pread",
@@ -382,6 +387,9 @@ static char *sysnames[] = {
   [SYS_statfs]      "statfs",
   [SYS_madvise]     "madvise",
   [SYS_getrusage]   "getrusage",
+  [SYS_setitimer]   "setitimer",
+  [SYS_fsync]       "fsync",
+  [SYS_sync]        "sync",
 };
 
 void
@@ -393,7 +401,7 @@ syscall(void)
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     if(num != 64 && num != 63)
-      debug_print("pid %d: %s\n", p->pid, sysnames[num]);
+      debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
     // if(num != SYS_read && num != SYS_write && num != SYS_writev)

@@ -1,6 +1,10 @@
 #include "include/types.h"
 #include "include/signal.h"
 #include "include/proc.h"
+#include "include/printf.h"
+#include "include/kalloc.h"
+#include "include/defs.h"
+#include "include/memlayout.h"
 
 int set_sigaction(int signum, sigaction const *act, sigaction *oldact)
 {
@@ -44,7 +48,30 @@ int sigprocmask(int how, __sigset_t *set, __sigset_t *oldset){
 	return 0;
 }
 
+uint64 rt_sigreturn(void){
+	struct proc *p = myproc();
+	memcpy(p->trapframe, p->sig_tf, sizeof(struct trapframe));
+	kfree(p->sig_tf);
+	p->sig_tf = 0;
+	return p->trapframe->a0;
+}
+
 void sighandle(void)
 {
-	exit(-1);
+	struct proc *p = myproc();
+	// printf("sighandle %p a0:%d a7:%d\n", p->sig_pending.__val[0], p->trapframe->a0, p->trapframe->a7);
+	if(p->sig_pending.__val[0] &= 1ul << SIGALRM){
+		p->sig_tf = kalloc();
+		memcpy(p->sig_tf, p->trapframe, sizeof(struct trapframe));
+		p->trapframe->epc = (uint64)p->sigaction[SIGALRM].__sigaction_handler.sa_handler;
+		p->trapframe->ra = (uint64)SIGTRAMPOLINE;
+		p->trapframe->sp = p->trapframe->sp - PGSIZE;
+		printf("sighandle epc:%p ra:%p\n", p->trapframe->epc, p->trapframe->ra);
+		p->sig_pending.__val[0] &= ~(1ul << SIGALRM);
+		if(p->sig_pending.__val[0] == 0){
+			p->killed = 0;
+		}
+	}else{
+		exit(-1);
+	}
 }

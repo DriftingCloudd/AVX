@@ -12,6 +12,7 @@
 #include "include/string.h"
 
 
+
 static int
 argfd(int n, int *pfd, struct file **pf)
 {
@@ -150,5 +151,35 @@ uint64 sys_utimensat(void)
 	if (NULL == f)
 		return -2;
 	
+	return 0;
+}
+
+
+uint64 sys_setitimer(){
+	int which;
+	struct itimerval *pvalue;
+	struct itimerval *povalue;
+	struct itimerval value;
+	struct itimerval ovalue;
+	if(argint(0,&which)<0){
+		return -1;
+	}
+	if(argaddr(1,(uint64*)&pvalue)<0){
+		return -1;
+	}
+	if(copyin(myproc()->pagetable,(char*)&value,(uint64)pvalue,sizeof(struct itimerval))<0){
+		return -1;
+	}
+	if(argaddr(2,(uint64*)&povalue)<0){
+		return -1;
+	}
+	if (copyin(myproc()->pagetable,(char*)&ovalue,(uint64)povalue,sizeof(struct itimerval))<0){
+		return -1;
+	}
+	
+	debug_print("sys_setitimer: %d\n", which);
+	debug_print("sys_setitimer: %p it value: %p, %p, start:%p %p\n", value, value.it_interval.tv_sec, value.it_interval.tv_usec, value.it_value.tv_sec, value.it_value.tv_usec);
+	debug_print("sys_setitimer: %p\n", ovalue);
+	setitimer(which, &value, &ovalue);
 	return 0;
 }

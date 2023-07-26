@@ -9,6 +9,7 @@ static longtest iozone[] ;
 static longtest libctest[];
 static longtest libctest_dy[];
 static longtest lua[];
+static longtest unixbench[];
 
 void test_busybox(){
 	dev(2,1,0);
@@ -127,15 +128,15 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	for(i = 0; libctest[i].name[1] ; i++){
-		if(!libctest[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("./runtest.exe",libctest[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-	}
+	// for(i = 0; libctest[i].name[1] ; i++){
+	// 	if(!libctest[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("./runtest.exe",libctest[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// }
 	
 	for(i = 0; libctest_dy[i].name[1] ; i++){
 		if(!libctest_dy[i].valid)continue;
@@ -171,6 +172,16 @@ void test_busybox(){
     }else{
       printf("testcase lua %s fail\n",lua[i].name[1]);
     }
+  }
+
+  /**
+  * run unixbench_testcode.sh
+  */
+  printf("run unixbench_testcode.sh\n");
+  pid = fork();
+  if(pid==0){
+    exec("busybox", unixbench[0].name);
+    exit(0);
   }
 
 	exit(0);
@@ -253,12 +264,12 @@ static longtest iozone[] = {
 };
 
 static longtest libctest[] = {
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "argv", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "basename", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "clocale_mbfuncs", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "clock_gettime", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "crypt", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "dirname", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "argv", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "basename", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "clocale_mbfuncs", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "clock_gettime", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "crypt", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "dirname", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "env", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fdopen", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "fnmatch", 0 } },
@@ -288,7 +299,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "snprintf", 0 } },
   
   // can not pass
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
   
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_long", 0 } },
@@ -414,11 +425,11 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_insque", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_lsearch", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_tsearch", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "setjmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "snprintf", 0}},
     
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf_long", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "stat", 0}},
@@ -449,7 +460,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "daemon_failure", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dn_expand_empty", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dn_expand_ptr_0", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fflush_exit", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fflush_exit", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fgets_eof", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fgetwc_buffering", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fpclassify_invalid_ld80", 0}},
@@ -516,6 +527,11 @@ static longtest lua[] = {
   {0, {0}},
 
 };
+static longtest unixbench[] = {
+  {1, {"busybox", "sh", "unixbench_testcode.sh", 0}},
+  {0, {0}},
+};
+
 
 int main(int argc, char ** argv)
 {

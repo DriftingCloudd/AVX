@@ -97,6 +97,7 @@
 //   TRAPFRAME (p->trapframe, used by the trampoline)
 //   TRAMPOLINE (the same page as in the kernel)
 #define TRAPFRAME               (TRAMPOLINE - PGSIZE)
+#define SIGTRAMPOLINE           (TRAPFRAME - PGSIZE)
 
 #define MAXUVA                  0x80000000L
 #define USER_STACK_BOTTOM (MAXUVA - (2*PGSIZE))

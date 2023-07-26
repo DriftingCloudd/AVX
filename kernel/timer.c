@@ -15,9 +15,13 @@ extern struct proc proc[NPROC];
 
 struct spinlock tickslock;
 uint ticks;
+timer timers[NTIMERS];
+int hastimer = 0;
 
 void timerinit() {
     initlock(&tickslock, "time");
+    memset(timers, 0, sizeof(timers));
+    hastimer = 0;
     #ifdef DEBUG
     printf("timerinit\n");
     #endif
@@ -40,6 +44,20 @@ void timer_tick() {
     wakeup(&ticks);
     release(&tickslock);
     set_next_timeout();
+    
+    //printf("ticks:%d\n",ticks);
+    if(hastimer){
+        // printf("begin timer\n");
+        for(int i=0;i<NTIMERS;i++){
+            if(timers[i].pid == 0) continue;
+            if(ticks -timers[i].ticks >= 10){
+                // printf("timer pid %d\n",timers[i].pid);
+                kill(timers[i].pid, SIGALRM);
+                timers[i].pid = 0;
+                hastimer = 0;
+            }
+        }
+    }
 }
 
 uint64
@@ -62,5 +80,45 @@ sys_times()
         release(&p->lock);
     }
     copyout2(utms, (char*)&ptms, sizeof(ptms));
+    return 0;
+}
+
+
+uint64 setitimer(int which, const struct itimerval *value, struct itimerval *ovalue) {
+    int pid = myproc()->pid;
+    struct timer *timer = NULL;
+    for(int i = 0; i < NTIMERS; i++) {
+        if (timers[i].pid == pid && timers[i].which == which) {
+            timer = &timers[i];
+            break;
+        }
+    }
+    if (ovalue != NULL && timer != NULL) {
+        copyout2((uint64)ovalue, (char*)&((timer->itimer)), sizeof(struct itimerval));
+    }
+    
+    if (value != NULL) {
+        if(value->it_value.tv_sec ==0 && value->it_value.tv_usec == 0 && value->it_interval.tv_sec == 0 && value->it_interval.tv_usec == 0){
+            return 0;
+        }
+        if (timer == NULL) {
+            for(int i = 0; i < NTIMERS; i++) {
+                if (timers[i].pid == 0) {
+                    // printf("set timer pid %d\n", pid);
+                    timer = &timers[i];
+                    timer->pid = pid;
+                    timer->which = which;
+                    timer->ticks = ticks;
+                    break;
+                }
+            }
+        }else{
+            timer->itimer = *value;
+            timer->which = which;
+            timer->ticks = ticks;
+            timer->pid = pid;
+        }
+        hastimer = 1;
+    }
     return 0;
 }

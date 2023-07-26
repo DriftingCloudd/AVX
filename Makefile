@@ -49,7 +49,8 @@ OBJS += \
   $K/bin.o \
   $K/ring_buffer.o \
   $K/socket.o \
-  $K/syssocket.o
+  $K/syssocket.o \
+  $K/SignalTrampoline.o \
 
 
 ifeq ($(platform), qemu)
@@ -152,7 +153,7 @@ all:
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu
+	@make build platform=qemu mode=release
 #	@make fs
 	@$(QEMU) $(QEMUOPTS)
 

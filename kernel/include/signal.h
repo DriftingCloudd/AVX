@@ -1,5 +1,6 @@
 #ifndef __SIGNAL_H
 #define __SIGNAL_H
+#include "types.h"
 
 #define SIGHUP     1    // Hangup
 #define SIGINT     2    // Interrupt
@@ -74,6 +75,6 @@ typedef struct sigaction {
 int set_sigaction(int signum, sigaction const *act, sigaction *oldact);
 
 int sigprocmask(int how, __sigset_t *set, __sigset_t *oldset);
-
+uint64 rt_sigreturn(void);
 void sighandle(void);
 #endif

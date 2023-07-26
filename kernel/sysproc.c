@@ -184,6 +184,7 @@ sys_execve(void)
 uint64
 sys_exit(void)
 {
+  debug_print("sys_exit\n");
   int n;
   if(argint(0, &n) < 0)
     return -1;

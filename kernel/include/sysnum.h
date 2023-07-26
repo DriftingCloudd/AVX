@@ -86,6 +86,7 @@
 #define SYS_rt_sigtimedwait 137
 #define SYS_prlimit64   261
 #define SYS_statfs      43
+#define SYS_setitimer   103
 
 // network syscall
 #define SYS_socket      198
