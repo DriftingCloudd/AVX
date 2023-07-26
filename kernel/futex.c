@@ -1,19 +1,19 @@
 #include "include/futex.h"
 #include "include/types.h"
-#include "include/proc.h"
 #include "include/timer.h"
+#include "include/trap.h"
 #include "include/thread.h"
 
 typedef struct FutexQueue
 {
     uint64 addr;
-    Thread* thread;
+    thread* thread;
     uint8 valid;
 } FutexQueue;
 
 FutexQueue futexQueue[FUTEX_COUNT];
 
-void futexWait(uint64 addr, Thread* th, TimeSpec2* ts) {
+void futexWait(uint64 addr, thread* th, TimeSpec2* ts) {
     for (int i = 0; i < FUTEX_COUNT; i++) {
         if (!futexQueue[i].valid) {
             futexQueue[i].valid = 1;
@@ -21,10 +21,9 @@ void futexWait(uint64 addr, Thread* th, TimeSpec2* ts) {
             futexQueue[i].thread = th;
             if (ts) {
                 th->awakeTime = ts->tv_sec * 1000000 + ts->tv_nsec / 1000;
-            } else {
-                th->state = SLEEPING;
             }
-            yield();
+            th->state = t_SLEEPING;            
+            sched();
         }
     }
     panic("No futex Resource!\n");
@@ -33,8 +32,8 @@ void futexWait(uint64 addr, Thread* th, TimeSpec2* ts) {
 void futexWake(uint64 addr, int n) {
     for (int i = 0; i < FUTEX_COUNT && n; i++) {
         if (futexQueue[i].valid && futexQueue[i].addr == addr) {
-            futexQueue[i].thread->state = RUNNABLE;
-            futexQueue[i].thread->trapframe.a0 = 0; // set next yield accept!
+            futexQueue[i].thread->state = t_RUNNABLE;
+            futexQueue[i].thread->trapframe->a0 = 0; 
             futexQueue[i].valid = 0;
             n--;
         }
@@ -44,8 +43,8 @@ void futexWake(uint64 addr, int n) {
 void futexRequeue(uint64 addr, int n, uint64 newAddr) {
     for (int i = 0; i < FUTEX_COUNT && n; i++) {
         if (futexQueue[i].valid && futexQueue[i].addr == addr) {
-            futexQueue[i].thread->state = RUNNABLE;
-            futexQueue[i].thread->trapframe.a0 = 0; // set next yield accept!
+            futexQueue[i].thread->state = t_RUNNABLE;
+            futexQueue[i].thread->trapframe->a0 = 0; 
             futexQueue[i].valid = 0;
             n--;
         }
@@ -57,7 +56,7 @@ void futexRequeue(uint64 addr, int n, uint64 newAddr) {
     }
 }
 
-void futexClear(Thread* thread) {
+void futexClear(thread* thread) {
     for (int i = 0; i < FUTEX_COUNT; i++) {
         if (futexQueue[i].valid && futexQueue[i].thread == thread) {
             futexQueue[i].valid = 0;

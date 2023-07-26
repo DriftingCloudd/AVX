@@ -14,6 +14,7 @@
 #include "include/trap.h"
 #include "include/vm.h"
 #include "include/vma.h"
+#include "include/futex.h"
 extern uchar initcode[]; 
 extern int initcodesize;
 struct cpu cpus[NCPU];
@@ -688,7 +689,7 @@ scheduler(void)
         for (i = 0; i < THREAD_NUM; i++) {
           if (threads[i].state == t_UNUSED)
             break;
-          if (threads[i].p == p && threads[i].state == t_RUNNABLE)
+          if (threads[i].p == p && (threads[i].state == t_RUNNABLE || (threads[i].state == t_SLEEPING && threads[i].awakeTime < r_time() + (1LL << 35))))
             break;
         }
         if (threads[i].state == t_UNUSED)  // 剩下线程池里的线程都是没有分配的，说明这个进程的线程都不能跑
@@ -696,9 +697,11 @@ scheduler(void)
         // 让threads[i]成为p的主线程
         p->main_thread = &threads[i];
         copycontext(&p->context,&p->main_thread->context);
-        copytrapframe(&p->trapframe,&p->main_thread->trapframe);
+        copytrapframe(p->trapframe,p->main_thread->trapframe);
         p->main_thread->state = t_RUNNING;
+        p->main_thread->awakeTime = 0;
         p->state = RUNNING;
+        futexClear(p->main_thread);
         c->proc = p;
         w_satp(MAKE_SATP(p->kpagetable));
         sfence_vma();

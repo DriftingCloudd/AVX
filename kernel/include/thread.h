@@ -18,8 +18,6 @@ enum threadState {
     t_ZOMBIE
 };
 
-extern struct context;
-
 typedef struct thread {
     struct spinlock lock;
 
@@ -28,6 +26,7 @@ typedef struct thread {
     struct proc *p;    // 这个线程属于哪一个进程
     void *chan;   // 如果不为NULL,则在chan地址上睡眠
     int tid;   // 线程ID
+    uint64 awakeTime; 
 
     // 使用下面这些变量的时候，thread的锁不需要持有
     uint64 kstack;   // 线程内核栈的地址,一个进程的不同线程所用的内核栈的地址应该不同

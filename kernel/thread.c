@@ -25,6 +25,7 @@ thread *allocNewThread() {
     if (NULL == (threads[i].trapframe = (struct trapframe *)kalloc())) {
         panic("allocNewThread: can not kalloc a page");
     }
+    threads[i].awakeTime = 0;
     threads[i].state = t_RUNNABLE;
     threads[i].tid = nexttid++;
     
