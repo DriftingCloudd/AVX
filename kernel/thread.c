@@ -12,7 +12,7 @@ void threadInit() {
         threads[i].state = t_UNUSED;
     }
 }
-
+// alloc main thread
 thread *allocNewThread() {
     int i = 0;
     for (i = 0; i < THREAD_NUM; i++) {
@@ -31,6 +31,7 @@ thread *allocNewThread() {
     
     return &threads[i];
 }
+
 
 /*
 Thread threads[THREAD_TOTAL_NUMBER];  // 暂时先定义100个线程？

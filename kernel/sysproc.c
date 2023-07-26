@@ -44,7 +44,10 @@ sys_clone(void)
   if(new_stack == 0){
     return fork();
   }
-  return clone(new_stack, new_fn);
+  if (new_fn & CLONE_VM)
+    return thread_clone(new_stack,ptid,tls,ctid);
+  else
+    return clone(new_stack, new_fn);
 }
 
 uint64

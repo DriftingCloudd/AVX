@@ -745,7 +745,7 @@ sched(void)
     panic("sched interruptible");
 
   copycontext(&p->context,&p->main_thread->context);  // 将主线程的context拷贝到进程的context中
-  copytrapframe(&p->trapframe,&p->main_thread->trapframe);  // 不知道这里到底要不要加
+  copytrapframe(p->trapframe,p->main_thread->trapframe);  // 不知道这里到底要不要加
   intena = mycpu()->intena;
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
@@ -1041,6 +1041,50 @@ uint64
 sys_yield()
 {
   yield();
+  return 0;
+}
+
+static void copycontext_from_trapframe(context *t,struct trapframe *f) {
+  t->ra = f->ra;
+  t->sp = f->sp;
+  t->s0 = f->s0;
+  t->s1 = f->s1;
+  t->s2 = f->s2;
+  t->s3 = f->s3;
+  t->s4 = f->s4;
+  t->s5 = f->s5;
+  t->s6 = f->s6;
+  t->s7 = f->s7;
+  t->s8 = f->s8;
+  t->s9 = f->s9;
+  t->s10 = f->s10;
+  t->s11 = f->s11;
+}
+
+uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
+  struct proc *p = myproc();
+  thread *t = allocNewThread();
+  t->p = p;
+  if (mappages(p->pagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
+    panic("thread_clone: mappages");
+  void *kstack_pa = kalloc();
+  if (NULL == kstack_pa)
+    panic("thread_clone: kalloc kstack failed");
+  if (mappages(p->pagetable,p->kstack-PGSIZE * (1 + p->thread_num * 2),PGSIZE,(uint64)kstack_pa,PTE_R | PTE_W) < 0)
+    panic("thread_clone: mappages");
+  copytrapframe(t->trapframe,p->trapframe);
+  t->trapframe->a0 = 0;
+  t->trapframe->tp = tls;
+  t->trapframe->kernel_sp = p->kstack-PGSIZE * (1 + p->thread_num * 2) + PGSIZE;
+  t->trapframe->sp = stackVa;
+  copycontext_from_trapframe(&t->context,t->trapframe);
+  if (ptid != 0) {
+    if (either_copyout(1,ptid,(void*)&t->tid,sizeof(int)) < 0)
+      panic("thread_clone: either_copyout");
+  }
+  t->clear_child_tid = ctid;
+  p->thread_num++;
+
   return 0;
 }
 

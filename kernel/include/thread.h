@@ -6,6 +6,7 @@
 #include "types.h"
 #include "queue.h"
 #include "riscv.h"
+#include "context.h"
 
 #define THREAD_NUM 2510
 
@@ -17,24 +18,7 @@ enum threadState {
     t_ZOMBIE
 };
 
-typedef struct t_context {
-    uint64 ra;
-    uint64 sp;
-
-    // callee-saved
-    uint64 s0;
-    uint64 s1;
-    uint64 s2;
-    uint64 s3;
-    uint64 s4;
-    uint64 s5;
-    uint64 s6;
-    uint64 s7;
-    uint64 s8;
-    uint64 s9;
-    uint64 s10;
-    uint64 s11;
-}t_context;
+extern struct context;
 
 typedef struct thread {
     struct spinlock lock;
@@ -49,7 +33,7 @@ typedef struct thread {
     uint64 kstack;   // 线程内核栈的地址,一个进程的不同线程所用的内核栈的地址应该不同
     uint64 sz;   // 复制自进程的sz
     struct trapframe *trapframe;
-    t_context context;  // 每个进程应该有自己的context
+    context context;  // 每个进程应该有自己的context
     uint64 clear_child_tid;
     // TODO: signal
 }thread;
