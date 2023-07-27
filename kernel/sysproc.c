@@ -554,8 +554,7 @@ sys_uname(void)
 //                    uint32_t *uaddr2, uint32_t val3
 uint64 sys_futex(void)
 {
-  // int futex_op, val, val3, userVal;
-  
+  int futex_op, val, val3, userVal;
   uint64 uaddr, timeout, uaddr2;
   struct proc *p = myproc();
   TimeSpec2 t;

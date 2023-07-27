@@ -50,7 +50,7 @@ OBJS += \
   $K/ring_buffer.o \
   $K/socket.o \
   $K/syssocket.o \
-  $K/SignalTrampoline.o \ \
+  $K/SignalTrampoline.o \
   $K/thread.o \
   $K/futex.o \
 
@@ -155,7 +155,7 @@ all:
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu mode=release
+	@make build platform=qemu mode=debug
 	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
