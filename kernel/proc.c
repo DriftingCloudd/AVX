@@ -14,6 +14,7 @@
 #include "include/trap.h"
 #include "include/vm.h"
 #include "include/vma.h"
+#include "include/futex.h"
 extern uchar initcode[]; 
 extern int initcodesize;
 struct cpu cpus[NCPU];
@@ -30,7 +31,7 @@ extern void swtch(struct context*, struct context*);
 static void wakeup1(struct proc *chan);
 static void freeproc(struct proc *p);
 
-
+extern thread threads[];
 extern char trampoline[]; // trampoline.S
 extern char signalTrampoline[]; // signalTrampoline.S
 
@@ -75,6 +76,7 @@ procinit(void)
       initlock(&p->lock, "proc");
       p->state = UNUSED;
       p->parent = 0;
+      p->main_thread = 0;
       p->chan = 0;
       p->killed = 0;
       p->xstate = 0;
@@ -158,6 +160,63 @@ allocpid() {
   return pid;
 }
 
+static void copycontext(context *t1, context *t2) {
+    t1->ra = t2->ra;
+    t1->sp = t2->sp;
+    t1->s0 = t2->s0;
+    t1->s1 = t2->s1;
+    t1->s2 = t2->s2;
+    t1->s3 = t2->s3;
+    t1->s4 = t2->s4;
+    t1->s5 = t2->s5;
+    t1->s6 = t2->s6;
+    t1->s7 = t2->s7;
+    t1->s8 = t2->s8;
+    t1->s9 = t2->s9;
+    t1->s10 = t2->s10;
+    t1->s11 = t2->s11;
+}
+
+// copy trapframe f2 to trapframe f1
+static void copytrapframe(struct trapframe *f1,struct trapframe *f2) {
+    f1->kernel_satp = f2->kernel_satp;
+    f1->kernel_sp = f2->kernel_sp;
+    f1->kernel_trap = f2->kernel_trap;
+    f1->epc = f2->epc;
+    f1->kernel_hartid = f2->kernel_hartid;
+    f1->ra = f2->ra;
+    f1->sp = f2->sp;
+    f1->gp = f2->gp;
+    f1->tp = f2->tp;
+    f1->t0 = f2->t0;
+    f1->t1 = f2->t1;
+    f1->t2 = f2->t2;
+    f1->s0 = f2->s0;
+    f1->s1 = f2->s1;
+    f1->a0 = f2->a0;
+    f1->a1 = f2->a1;
+    f1->a2 = f2->a2;
+    f1->a3 = f2->a3;
+    f1->a4 = f2->a4;
+    f1->a5 = f2->a5;
+    f1->a6 = f2->a6;
+    f1->a7 = f2->a7;
+    f1->s2 = f2->s2;
+    f1->s3 = f2->s3;
+    f1->s4 = f2->s4;
+    f1->s5 = f2->s5;
+    f1->s6 = f2->s6;
+    f1->s7 = f2->s7;
+    f1->s8 = f2->s8;
+    f1->s9 = f2->s9;
+    f1->s10 = f2->s10;
+    f1->s11 = f2->s11;
+    f1->t3 = f2->t3;
+    f1->t4 = f2->t4;
+    f1->t5 = f2->t5;
+    f1->t6 = f2->t6;
+}
+
 // Look in the process table for an UNUSED proc.
 // If found, initialize state required to run in the kernel,
 // and return with p->lock held.
@@ -188,6 +247,7 @@ found:
   p->pgid = 0;
   p->vsw = 0;
   p->ivsw = 0;
+  p->thread_num = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -203,7 +263,6 @@ found:
     release(&p->lock);
     return NULL;
   }
-
   p->kstack = VKSTACK;
 
   p->exec_close = kalloc();
@@ -215,7 +274,19 @@ found:
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
   p->context.sp = p->kstack + PGSIZE;
-
+  p->main_thread = allocNewThread();
+  copycontext(&p->main_thread->context,&p->context);
+  p->thread_num++;
+  p->main_thread->p = p;
+  p->main_thread->sz = p->sz;
+  p->main_thread->clear_child_tid = p->clear_child_tid;
+  p->main_thread->kstack = p->kstack;
+  p->thread_queue = p->main_thread;
+  if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
+    panic("allocproc: map thread trapframe failed");
+  if (mappages(p->kpagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
+    panic("allocproc: map thread trapframe failed");
+  
   return p;
 }
 
@@ -238,10 +309,13 @@ freeproc(struct proc *p)
     free_vma_list(p);
     proc_freepagetable(p->pagetable, p->sz);
   }
+  // TODO: free threads
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
   p->pid = 0;
+  p->main_thread->state = t_UNUSED;
+  p->main_thread = 0;
   p->parent = 0;
   p->name[0] = 0;
   p->chan = 0;
@@ -337,6 +411,9 @@ userinit(void)
 
   p->tmask = 0;
 
+  copytrapframe(p->main_thread->trapframe,p->trapframe);
+  p->main_thread->state = t_RUNNABLE;
+
   release(&p->lock);
   #ifdef DEBUG
   printf("userinit\n");
@@ -424,7 +501,7 @@ fork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
-
+  copytrapframe(np->main_thread->trapframe,np->trapframe);
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
@@ -436,6 +513,7 @@ fork(void)
   pid = np->pid;
 
   np->state = RUNNABLE;
+  np->main_thread->state = t_RUNNABLE;
 
   release(&np->lock);
 
@@ -528,6 +606,7 @@ exit(int status)
 
   p->xstate = status;
   p->state = ZOMBIE;
+  p->main_thread->state = t_ZOMBIE;
 
   release(&original_parent->lock);
 
@@ -616,11 +695,53 @@ scheduler(void)
         // to release its lock and then reacquire it
         // before jumping back to us.
         // printf("[scheduler]found runnable proc with pid: %d\n", p->pid);
+        
+        // TODO: 改进线程枚举算法
+        /*
+        int i = 0;
+        for (i = 0; i < THREAD_NUM; i++) {
+          if (threads[i].state == t_UNUSED)
+            break;
+          if (threads[i].p == p && (threads[i].state == t_RUNNABLE || (threads[i].state == t_TIMING && threads[i].awakeTime < r_time() + (1LL << 35))))
+            break;
+        }
+        if (threads[i].state == t_UNUSED)  // 剩下线程池里的线程都是没有分配的，说明这个进程的线程都不能跑
+          continue; 
+        // 让threads[i]成为p的主线程
+        p->main_thread = &threads[i];
+        */
+        thread *t = p->thread_queue;
+        while (NULL != t) {
+          if (t->state == t_RUNNABLE || (t->state == t_TIMING && t->awakeTime < r_time() + (1LL << 35)))
+            break;
+          t = t->next_thread;
+        }
+        if (NULL == t)
+          continue;
+        if (p->thread_queue != t) {   // 放到队首，避免死线程集中在首部
+          if (NULL != t->next_thread) {
+            t->next_thread->pre_thread = t->pre_thread;
+          }
+          if (NULL != t->pre_thread) {
+            t->pre_thread->next_thread = t->next_thread;
+          }
+          t->pre_thread = NULL;
+          t->next_thread = p->thread_queue;
+          p->thread_queue->pre_thread = t;
+          p->thread_queue = t;
+        }
+        p->main_thread = t;
+        copycontext(&p->context,&p->main_thread->context);
+        copytrapframe(p->trapframe,p->main_thread->trapframe);
+        p->main_thread->state = t_RUNNING;
+        p->main_thread->awakeTime = 0;
         p->state = RUNNING;
+        futexClear(p->main_thread);
         c->proc = p;
         w_satp(MAKE_SATP(p->kpagetable));
         sfence_vma();
         swtch(&c->context, &p->context);
+        copycontext(&p->main_thread->context,&p->context);
         w_satp(MAKE_SATP(kernel_pagetable));
         sfence_vma();
         // Process is done running for now.
@@ -657,11 +778,12 @@ sched(void)
     printf("noff:%d\n", mycpu()->noff);
     panic("sched locks");
   }
-  if(p->state == RUNNING)
+  if(p->state == RUNNING || p->main_thread->state == t_RUNNING)
     panic("sched running");
   if(intr_get())
     panic("sched interruptible");
 
+  copytrapframe(p->main_thread->trapframe,p->trapframe);  
   intena = mycpu()->intena;
   swtch(&p->context, &mycpu()->context);
   mycpu()->intena = intena;
@@ -674,6 +796,7 @@ yield(void)
   struct proc *p = myproc();
   acquire(&p->lock);
   p->state = RUNNABLE;
+  p->main_thread->state = t_RUNNABLE;
   sched();
   release(&p->lock);
 }
@@ -683,7 +806,7 @@ yield(void)
 void
 forkret(void)
 {
-  // printf("run in forkret\n");
+  printf("run in forkret\n");
   static int first = 1;
 
   // Still holding p->lock from scheduler.
@@ -724,6 +847,7 @@ sleep(void *chan, struct spinlock *lk)
   p->chan = chan;
   p->vsw += 1;
   p->state = SLEEPING;
+  p->main_thread->state = t_RUNNABLE;
 
   sched();
 
@@ -958,6 +1082,66 @@ sys_yield()
 {
   yield();
   return 0;
+}
+
+static void copycontext_from_trapframe(context *t,struct trapframe *f) {
+  t->ra = f->ra;
+  t->sp = f->kernel_sp;
+  t->s0 = f->s0;
+  t->s1 = f->s1;
+  t->s2 = f->s2;
+  t->s3 = f->s3;
+  t->s4 = f->s4;
+  t->s5 = f->s5;
+  t->s6 = f->s6;
+  t->s7 = f->s7;
+  t->s8 = f->s8;
+  t->s9 = f->s9;
+  t->s10 = f->s10;
+  t->s11 = f->s11;
+}
+
+uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
+  struct proc *p = myproc();
+  thread *t = allocNewThread();
+  t->p = p;
+  if (mappages(p->kpagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
+    panic("thread_clone: mappages");
+  void *kstack_pa = kalloc();
+  if (NULL == kstack_pa)
+    panic("thread_clone: kalloc kstack failed");
+  if (mappages(p->kpagetable,p->kstack-PGSIZE * (1 + p->thread_num * 2),PGSIZE,(uint64)kstack_pa,PTE_R | PTE_W) < 0)
+    panic("thread_clone: mappages");
+  thread_stack_param tmp;
+
+  if (copyin(p->pagetable,(char*)(&tmp),stackVa,sizeof(thread_stack_param)) < 0) {
+    panic("copy in thread_stack_param failed");
+  }
+
+  printf("thread stack param:%p %p\n",tmp.func_point,tmp.arg_point);
+  
+  t->next_thread = p->thread_queue;
+  if (NULL != p->thread_queue)
+    p->thread_queue->pre_thread = t;
+  p->thread_queue = t;
+  
+  copytrapframe(t->trapframe,p->trapframe);
+  t->trapframe->a0 = tmp.func_point;
+  t->trapframe->tp = tls;
+  t->trapframe->kernel_sp = p->kstack-PGSIZE * (1 + p->thread_num * 2) + PGSIZE;
+  t->trapframe->sp = stackVa;
+  t->trapframe->epc = tmp.func_point;
+  copycontext_from_trapframe(&t->context,t->trapframe);
+  t->context.ra = (uint64)forkret;
+  t->context.sp = t->trapframe->kernel_sp;
+  if (ptid != 0) {
+    if (either_copyout(1,ptid,(void*)&t->tid,sizeof(int)) < 0)
+      panic("thread_clone: either_copyout");
+  }
+  t->clear_child_tid = ctid;
+  p->thread_num++;
+
+  return t->tid;
 }
 
 uint64

@@ -50,7 +50,9 @@ OBJS += \
   $K/ring_buffer.o \
   $K/socket.o \
   $K/syssocket.o \
-  $K/SignalTrampoline.o \
+  $K/SignalTrampoline.o \ \
+  $K/thread.o \
+  $K/futex.o \
 
 
 ifeq ($(platform), qemu)

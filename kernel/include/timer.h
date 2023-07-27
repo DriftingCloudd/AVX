@@ -48,6 +48,8 @@ typedef struct timer{
     int ticks;
 }timer;
 
+typedef struct timespec2 TimeSpec2;
+
 void timerinit();
 void set_next_timeout();
 void timer_tick();
