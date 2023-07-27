@@ -806,7 +806,7 @@ yield(void)
 void
 forkret(void)
 {
-  printf("run in forkret\n");
+  debug_print("run in forkret\n");
   static int first = 1;
 
   // Still holding p->lock from scheduler.
@@ -1118,7 +1118,7 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
     panic("copy in thread_stack_param failed");
   }
 
-  printf("thread stack param:%p %p\n",tmp.func_point,tmp.arg_point);
+  // printf("thread stack param:%p %p\n",tmp.func_point,tmp.arg_point);
   
   t->next_thread = p->thread_queue;
   if (NULL != p->thread_queue)

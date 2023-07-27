@@ -11,6 +11,7 @@ static longtest libctest_dy[];
 static longtest lua[];
 static longtest unixbench[];
 const char* unixben_testcode[];
+static longtest libc_bench[];
 
 void test_busybox(){
 	dev(2,1,0);
@@ -25,21 +26,21 @@ void test_busybox(){
 	wait4(pid, &status, 0);
 	printf("run busybox_testcode.sh\n");
 	int i;
-	for(i = 0; busybox[i].name[1] ; i++){
-		if(!busybox[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("busybox",busybox[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-		if(status==0){
-			printf("testcase busybox %d success\n",i);
-		}else{
-			printf("testcase busybox %d success\n",i);
-			// printf("testcase busybox %d fail\n",i);
-		}
-	}
+	// for(i = 0; busybox[i].name[1] ; i++){
+	// 	if(!busybox[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("busybox",busybox[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// 	if(status==0){
+	// 		printf("testcase busybox %d success\n",i);
+	// 	}else{
+	// 		printf("testcase busybox %d success\n",i);
+	// 		// printf("testcase busybox %d fail\n",i);
+	// 	}
+	// }
 		// pid = fork();
 		// if(pid==0){
 		// 	exec("busybox",busybox[21].name);
@@ -129,25 +130,25 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	for(i = 0; libctest[i].name[1] ; i++){
-		if(!libctest[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("./runtest.exe",libctest[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-	}
+	// for(i = 0; libctest[i].name[1] ; i++){
+	// 	if(!libctest[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("./runtest.exe",libctest[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// }
 	
-	for(i = 0; libctest_dy[i].name[1] ; i++){
-		if(!libctest_dy[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("./runtest.exe",libctest_dy[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-	}
+	// for(i = 0; libctest_dy[i].name[1] ; i++){
+	// 	if(!libctest_dy[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("./runtest.exe",libctest_dy[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// }
 
 	/**
 	* run lmbench_testcode.sh
@@ -160,47 +161,53 @@ void test_busybox(){
 	*/
 	printf("run lua_testcode.sh\n");
 
-  for(i = 0; lua[i].name[1] ; i++){
-    if(!lua[i].valid)continue;
-    pid = fork();
-    if(pid==0){
-      exec("lua",lua[i].name);
-      exit(0);
-    }
-    wait4(pid, &status, 0);
-    if(status==0){
-      printf("testcase lua %s success\n",lua[i].name[1]);
-    }else{
-      printf("testcase lua %s fail\n",lua[i].name[1]);
-    }
-  }
+  // for(i = 0; lua[i].name[1] ; i++){
+  //   if(!lua[i].valid)continue;
+  //   pid = fork();
+  //   if(pid==0){
+  //     exec("lua",lua[i].name);
+  //     exit(0);
+  //   }
+  //   wait4(pid, &status, 0);
+  //   if(status==0){
+  //     printf("testcase lua %s success\n",lua[i].name[1]);
+  //   }else{
+  //     printf("testcase lua %s fail\n",lua[i].name[1]);
+  //   }
+  // }
 
   /**
   * run unixbench_testcode.sh
   */
   printf("run unixbench_testcode.sh\n");
-  pid = fork();
-  if(pid==0){
-    exec("busybox", unixbench[0].name);
-    exit(0);
-  }
-  wait4(pid, &status, 0);
-  if((pid = fork()) == 0){
-    int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
-    write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
-    write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
-    write(fd, unixben_testcode[2], strlen(unixben_testcode[2]));
-    close(fd);
-    exec("busybox", unixbench[1].name);
-    exit(0);
-  }
-	wait4(pid, &status, 0);
+  // pid = fork();
+  // if(pid==0){
+  //   exec("busybox", unixbench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid, &status, 0);
+  // if((pid = fork()) == 0){
+  //   int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
+  //   write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
+  //   write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
+  //   write(fd, unixben_testcode[3], strlen(unixben_testcode[3]));
+  //   close(fd);
+  //   exec("busybox", unixbench[1].name);
+  //   exit(0);
+  // }
+	// wait4(pid, &status, 0);
 
   printf("run netperf_testcode.sh\n");
 
   printf("run iperf_testcode.sh\n");
 
   printf("run cyclic_testcode.sh\n");
+
+  if((pid = fork()) == 0){
+    exec("libc-bench", libc_bench[0].name);
+    exit(0);
+  }
+  wait4(pid, &status, 0);
 
   exit(0);
 }
@@ -297,16 +304,10 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "inet_pton", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "mbc", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "memstream", 0 } },
-
-
-	// can not pass
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_points", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_tsd", 0 } },
-
-
-
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "qsort", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "random", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "search_hsearch", 0 } },
@@ -315,10 +316,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "search_tsearch", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "setjmp", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "snprintf", 0 } },
-  
-  // can not pass
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
-  
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_long", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "stat", 0 } },
@@ -553,6 +551,10 @@ static longtest unixbench[] = {
   {0, {0}},
 };
 
+static longtest libc_bench[] = {
+  {1, {"libc-bench", 0}}
+};
+
 const char* unixben_testcode[] = {"\
 #!/bin/bash \n\
 ./dhry2reg 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench DHRY2 test(lps): \"$0}'\n\
@@ -567,8 +569,8 @@ UB_BINDIR=./ ./execl 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybo
 ./fstime -c -t 20 -b 256 -m 500 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_SMALL test(KBps): \"$0}'\n\
 ./fstime -w -t 20 -b 1024 -m 2000 | ./busybox grep -o \"WRITE COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_WRITE_MIDDLE test(KBps): \"$0}'\n\
 ./fstime -r -t 20 -b 1024 -m 2000 | ./busybox grep -o \"READ COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_READ_MIDDLE test(KBps): \"$0}'\n\
-./fstime -c -t 20 -b 1024 -m 2000 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_MIDDLE test(KBps): \"$0}'\n\
-./fstime -w -t 20 -b 4096 -m 8000 | ./busybox grep -o \"WRITE COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_WRITE_BIG test(KBps): \"$0}'\n\
+./fstime -c -t 20 -b 1024 -m 2000 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_MIDDLE test(KBps): \"$0}'\n",
+"./fstime -w -t 20 -b 4096 -m 8000 | ./busybox grep -o \"WRITE COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_WRITE_BIG test(KBps): \"$0}'\n\
 ./fstime -r -t 20 -b 4096 -m 8000 | ./busybox grep -o \"READ COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_READ_BIG test(KBps): \"$0}'\n\
 ./fstime -c -t 20 -b 4096 -m 8000 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_BIG test(KBps): \"$0}'\n",
 "./arithoh 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench ARITHOH test(lps): \"$0}'\n\

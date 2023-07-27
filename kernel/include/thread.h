@@ -8,7 +8,7 @@
 #include "riscv.h"
 #include "context.h"
 
-#define THREAD_NUM 2510
+#define THREAD_NUM 10000
 
 enum threadState {
     t_UNUSED,
