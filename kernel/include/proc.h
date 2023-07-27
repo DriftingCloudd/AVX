@@ -100,6 +100,11 @@ typedef struct rlimit {
   uint64 rlim_max;
 }rlimit;
 
+typedef struct thread_stack_param {
+  uint64 func_point;
+  uint64 arg_point;
+}thread_stack_param;
+
 #define NOFILEMAX(p) (p->filelimit<NOFILE?p->filelimit:NOFILE)
 #define LOG_PROCESS_NUM 7
 #define THREAD_TOTAL_NUMBER (1 << LOG_PROCESS_NUM)

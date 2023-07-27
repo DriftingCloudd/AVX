@@ -281,6 +281,8 @@ found:
   p->main_thread->kstack = p->kstack;
   if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
     panic("allocproc: map thread trapframe failed");
+  if (mappages(p->kpagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
+    panic("allocproc: map thread trapframe failed");
   
   return p;
 }
@@ -1051,7 +1053,7 @@ sys_yield()
 
 static void copycontext_from_trapframe(context *t,struct trapframe *f) {
   t->ra = f->ra;
-  t->sp = f->sp;
+  t->sp = f->kernel_sp;
   t->s0 = f->s0;
   t->s1 = f->s1;
   t->s2 = f->s2;
@@ -1070,18 +1072,27 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   struct proc *p = myproc();
   thread *t = allocNewThread();
   t->p = p;
-  if (mappages(p->pagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
+  if (mappages(p->kpagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
     panic("thread_clone: mappages");
   void *kstack_pa = kalloc();
   if (NULL == kstack_pa)
     panic("thread_clone: kalloc kstack failed");
-  if (mappages(p->pagetable,p->kstack-PGSIZE * (1 + p->thread_num * 2),PGSIZE,(uint64)kstack_pa,PTE_R | PTE_W) < 0)
+  if (mappages(p->kpagetable,p->kstack-PGSIZE * (1 + p->thread_num * 2),PGSIZE,(uint64)kstack_pa,PTE_R | PTE_W) < 0)
     panic("thread_clone: mappages");
+  thread_stack_param tmp;
+
+  if (copyin(p->pagetable,(char*)(&tmp),stackVa,sizeof(thread_stack_param)) < 0) {
+    panic("copy in thread_stack_param failed");
+  }
+
+  printf("thread stack param:%p %p\n",tmp.func_point,tmp.arg_point);
+
   copytrapframe(t->trapframe,p->trapframe);
-  t->trapframe->a0 = 0;
+  t->trapframe->a0 = tmp.func_point;
   t->trapframe->tp = tls;
   t->trapframe->kernel_sp = p->kstack-PGSIZE * (1 + p->thread_num * 2) + PGSIZE;
   t->trapframe->sp = stackVa;
+  t->trapframe->epc = tmp.func_point;
   copycontext_from_trapframe(&t->context,t->trapframe);
   t->context.ra = (uint64)forkret;
   t->context.sp = t->trapframe->kernel_sp;
