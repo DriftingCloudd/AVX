@@ -76,6 +76,7 @@
 
 // #define PHYSTOP                 0x240000000
 // #define PHYSTOP                 0x80a00000
+//128M  0x800_0000
 #define PHYSTOP                 0x86a00000
 
 // map the trampoline page to the highest address,
@@ -97,6 +98,7 @@
 //   TRAPFRAME (p->trapframe, used by the trampoline)
 //   TRAMPOLINE (the same page as in the kernel)
 #define TRAPFRAME               (TRAMPOLINE - PGSIZE)
+#define SIGTRAMPOLINE           (TRAPFRAME - PGSIZE)
 
 #define MAXUVA                  0x80000000L
 #define USER_STACK_BOTTOM (MAXUVA - (2*PGSIZE))

@@ -87,8 +87,7 @@ uint64 sys_rt_sigprocmask(void){
 */
 uint64
 sys_rt_sigreturn(void){
-
-    return 0;
+	return rt_sigreturn();
 }
 
 /**

@@ -14,7 +14,8 @@
 #define AT_FDCWD  -100
 
 struct file {
-  enum { FD_NONE, FD_PIPE, FD_ENTRY, FD_DEVICE } type;
+  //FD_NULL特指/dev/null文件
+  enum { FD_NONE, FD_PIPE, FD_ENTRY, FD_DEVICE, FD_SOCK, FD_NULL} type;
   int ref; // reference count
   char readable;
   char writable;
@@ -22,6 +23,7 @@ struct file {
   struct dirent *ep;
   uint off;          // FD_ENTRY
   short major;       // FD_DEVICE
+  struct socket* sock; // FD_SOCK
   uint64 t0_sec;
   uint64 t0_nsec;
   uint64 t1_sec;

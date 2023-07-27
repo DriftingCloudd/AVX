@@ -12,6 +12,7 @@
 #include "include/spinlock.h"
 #include "include/proc.h"
 #include "include/sleeplock.h"
+#include "include/socket.h"
 #include "include/file.h"
 #include "include/pipe.h"
 #include "include/fcntl.h"
@@ -203,7 +204,10 @@ sys_write(void)
 
   if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
     return -1;
-
+  // if(f->type == FD_ENTRY){
+  //   printf("write file : %s\n", f->ep->filename);
+  //   printf("write file from :%p\n", p);
+  // }
   return filewrite(f, p, n);
 }
 
@@ -263,10 +267,10 @@ sys_writev(void)
   if (argfd(0, &fd, &f) < 0) return -1;
   if (argaddr(1, &iov) < 0) return -1;
   if (argint(2, &iovcnt) < 0) return -1;
-
+  // printf("writev fd:%d iov:%p iovcnt:%d\n",fd,iov,iovcnt);
   if (iov)
   {
-    copyin(p->pagetable, (char*) v, iov, sizeof(v));
+    copyin(p->pagetable, (char*) v, iov, sizeof(iovec) * iovcnt);
   }
   else  
     return -1;
@@ -274,6 +278,9 @@ sys_writev(void)
   uint64 len = 0;
   for (int i = 0; i < iovcnt; i++)
   {
+    // char tmp[50];
+    // copyin(p->pagetable, tmp, (uint64)(v[i].iov_base), v[i].iov_len);
+    // printf("\n\n\nwritev: %s\n\n\n", tmp);
     len += filewrite(f, (uint64)(v[i].iov_base), v[i].iov_len);
   }
   
@@ -986,9 +993,23 @@ sys_openat()
   argfd(0,&dirfd,&dirf);
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
-  } 
+  }
+  //打开/dev/null文件，这个文件做一个特殊的标记
   if (0 == strncmp(path,"/dev/null",9)) {
-    return -24;
+    //获取文件描述符
+    if(NULL == (f = filealloc()) || (fd = fdalloc(f)) < 0) {
+      // 文件描述符或者文件创建失败
+      if (f) {
+        fileclose(f);
+      }
+      return -24;
+    }
+    f->type = FD_NULL;
+    f->off = 0;
+    f->ep = 0;
+    f->readable = 1;
+    f->writable = 1;
+    return fd;
   }
   flags |= O_RDWR;
 
@@ -999,7 +1020,7 @@ sys_openat()
       dp = NULL;
     }
   }
-
+  debug_print("%s\n", path);
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
     if ((flags & O_CREATE) || strncmp(path,"/tmp/testsuite-",15) == 0 ||strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
@@ -1315,6 +1336,14 @@ sys_fcntl(void)
     p->exec_close[fd] = 1;
 
     return fd;
+  } else if (F_GETFL == cmd) {
+    // handle O_NONBLOCK here; we just need special handling
+    uint64 ret = 0;
+    if (f->type == FD_SOCK) {
+      if (f->sock->type & SOCK_NONBLOCK)
+        ret |= O_NONBLOCK;
+    }
+    return ret;
   }
 
   return 0;
@@ -1375,26 +1404,7 @@ sys_sendfile(void)
 uint64
 sys_sync(void)
 {
-
-  int bufsiz;
-  uint64 addr2;
-  char path[FAT32_MAX_PATH];
-  if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
-  {
-    return -1;
-  }
-  int copy_size;
-  if (bufsiz < strlen(path))
-  {
-    copy_size = bufsiz;
-  }
-  else
-  {
-    copy_size = strlen(path);
-  }
-  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
-  either_copyout(1, addr2, "/", 1);
-  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
+  //todo
   return 0;
 }
 
@@ -1429,6 +1439,11 @@ sys_readlinkat(void)
   int bufsiz;
   uint64 addr2;
   char path[FAT32_MAX_PATH];
+  int dirfd = 0;
+  if(argfd(0, &dirfd, NULL) < 0)
+  {
+    return -1;
+  }
   if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
   {
     return -1;
@@ -1442,9 +1457,14 @@ sys_readlinkat(void)
   {
     copy_size = strlen(path);
   }
-  debug_print("readlinkat path: %s proc name :%s\n", path, myproc()->name);
-  either_copyout(1, addr2, "/", 1);
-  either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
+  debug_print("readlinkat fd:%d path: %s proc name :%s\n", dirfd, path, myproc()->name);
+  if(strncmp(path, "/proc/self/exe", 14) == 0){
+    either_copyout(1, addr2, "/", 1);
+    either_copyout(1, addr2 + 1, myproc()->name, copy_size - 1);
+  }else{
+    copyout(myproc()->pagetable, addr2, path, copy_size);
+  }
+  
   
   return copy_size;
   // return 0;

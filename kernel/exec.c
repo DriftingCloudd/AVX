@@ -17,7 +17,7 @@
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
 
-#define STACK_SIZE 36*PGSIZE
+#define STACK_SIZE 64*PGSIZE
 enum redir{
   REDIR_OUT,
   REDIR_APPEND,
@@ -383,7 +383,7 @@ int exec(char *path, char **argv, char ** env)
 /*--------------------开始处理environment---------------------------------------*/
   uint64 envp[MAXARG+1];
   envp[0] = 0;
-  if((sp = user_stack_push_str(pagetable, envp, "LD_LIBRARY_PATH=/", sp, stackbase)) == -1){
+  if((sp = user_stack_push_str(pagetable, envp, "UB_BINDIR=.", sp, stackbase)) == -1){
     printf("user_stack_push_str failed 1\n");
     goto bad;
   }
@@ -499,7 +499,7 @@ int exec(char *path, char **argv, char ** env)
   p->sz = sz;
   p->trapframe->epc = program_entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
-  debug_print("program entry:%p\n", program_entry);
+  // debug_print("program entry:%p\n", program_entry);
   // maybe it's wrong
   for (int fd = 0; fd < NOFILEMAX(p); fd++) {
     struct file *f = p -> ofile[fd];

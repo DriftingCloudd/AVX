@@ -184,6 +184,7 @@ sys_execve(void)
 uint64
 sys_exit(void)
 {
+  debug_print("sys_exit\n");
   int n;
   if(argint(0, &n) < 0)
     return -1;
@@ -281,7 +282,7 @@ sys_brk(void)
 
   if(argaddr(0, &n) < 0)
     return -1;
-  debug_print("sys_brk n = %d\n", n);
+
   addr = myproc()->sz;
   if (n == 0)
   {
@@ -550,7 +551,7 @@ sys_uname(void)
 //                    uint32_t *uaddr2, uint32_t val3
 uint64 sys_futex(void)
 {
-  int futex_op, val, val3, userVal;
+  // int futex_op, val, val3, userVal;
   
   // uint64 uaddr, timeout, uaddr2;
   // struct proc *p = myproc();
@@ -674,8 +675,8 @@ sys_getrusage(void)
   }
   
   rs = (struct rusage){
-    .ru_utime = p->utime,
-    .ru_stime = p->ktime,
+    .ru_utime = {p->utime},
+    .ru_stime = {p->ktime},
   };
 
   switch (who)

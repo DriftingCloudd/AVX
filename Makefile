@@ -1,7 +1,7 @@
 platform	:= visionfive
 #platform	:= qemu
-# mode := debug
- mode := release
+ mode := debug
+# mode := release
 K=kernel
 U=xv6-user
 T=target
@@ -46,7 +46,11 @@ OBJS += \
   $K/vma.o \
   $K/signal.o \
   $K/syssig.o \
-  $K/bin.o
+  $K/bin.o \
+  $K/ring_buffer.o \
+  $K/socket.o \
+  $K/syssocket.o \
+  $K/SignalTrampoline.o \
 
 
 ifeq ($(platform), qemu)
@@ -149,7 +153,7 @@ all:
 	@cp target/kernel kernel-qemu
 
 qemu-run:
-	@make build platform=qemu
+	@make build platform=qemu mode=release
 	@make fs
 	@$(QEMU) $(QEMUOPTS)
 

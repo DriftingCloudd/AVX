@@ -41,4 +41,14 @@ typedef uint64 pde_t;
 
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))
 
+
+// for socket use
+typedef uint64 size_t;
+typedef int64 ssize_t;
+typedef int in_addr_t;
+typedef uint16 in_port_t;
+typedef uint32 socklen_t;
+typedef uint16 sa_family_t;
+typedef int64 time_t;
+typedef int64 suseconds_t;
 #endif

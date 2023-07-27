@@ -32,6 +32,7 @@ static void freeproc(struct proc *p);
 
 
 extern char trampoline[]; // trampoline.S
+extern char signalTrampoline[]; // signalTrampoline.S
 
 void reg_info(void) {
   printf("register info: {\n");
@@ -94,6 +95,7 @@ procinit(void)
       memset(p->sigaction, 0, sizeof(p->sigaction));
       memset(p->sig_set.__val, 0, sizeof(p->sig_set));
       memset(p->sig_pending.__val, 0, sizeof(p->sig_pending));
+      p->sig_tf = NULL;
       // Allocate a page for the process's kernel stack.
       // Map it high in memory, followed by an invalid
       // guard page.
@@ -278,6 +280,12 @@ proc_pagetable(struct proc *p)
   if(mappages(pagetable, TRAPFRAME, PGSIZE,
               (uint64)(p->trapframe), PTE_R | PTE_W) < 0){
     vmunmap(pagetable, TRAMPOLINE, 1, 0);
+    uvmfree(pagetable, 0);
+    return NULL;
+  }
+  if(mappages(pagetable, SIGTRAMPOLINE, PGSIZE, (uint64)signalTrampoline, PTE_R | PTE_X | PTE_U) < 0){
+    vmunmap(pagetable, TRAMPOLINE, 1, 0);
+    vmunmap(pagetable, TRAPFRAME, 1, 0);
     uvmfree(pagetable, 0);
     return NULL;
   }
@@ -769,6 +777,7 @@ kill(int pid, int sig)
     acquire(&p->lock);
     if(p->pid == pid){
       p->sig_pending.__val[0] |= (1 << (sig));
+      // printf("kill peding:%p, killed:%d\n", p->sig_pending.__val[0], p->killed);
       if(p->killed == 0 || p->killed > sig){
         p->killed = sig;
       }

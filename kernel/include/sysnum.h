@@ -86,6 +86,18 @@
 #define SYS_rt_sigtimedwait 137
 #define SYS_prlimit64   261
 #define SYS_statfs      43
+#define SYS_setitimer   103
+
+// network syscall
+#define SYS_socket      198
+#define SYS_bind        200
+#define SYS_listen      201
+#define SYS_accept      202
+#define SYS_connect     203
+#define SYS_getsockname 204
+#define SYS_sendto      206
+#define SYS_recvfrom    207
+#define SYS_setsockopt  208
 #define SYS_pread       67
 #define SYS_mprotect    226
 #define SYS_madvise     233

@@ -135,7 +135,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
     return NULL;
   }
   if((*pte & PTE_V) == 0){
-    debug_print("walkaddr: *pte & PTE_V == 0\n");
+    debug_print("va :%p walkaddr: *pte & PTE_V == 0\n", va);
     return NULL;
   }
   if((*pte & PTE_U) == 0){
@@ -454,6 +454,29 @@ uvmclear(pagetable_t pagetable, uint64 va)
   if(pte == NULL)
     panic("uvmclear");
   *pte &= ~PTE_U;
+}
+
+//向指定的用户地址输出长度为len的0值
+int
+copyout_zero(pagetable_t pagetable, uint64 dstva, uint64 len)
+{
+  uint64 n, va0, pa0;
+
+  while(len > 0){
+    va0 = PGROUNDDOWN(dstva);
+    pa0 = walkaddr(pagetable, va0);
+    if(pa0 == NULL)
+      return -1;
+    n = PGSIZE - (dstva - va0);
+    if(n > len)
+      n = len;
+    
+    memset((void *)(pa0 + (dstva - va0)), 0, n);
+    
+    len -= n;
+    dstva = va0 + PGSIZE;
+  }
+  return 0;
 }
 
 // Copy from kernel to user.

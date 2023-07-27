@@ -66,26 +66,6 @@ int             filestat(struct file*, uint64 addr);
 int             filewrite(struct file*, uint64, int n);
 int             dirnext(struct file *f, uint64 addr);
 
-// fs.c
-// void            fsinit(int);
-// int             dirlink(struct inode*, char*, uint);
-// struct inode*   dirlookup(struct inode*, char*, uint*);
-// struct inode*   ialloc(uint, short);
-// struct inode*   idup(struct inode*);
-// void            iinit();
-// void            ilock(struct inode*);
-// void            iput(struct inode*);
-// void            iunlock(struct inode*);
-// void            iunlockput(struct inode*);
-// void            iupdate(struct inode*);
-// int             namecmp(const char*, const char*);
-// struct inode*   namei(char*);
-// struct inode*   nameiparent(char*, char*);
-// int             readi(struct inode*, int, uint64, uint, uint);
-// void            stati(struct inode*, struct stat*);
-// int             writei(struct inode*, int, uint64, uint, uint);
-// void            itrunc(struct inode*);
-
 // kalloc.c
 void*           kalloc(void);
 void            kfree(void *);
@@ -118,7 +98,7 @@ int             fork(void);
 int             growproc(int);
 pagetable_t     proc_pagetable(struct proc *);
 void            proc_freepagetable(pagetable_t, uint64);
-int             kill(int);
+// int             kill(int);
 struct cpu*     mycpu(void);
 struct cpu*     getmycpu(void);
 struct proc*    myproc();
@@ -159,6 +139,7 @@ void            initsleeplock(struct sleeplock*, char*);
 int             memcmp(const void*, const void*, uint);
 void*           memmove(void*, const void*, uint);
 void*           memset(void*, int, uint);
+void*           memcpy(void *dst, const void *src, uint n);
 char*           safestrcpy(char*, const char*, int);
 int             strlen(const char*);
 int             strncmp(const char*, const char*, uint);
@@ -192,24 +173,6 @@ void            uartintr(void);
 void            uartputc(int);
 void            uartputc_sync(int);
 int             uartgetc(void);
-
-// vm.c
-void            kvminit(void);
-void            kvminithart(void);
-uint64          kvmpa(uint64);
-void            kvmmap(uint64, uint64, uint64, int);
-int             mappages(pagetable_t, uint64, uint64, uint64, int);
-pagetable_t     uvmcreate(void);
-void            uvminit(pagetable_t, uchar *, uint);
-uint64          uvmdealloc(pagetable_t, uint64, uint64);
-int             uvmcopy(pagetable_t, pagetable_t, uint64);
-void            uvmfree(pagetable_t, uint64);
-void            uvmunmap(pagetable_t, uint64, uint64, int);
-void            uvmclear(pagetable_t, uint64);
-uint64          walkaddr(pagetable_t, uint64);
-int             copyout(pagetable_t, uint64, char *, uint64);
-int             copyin(pagetable_t, char *, uint64, uint64);
-int             copyinstr(pagetable_t, char *, uint64, uint64);
 
 // virtio_disk.c
 void            virtio_disk_init(void);
