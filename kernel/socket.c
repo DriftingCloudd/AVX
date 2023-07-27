@@ -27,6 +27,7 @@ int init_socket(){
         memset(&sock[i],0,sizeof(struct socket));
         init_ring_buffer(&sock[i].data);
     }
+    return 0;
 }
 
 // 分配并初始化一个socket，将对应的信息填入其中
@@ -123,17 +124,38 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     if(addrlen != sizeof(struct sockaddr)) return -EINVAL;
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     int i, j;
-    acquire(&sock_lock);
-    for (i=1;i<=MAX_SOCK_NUM;i++){
-        // printk("sock[%d]: addr = %x, status = %d\n",i,sock[i].addr->sin_addr,sock[i].status);
-        if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
-            && sock[i].status == SOCK_LISTEN)
-            break;
+    printf("socket type:%p\n", curr_proc->ofile[sockfd]->sock->type);
+    if(sock[sock_num].type & SOCK_NONBLOCK){
+        acquire(&sock_lock);
+        for (i=1;i<=MAX_SOCK_NUM;i++){
+            // printk("sock[%d]: addr = %x, status = %d\n",i,sock[i].addr->sin_addr,sock[i].status);
+            if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
+                && sock[i].status == SOCK_LISTEN)
+                break;
+        }
+        if (i == MAX_SOCK_NUM + 1) {
+            release(&sock_lock);
+            return -ECONNREFUSED;
+        }
+    }else{
+        while(1){
+            acquire(&sock_lock);
+            for (i=1;i<=MAX_SOCK_NUM;i++){
+                // printk("sock[%d]: addr = %x, status = %d\n",i,sock[i].addr->sin_addr,sock[i].status);
+                if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
+                    && sock[i].status == SOCK_LISTEN)
+                    break;
+            }
+            if (i == MAX_SOCK_NUM + 1) {
+                release(&sock_lock);
+                // do_scheduler();
+                yield(); // give up cpu here
+            }else{
+                break;
+            }
+        }
     }
-    if (i == MAX_SOCK_NUM + 1) {
-        release(&sock_lock);
-        return -ECONNREFUSED;
-    }
+    
     for (j = 0; j < sock[i].backlog; j++)
         if (!sock[i].wait_list[j]) {
             sock[i].wait_list[j] = sock_num;
@@ -200,7 +222,7 @@ ssize_t do_sendto(int sockfd, void *buf, size_t len, int flags, struct sockaddr 
     if (addrlen != sizeof(struct sockaddr)) {
         return -EINVAL;
     }
-    int i,j;
+    int i;
     acquire(&sock_lock);
     for (i = 1; i <= MAX_SOCK_NUM; i++)
         if (!memcmp(dest_addr, sock[i].addr, sizeof(struct sockaddr)) && 
@@ -230,7 +252,6 @@ ssize_t do_recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockadd
         return -EINVAL;
     }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
-    int i;
     acquire(&sock_lock);
     int read_len = (len < ring_buffer_used(&sock[sock_num].data)) ?
                         len :

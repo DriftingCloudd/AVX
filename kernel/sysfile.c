@@ -993,9 +993,23 @@ sys_openat()
   argfd(0,&dirfd,&dirf);
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
-  } 
+  }
+  //打开/dev/null文件，这个文件做一个特殊的标记
   if (0 == strncmp(path,"/dev/null",9)) {
-    return -24;
+    //获取文件描述符
+    if(NULL == (f = filealloc()) || (fd = fdalloc(f)) < 0) {
+      // 文件描述符或者文件创建失败
+      if (f) {
+        fileclose(f);
+      }
+      return -24;
+    }
+    f->type = FD_NULL;
+    f->off = 0;
+    f->ep = 0;
+    f->readable = 1;
+    f->writable = 1;
+    return fd;
   }
   flags |= O_RDWR;
 

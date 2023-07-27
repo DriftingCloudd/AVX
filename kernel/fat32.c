@@ -81,8 +81,8 @@ int fat32_init()
     printf("[fat32_init] enter!\n");
     #endif
     struct buf *b;
-    int getfat32 = 0;
     #ifdef visionfive
+    int getfat32 = 0;
     for(uint64 i = 0; i < 33554432;i++){
         b = bread(0, i);
         if (strncmp((char const*)(b->data + 82), "FAT32", 5) == 0){

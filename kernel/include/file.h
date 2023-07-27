@@ -14,7 +14,8 @@
 #define AT_FDCWD  -100
 
 struct file {
-  enum { FD_NONE, FD_PIPE, FD_ENTRY, FD_DEVICE, FD_SOCK} type;
+  //FD_NULL特指/dev/null文件
+  enum { FD_NONE, FD_PIPE, FD_ENTRY, FD_DEVICE, FD_SOCK, FD_NULL} type;
   int ref; // reference count
   char readable;
   char writable;

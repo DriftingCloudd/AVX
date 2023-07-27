@@ -390,6 +390,20 @@ static char *sysnames[] = {
   [SYS_setitimer]   "setitimer",
   [SYS_fsync]       "fsync",
   [SYS_sync]        "sync",
+  [SYS_ftruncate]   "ftruncate",
+
+  //socket syscalls
+  [SYS_socket]      "socket",
+  [SYS_bind]        "bind",
+  [SYS_listen]      "listen",
+  [SYS_accept]      "accept",
+  [SYS_connect]     "connect",
+  [SYS_sendto]      "sendto",
+  [SYS_recvfrom]    "recvfrom",
+  [SYS_getsockname] "getsockname",
+  [SYS_setsockopt]  "setsockopt",
+  [SYS_madvise]     "madvise",
+
 };
 
 void
@@ -404,7 +418,7 @@ syscall(void)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
-    // if(num != SYS_read && num != SYS_write && num != SYS_writev)
+    if(num != SYS_read && num != SYS_write && num != SYS_writev)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);

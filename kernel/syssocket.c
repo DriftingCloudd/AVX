@@ -51,7 +51,7 @@ sys_bind(void) {
         printf("sys_bind: argaddr(1, (void *)&addr) < 0\n");
         return -1;
     }
-    if (argint(2, &addrlen) < 0) {
+    if (argint(2, (int*)&addrlen) < 0) {
         printf("sys_bind: argint(2, &addrlen) < 0\n");
         return -1;
     }
@@ -69,6 +69,7 @@ sys_listen(void) {
         printf("sys_listen: argint(1, &backlog) < 0\n");
         return -1;
     }
+    // debug_print("sys_listen sockfd:%d, backlog:%d\n", sockfd, backlog);
     return do_listen(sockfd, backlog);
 }
 
@@ -85,7 +86,7 @@ sys_connect(void) {
         printf("sys_connect: argaddr(1, (void *)&addr) < 0\n");
         return -1;
     }
-    if (argint(2, &addrlen) < 0) {
+    if (argint(2, (int*)&addrlen) < 0) {
         printf("sys_connect: argint(2, &addrlen) < 0\n");
         return -1;
     }
@@ -128,7 +129,7 @@ sys_sendto(void) {
         printf("sys_sendto: argaddr(1, (void *)&buf) < 0\n");
         return -1;
     }
-    if (argint(2, &len) < 0) {
+    if (argaddr(2, &len) < 0) {
         printf("sys_sendto: argint(2, &len) < 0\n");
         return -1;
     }
@@ -140,7 +141,7 @@ sys_sendto(void) {
         printf("sys_sendto: argaddr(4, (void *)&dest_addr) < 0\n");
         return -1;
     }
-    if (argint(5, &addrlen) < 0) {
+    if (argint(5, (int*)&addrlen) < 0) {
         printf("sys_sendto: argint(5, &addrlen) < 0\n");
         return -1;
     }
@@ -163,7 +164,7 @@ sys_recvfrom(void) {
         printf("sys_recvfrom: argaddr(1, (void *)&buf) < 0\n");
         return -1;
     }
-    if (argint(2, &len) < 0) {
+    if (argaddr(2, &len) < 0) {
         printf("sys_recvfrom: argint(2, &len) < 0\n");
         return -1;
     }
@@ -225,7 +226,7 @@ sys_setsockopt(void) {
         printf("sys_setsockopt: argaddr(3, (void *)&optval) < 0\n");
         return -1;
     }
-    if (argint(4, &optlen) < 0) {
+    if (argint(4, (int*)&optlen) < 0) {
         printf("sys_setsockopt: argint(4, &optlen) < 0\n");
         return -1;
     }

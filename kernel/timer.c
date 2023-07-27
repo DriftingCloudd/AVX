@@ -11,6 +11,8 @@
 #include "include/proc.h"
 #include "include/syscall.h"
 #include "include/vm.h"
+#include "include/defs.h"
+
 extern struct proc proc[NPROC];
 
 struct spinlock tickslock;

@@ -7,15 +7,21 @@
 #include "error.h"
 
 #define PF_INET 2
-#define AF_INET PF_INET
-
-#define SOCK_STREAM    1
-#define SOCK_DGRAM     2
+// 套接字的通信域(domain)的常用宏定义
+#define AF_INET PF_INET  // IPv4 网络协议
+#define AF_INET6    10   // IPv6 网络协议
+#define AF_UNIX     1    // Unix 域套接字，用于本地进程间通信
+// 套接字的类型(type)的常用宏定义
+#define SOCK_STREAM 1    // 面向连接的流套接字，如TCP套接字
+#define SOCK_DGRAM  2    // 无连接的数据报套接字，如UDP套接字
 
 #define SOL_SOCKET      1
 
-#define IPPROTO_TCP      6
-#define IPPROTO_UDP      17
+// 套接字的协议(protocol)的常用宏定义
+#define IPPROTO_TCP 6    // TCP协议
+#define IPPROTO_UDP 17   // UDP协议
+#define IPPROTO_SCTP 132 // SCTP协议
+#define IPPROTO_ICMP 1   // ICMP协议
 
 #define SOCK_CLOEXEC   02000000
 #define SOCK_NONBLOCK  04000
@@ -24,7 +30,7 @@
 #define SO_RCVTIMEO	20
 
 #define MAX_SOCK_NUM 16
-#define MAX_WAIT_LIST 32
+#define MAX_WAIT_LIST 1024
 
 #define SOCK_CLOSED 0
 #define SOCK_LISTEN 1
