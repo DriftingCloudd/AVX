@@ -124,7 +124,7 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     if(addrlen != sizeof(struct sockaddr)) return -EINVAL;
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     int i, j;
-    printf("socket type:%p\n", curr_proc->ofile[sockfd]->sock->type);
+    // debug_print("socket type:%p\n", curr_proc->ofile[sockfd]->sock->type);
     if(sock[sock_num].type & SOCK_NONBLOCK){
         acquire(&sock_lock);
         for (i=1;i<=MAX_SOCK_NUM;i++){
