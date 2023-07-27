@@ -71,6 +71,7 @@ struct proc {
 
   // these are private to the process, so p->lock need not be held.
   thread *main_thread;         // Main thread per process
+  thread *thread_queue;        // thread_queue
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
   pagetable_t pagetable;       // User page table

@@ -279,6 +279,7 @@ found:
   p->main_thread->sz = p->sz;
   p->main_thread->clear_child_tid = p->clear_child_tid;
   p->main_thread->kstack = p->kstack;
+  p->thread_queue = p->main_thread;
   if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
     panic("allocproc: map thread trapframe failed");
   if (mappages(p->kpagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
@@ -688,6 +689,7 @@ scheduler(void)
         // printf("[scheduler]found runnable proc with pid: %d\n", p->pid);
         
         // TODO: 改进线程枚举算法
+        /*
         int i = 0;
         for (i = 0; i < THREAD_NUM; i++) {
           if (threads[i].state == t_UNUSED)
@@ -699,6 +701,28 @@ scheduler(void)
           continue; 
         // 让threads[i]成为p的主线程
         p->main_thread = &threads[i];
+        */
+        thread *t = p->thread_queue;
+        while (NULL != t) {
+          if (t->state == t_RUNNABLE || (t->state == t_TIMING && t->awakeTime < r_time() + (1LL << 35)))
+            break;
+          t = t->next_thread;
+        }
+        if (NULL == t)
+          continue;
+        if (p->thread_queue != t) {   // 放到队首，避免死线程集中在首部
+          if (NULL != t->next_thread) {
+            t->next_thread->pre_thread = t->pre_thread;
+          }
+          if (NULL != t->pre_thread) {
+            t->pre_thread->next_thread = t->next_thread;
+          }
+          t->pre_thread = NULL;
+          t->next_thread = p->thread_queue;
+          p->thread_queue->pre_thread = t;
+          p->thread_queue = t;
+        }
+        p->main_thread = t;
         copycontext(&p->context,&p->main_thread->context);
         copytrapframe(p->trapframe,p->main_thread->trapframe);
         p->main_thread->state = t_RUNNING;
@@ -1086,7 +1110,12 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   }
 
   printf("thread stack param:%p %p\n",tmp.func_point,tmp.arg_point);
-
+  
+  t->next_thread = p->thread_queue;
+  if (NULL != p->thread_queue)
+    p->thread_queue->pre_thread = t;
+  p->thread_queue = t;
+  
   copytrapframe(t->trapframe,p->trapframe);
   t->trapframe->a0 = tmp.func_point;
   t->trapframe->tp = tls;
