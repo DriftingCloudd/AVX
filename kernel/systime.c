@@ -34,7 +34,16 @@ argfd(int n, int *pfd, struct file **pf)
 
 uint64
 sys_clock_getres(void) {
-	// TODO
+	uint64 addr;
+	if (argaddr(1,&addr) < 0)
+		return -1;
+	printf("addr: %p\n",addr);
+	struct timespec2 t;
+	t.tv_sec = 0;
+	t.tv_nsec = 1;
+	if (either_copyout(1,addr,(void*)&t,sizeof(struct timespec2)) < 0)
+		return -1;
+
 	return 0;
 }
 

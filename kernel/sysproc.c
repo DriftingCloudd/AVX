@@ -209,7 +209,17 @@ sys_sched_getparam(void) {
 
 uint64
 sys_sched_getaffinity(void) {
-  // TODO
+  int pid;
+  uint64 cpuset_size;
+  uint64 addr;
+  if (argint(0,&pid) < 0 || argaddr(1,&cpuset_size) < 0 || argaddr(2,&addr) < 0) {
+    return -1;
+  }
+  //printf("%p %p %p\n",pid,cpuset_size,addr);
+  uint64 affinity = 1;
+  if (either_copyout(1,addr,(void*)&affinity,sizeof(uint64)) < 0)
+    return -1;
+
   return 0;
 }
 
