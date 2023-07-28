@@ -230,20 +230,20 @@ filewrite(struct file *f, uint64 addr, int n)
     ret = devsw[f->major].write(1, addr, n);
   } else if(f->type == FD_ENTRY){
     elock(f->ep);
-    if(addr <= MAXUVA){
-      if((ret = ewrite(f->ep, 0, addr, f->off, n)) == n){
-        f->off += ret;
-      }else{
-        ret = -1;
-      }
-    } else {
+    // if(addr <= MAXUVA){
+    //   if((ret = ewrite(f->ep, 0, addr, f->off, n)) == n){
+    //     f->off += ret;
+    //   }else{
+    //     ret = -1;
+    //   }
+    // } else {
       if (ewrite(f->ep, 1, addr, f->off, n) == n) {
         ret = n;
         f->off += n;
       } else {
         ret = -1;
       }
-    }
+    //}
     eunlock(f->ep);
   } else if(f->type == FD_NULL){
     //do nothing, just set ret
