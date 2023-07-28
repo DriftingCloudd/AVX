@@ -181,6 +181,9 @@ extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
 extern uint64 sys_setitimer();
+extern uint64 sys_sched_getscheduler();
+extern uint64 sys_sched_getparam();
+extern uint64 sys_sched_getaffinity();
 
 // socket syscalls
 extern uint64 sys_socket(void);
@@ -196,6 +199,8 @@ extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
 extern uint64 sys_getrusage();
+extern uint64 sys_sched_setscheduler();
+extern uint64 sys_clock_getres();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -300,6 +305,11 @@ static uint64 (*syscalls[])(void) = {
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
   [SYS_getrusage]   sys_getrusage,
+  [SYS_sched_getscheduler]  sys_sched_getscheduler,
+  [SYS_sched_getparam]  sys_sched_getparam,
+  [SYS_sched_getaffinity]   sys_sched_getaffinity,
+  [SYS_sched_setscheduler]  sys_sched_setscheduler,
+  [SYS_clock_getres]  sys_clock_getres,
 };
 
 static char *sysnames[] = {
@@ -403,7 +413,11 @@ static char *sysnames[] = {
   [SYS_getsockname] "getsockname",
   [SYS_setsockopt]  "setsockopt",
   [SYS_madvise]     "madvise",
-
+  [SYS_sched_getscheduler]  "sched_getscheduler",
+  [SYS_sched_getparam]  "sched_getparam",
+  [SYS_sched_getaffinity]   "sched_getaffinity",
+  [SYS_sched_setscheduler]  "sched_setscheduler",
+  [SYS_clock_getres]  "clock_getres",
 };
 
 void

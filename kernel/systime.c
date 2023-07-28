@@ -33,6 +33,12 @@ argfd(int n, int *pfd, struct file **pf)
 }
 
 uint64
+sys_clock_getres(void) {
+	// TODO
+	return 0;
+}
+
+uint64
 sys_clock_gettime(void)
 {
   uint64 tid,addr;

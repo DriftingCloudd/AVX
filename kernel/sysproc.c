@@ -195,7 +195,29 @@ sys_exit(void)
   return 0;  // not reached
 }
 
+uint64
+sys_sched_getscheduler(void) {
+  // TODO
+  return 0;
+}
 
+uint64
+sys_sched_getparam(void) {
+  // TODO
+  return 0;
+}
+
+uint64
+sys_sched_getaffinity(void) {
+  // TODO
+  return 0;
+}
+
+uint64
+sys_sched_setscheduler(void) {
+  // TODO
+  return 0;
+}
 
 uint64 sys_nanosleep(void) {
 	uint64 addr_sec, addr_usec;

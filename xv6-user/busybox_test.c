@@ -12,13 +12,24 @@ static longtest lua[];
 static longtest unixbench[];
 const char* unixben_testcode[];
 static longtest libc_bench[];
+static longtest cyclic_bench[];
 
 void test_busybox(){
 	dev(2,1,0);
 	dup(0);
 	dup(0);
 
-	int status,pid = fork();
+	int status,pid;
+  printf("111\n");
+  pid = fork();
+  if (pid == 0) {
+    exec("./cyclictest",cyclic_bench[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+  printf("%d\n",status);
+  printf("222\n");
+  pid = fork();
 	if(pid == 0){
 		exec("time-test",time_test[0].name);
 		exit(0);
@@ -203,11 +214,11 @@ void test_busybox(){
 
   printf("run cyclic_testcode.sh\n");
 
-  if((pid = fork()) == 0){
-    exec("libc-bench", libc_bench[0].name);
-    exit(0);
-  }
-  wait4(pid, &status, 0);
+  // if((pid = fork()) == 0){
+  //   exec("libc-bench", libc_bench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid, &status, 0);
 
   exit(0);
 }
@@ -583,6 +594,10 @@ UB_BINDIR=./ ./execl 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybo
 ./syscall 10 exec | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench EXEC test(lps): \"$0}'\n"
 };
 
+static longtest cyclic_bench[] = {
+  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p99","-D","1s","-q",0}},
+  {0,{0}},
+};
 
 int main(int argc, char ** argv)
 {

@@ -17,6 +17,7 @@
 #include "include/futex.h"
 extern uchar initcode[]; 
 extern int initcodesize;
+extern thread *free_thread;
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -301,6 +302,23 @@ freeproc(struct proc *p)
 
   kfree((void*)p->exec_close);
   p->trapframe = 0;
+
+  thread *t = p->thread_queue;
+  while (NULL != t) {
+    thread *tmp = t->next_thread;
+    if (NULL != t->next_thread)
+      t->next_thread->pre_thread = NULL;
+    t->state = t_UNUSED;
+    t->next_thread = free_thread;
+    if (NULL != free_thread)
+      free_thread->pre_thread = t;
+    free_thread = t;
+    kfree((void*)t->trapframe);
+    if (t->kstack != p->kstack)
+      kfree((void*)t->kstack_pa);
+    t = tmp;
+  }
+
   if (p->kpagetable) {
     kvmfree(p->kpagetable, 1);
   }
@@ -1117,7 +1135,8 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   if (copyin(p->pagetable,(char*)(&tmp),stackVa,sizeof(thread_stack_param)) < 0) {
     panic("copy in thread_stack_param failed");
   }
-
+  t->kstack_pa = (uint64)kstack_pa;
+  t->kstack = p->kstack-PGSIZE * (1 + p->thread_num * 2);
   // printf("thread stack param:%p %p\n",tmp.func_point,tmp.arg_point);
   
   t->next_thread = p->thread_queue;

@@ -35,6 +35,7 @@ typedef struct thread {
     struct trapframe *trapframe;
     context context;  // 每个进程应该有自己的context
     uint64 clear_child_tid;
+    uint64 kstack_pa;
 
     struct thread *next_thread;
     struct thread *pre_thread;

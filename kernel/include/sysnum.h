@@ -102,4 +102,11 @@
 #define SYS_mprotect    226
 #define SYS_madvise     233
 #define SYS_getrusage   165
+#define SYS_sched_getscheduler 120
+#define SYS_sched_getparam 121
+#define SYS_sched_getaffinity 123
+#define SYS_sched_setscheduler 119
+#define SYS_clock_getres    114
+
+
 #endif
