@@ -99,7 +99,6 @@ int fat32_init()
     #else
     b = bread(0, 0);
     #endif
-    printf("reach here\n");
     if (strncmp((char const*)(b->data + 82), "FAT32", 5))
         panic("not FAT32 volume");
     // fat.bpb.byts_per_sec = *(uint16 *)(b->data + 11);

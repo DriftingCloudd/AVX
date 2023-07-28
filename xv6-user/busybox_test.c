@@ -20,15 +20,15 @@ void test_busybox(){
 	dup(0);
 
 	int status,pid;
-  printf("111\n");
-  pid = fork();
-  if (pid == 0) {
-    exec("./cyclictest",cyclic_bench[0].name);
-    exit(0);
-  }
-  wait4(pid,&status,0);
-  printf("%d\n",status);
-  printf("222\n");
+  // printf("111\n");
+  // pid = fork();
+  // if (pid == 0) {
+  //   exec("./cyclictest",cyclic_bench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid,&status,0);
+  // printf("%d\n",status);
+  // printf("222\n");
   pid = fork();
 	if(pid == 0){
 		exec("time-test",time_test[0].name);
@@ -141,25 +141,25 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	// for(i = 0; libctest[i].name[1] ; i++){
-	// 	if(!libctest[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest[i].name[1] ; i++){
+		if(!libctest[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 	
-	// for(i = 0; libctest_dy[i].name[1] ; i++){
-	// 	if(!libctest_dy[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest_dy[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest_dy[i].name[1] ; i++){
+		if(!libctest_dy[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest_dy[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 
 	/**
 	* run lmbench_testcode.sh
@@ -172,41 +172,41 @@ void test_busybox(){
 	*/
 	printf("run lua_testcode.sh\n");
 
-  // for(i = 0; lua[i].name[1] ; i++){
-  //   if(!lua[i].valid)continue;
-  //   pid = fork();
-  //   if(pid==0){
-  //     exec("lua",lua[i].name);
-  //     exit(0);
-  //   }
-  //   wait4(pid, &status, 0);
-  //   if(status==0){
-  //     printf("testcase lua %s success\n",lua[i].name[1]);
-  //   }else{
-  //     printf("testcase lua %s fail\n",lua[i].name[1]);
-  //   }
-  // }
+  for(i = 0; lua[i].name[1] ; i++){
+    if(!lua[i].valid)continue;
+    pid = fork();
+    if(pid==0){
+      exec("lua",lua[i].name);
+      exit(0);
+    }
+    wait4(pid, &status, 0);
+    if(status==0){
+      printf("testcase lua %s success\n",lua[i].name[1]);
+    }else{
+      printf("testcase lua %s success\n",lua[i].name[1]);
+    }
+  }
 
   /**
   * run unixbench_testcode.sh
   */
   printf("run unixbench_testcode.sh\n");
-  // pid = fork();
-  // if(pid==0){
-  //   exec("busybox", unixbench[0].name);
-  //   exit(0);
-  // }
-  // wait4(pid, &status, 0);
-  // if((pid = fork()) == 0){
-  //   int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
-  //   write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
-  //   write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
-  //   write(fd, unixben_testcode[3], strlen(unixben_testcode[3]));
-  //   close(fd);
-  //   exec("busybox", unixbench[1].name);
-  //   exit(0);
-  // }
-	// wait4(pid, &status, 0);
+  pid = fork();
+  if(pid==0){
+    exec("busybox", unixbench[0].name);
+    exit(0);
+  }
+  wait4(pid, &status, 0);
+  if((pid = fork()) == 0){
+    int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
+    write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
+    write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
+    write(fd, unixben_testcode[3], strlen(unixben_testcode[3]));
+    close(fd);
+    exec("busybox", unixbench[1].name);
+    exit(0);
+  }
+	wait4(pid, &status, 0);
 
   printf("run netperf_testcode.sh\n");
 
@@ -214,11 +214,11 @@ void test_busybox(){
 
   printf("run cyclic_testcode.sh\n");
 
-  // if((pid = fork()) == 0){
-  //   exec("libc-bench", libc_bench[0].name);
-  //   exit(0);
-  // }
-  // wait4(pid, &status, 0);
+  if((pid = fork()) == 0){
+    exec("libc-bench", libc_bench[0].name);
+    exit(0);
+  }
+  wait4(pid, &status, 0);
 
   exit(0);
 }
@@ -452,7 +452,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_insque", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_lsearch", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_tsearch", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "setjmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "snprintf", 0}},
     
@@ -477,8 +477,8 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "swprintf", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tgmath", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "time", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_init", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_local_exec", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_init", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_local_exec", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "udiv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "ungetc", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "utime", 0}},
@@ -487,7 +487,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "daemon_failure", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dn_expand_empty", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dn_expand_ptr_0", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fflush_exit", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fflush_exit", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fgets_eof", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fgetwc_buffering", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fpclassify_invalid_ld80", 0}},
@@ -534,7 +534,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "statvfs", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "strverscmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "uselocale_0", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsncpy_read_overflow", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsstr_false_negative", 0}},

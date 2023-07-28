@@ -89,8 +89,8 @@ usertrap(void)
   }
   
   else {
-    printf("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
-    printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+    debug_print("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
+    debug_print("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     trapframedump(p->trapframe);
     p->killed = SIGTERM;
   }
@@ -253,36 +253,36 @@ int devintr(void) {
 
 void trapframedump(struct trapframe *tf)
 {
-  printf("a0: %p\t", tf->a0);
-  printf("a1: %p\t", tf->a1);
-  printf("a2: %p\t", tf->a2);
-  printf("a3: %p\n", tf->a3);
-  printf("a4: %p\t", tf->a4);
-  printf("a5: %p\t", tf->a5);
-  printf("a6: %p\t", tf->a6);
-  printf("a7: %p\n", tf->a7);
-  printf("t0: %p\t", tf->t0);
-  printf("t1: %p\t", tf->t1);
-  printf("t2: %p\t", tf->t2);
-  printf("t3: %p\n", tf->t3);
-  printf("t4: %p\t", tf->t4);
-  printf("t5: %p\t", tf->t5);
-  printf("t6: %p\t", tf->t6);
-  printf("s0: %p\n", tf->s0);
-  printf("s1: %p\t", tf->s1);
-  printf("s2: %p\t", tf->s2);
-  printf("s3: %p\t", tf->s3);
-  printf("s4: %p\n", tf->s4);
-  printf("s5: %p\t", tf->s5);
-  printf("s6: %p\t", tf->s6);
-  printf("s7: %p\t", tf->s7);
-  printf("s8: %p\n", tf->s8);
-  printf("s9: %p\t", tf->s9);
-  printf("s10: %p\t", tf->s10);
-  printf("s11: %p\t", tf->s11);
-  printf("ra: %p\n", tf->ra);
-  printf("sp: %p\t", tf->sp);
-  printf("gp: %p\t", tf->gp);
-  printf("tp: %p\t", tf->tp);
-  printf("epc: %p\n", tf->epc);
+  debug_print("a0: %p\t", tf->a0);
+  debug_print("a1: %p\t", tf->a1);
+  debug_print("a2: %p\t", tf->a2);
+  debug_print("a3: %p\n", tf->a3);
+  debug_print("a4: %p\t", tf->a4);
+  debug_print("a5: %p\t", tf->a5);
+  debug_print("a6: %p\t", tf->a6);
+  debug_print("a7: %p\n", tf->a7);
+  debug_print("t0: %p\t", tf->t0);
+  debug_print("t1: %p\t", tf->t1);
+  debug_print("t2: %p\t", tf->t2);
+  debug_print("t3: %p\n", tf->t3);
+  debug_print("t4: %p\t", tf->t4);
+  debug_print("t5: %p\t", tf->t5);
+  debug_print("t6: %p\t", tf->t6);
+  debug_print("s0: %p\n", tf->s0);
+  debug_print("s1: %p\t", tf->s1);
+  debug_print("s2: %p\t", tf->s2);
+  debug_print("s3: %p\t", tf->s3);
+  debug_print("s4: %p\n", tf->s4);
+  debug_print("s5: %p\t", tf->s5);
+  debug_print("s6: %p\t", tf->s6);
+  debug_print("s7: %p\t", tf->s7);
+  debug_print("s8: %p\n", tf->s8);
+  debug_print("s9: %p\t", tf->s9);
+  debug_print("s10: %p\t", tf->s10);
+  debug_print("s11: %p\t", tf->s11);
+  debug_print("ra: %p\n", tf->ra);
+  debug_print("sp: %p\t", tf->sp);
+  debug_print("gp: %p\t", tf->gp);
+  debug_print("tp: %p\t", tf->tp);
+  debug_print("epc: %p\n", tf->epc);
 }

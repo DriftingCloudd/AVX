@@ -23,6 +23,7 @@ int hastimer = 0;
 void timerinit() {
     initlock(&tickslock, "time");
     memset(timers, 0, sizeof(timers));
+    ticks = 0;
     hastimer = 0;
     #ifdef DEBUG
     printf("timerinit\n");
@@ -47,7 +48,7 @@ void timer_tick() {
     release(&tickslock);
     set_next_timeout();
     
-    //printf("ticks:%d\n",ticks);
+    // printf("ticks:%d\n",ticks);
     if(hastimer){
         // printf("begin timer\n");
         for(int i=0;i<NTIMERS;i++){

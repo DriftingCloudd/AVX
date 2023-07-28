@@ -18,6 +18,7 @@
 #include "include/buf.h"
 #include "include/sysinfo.h"
 #include "include/thread.h"
+#include "include/socket.h"
 #ifndef QEMU
 #include "include/sd_final.h"
 extern void _start(void);
@@ -62,7 +63,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     plicinithart();
     // sd_test();
     disk_init();
-    // test_sdcard();
+    init_socket();
     binit();         // buffer cache
     initlogbuffer();
     fileinit();      // file table
