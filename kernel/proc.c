@@ -334,7 +334,6 @@ freeproc(struct proc *p)
   p->vma = NULL;
   p->sz = 0;
   p->pid = 0;
-  p->main_thread->state = t_UNUSED;
   p->main_thread = 0;
   p->parent = 0;
   p->name[0] = 0;
