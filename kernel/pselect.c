@@ -9,6 +9,7 @@
 #include "include/file.h"
 #include "include/pipe.h"
 #include "include/pselect.h"
+#include "include/param.h"
 
 //后续可移动到util中
 

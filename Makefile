@@ -53,6 +53,7 @@ OBJS += \
   $K/SignalTrampoline.o \
   $K/thread.o \
   $K/futex.o \
+  $K/pselect.o \
 
 
 ifeq ($(platform), qemu)

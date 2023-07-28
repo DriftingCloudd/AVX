@@ -485,11 +485,6 @@ sys_getegid(void)
   return myproc() ->gid;
 }
 
-uint64
-sys_ppoll(void)
-{
-  return 0;
-}
 
 uint64
 sys_chroot(void)

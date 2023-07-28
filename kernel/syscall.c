@@ -184,6 +184,7 @@ extern uint64 sys_setitimer();
 extern uint64 sys_sched_getscheduler();
 extern uint64 sys_sched_getparam();
 extern uint64 sys_sched_getaffinity();
+extern uint64 sys_pselect6();
 
 // socket syscalls
 extern uint64 sys_socket(void);
@@ -288,6 +289,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_fsync]       sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
   [SYS_setitimer]   sys_setitimer,
+  [SYS_pselect6]    sys_pselect6,
 
   // socket syscalls
   [SYS_socket]      sys_socket,
@@ -401,6 +403,7 @@ static char *sysnames[] = {
   [SYS_fsync]       "fsync",
   [SYS_sync]        "sync",
   [SYS_ftruncate]   "ftruncate",
+  [SYS_pselect6]    "pselect6",
 
   //socket syscalls
   [SYS_socket]      "socket",
