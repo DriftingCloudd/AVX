@@ -690,21 +690,11 @@ sys_getrusage(void)
   }
   
   rs = (struct rusage){
-    .ru_utime = {p->utime},
-    .ru_stime = {p->ktime},
+    .ru_utime = get_timeval(),
+    .ru_stime = get_timeval(),
   };
 
-  switch (who)
-  {
-  case RUSAGE_SELF:
-		case RUSAGE_THREAD:
-			rs.ru_nvcsw = p->vsw;
-			rs.ru_nivcsw = p->ivsw;
-      break;
-    default:
-      break;
-  }
-  if(either_copyout(1,addr,&rs,sizeof(rs))<0){
+  if(either_copyout(1,addr,(void*)&rs,sizeof(rs))<0){
     return -1;
   }
   return 0;
