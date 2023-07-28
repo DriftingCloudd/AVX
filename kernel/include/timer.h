@@ -62,4 +62,5 @@ void timerinit();
 void set_next_timeout();
 void timer_tick();
 uint64 setitimer(int which, const struct itimerval *value, struct itimerval *ovalue);
+struct timeval get_timeval();
 #endif

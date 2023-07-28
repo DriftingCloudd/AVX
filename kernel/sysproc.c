@@ -14,6 +14,7 @@
 #include "include/futex.h"
 #include "include/mmap.h"
 #include "include/rusage.h"
+#include "include/timer.h"
 
 extern int exec(char *path, char **argv, char ** env);
 

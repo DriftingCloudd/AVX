@@ -124,3 +124,11 @@ uint64 setitimer(int which, const struct itimerval *value, struct itimerval *ova
     }
     return 0;
 }
+
+struct timeval get_timeval(){
+   uint64 time = r_time();
+   return (struct timeval){
+     .tv_sec = time / (CLK_FREQ),
+     .tv_usec = time / (CLK_FREQ / 1000),
+   };
+}
