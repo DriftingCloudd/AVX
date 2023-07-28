@@ -47,7 +47,10 @@ struct vma* alloc_vma(struct proc *p,enum segtype type,uint64 addr, uint64 sz,in
             break;
         else if(start >= find_vma->end)
             find_vma = find_vma->next;
-        else {
+        else if (start >= find_vma->addr && end <= find_vma->end) {
+            return find_vma;
+        }
+        else {  
             printf("vma address overflow\n");
             return NULL;
         }
