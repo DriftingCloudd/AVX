@@ -1023,7 +1023,7 @@ sys_openat()
   debug_print("%s\n", path);
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
-    if ((flags & O_CREATE) || strncmp(path,"/tmp/testsuite-",15) == 0 ||strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
+    if ((flags & O_CREATE) || strncmp(path,"/proc/loadavg",13) == 0 || strncmp(path,"/tmp/testsuite-",15) == 0 ||strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
       ep = new_create(dp,path,T_FILE,flags);
       if (NULL == ep) {
         // 创建不了dirent

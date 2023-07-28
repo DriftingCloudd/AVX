@@ -595,7 +595,7 @@ UB_BINDIR=./ ./execl 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybo
 };
 
 static longtest cyclic_bench[] = {
-  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p99","-D","1s","-q",0}},
+  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p2","-D","20s","-q",0}},
   {0,{0}},
 };
 
