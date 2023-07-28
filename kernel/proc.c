@@ -824,7 +824,7 @@ yield(void)
 void
 forkret(void)
 {
-  debug_print("run in forkret\n");
+  
   static int first = 1;
 
   // Still holding p->lock from scheduler.

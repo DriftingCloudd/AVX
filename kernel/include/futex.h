@@ -21,7 +21,7 @@
 #define FUTEX_LOCK_PI2		13
 
 #define FUTEX_PRIVATE_FLAG 128
-#define FUTEX_COUNT 64
+#define FUTEX_COUNT 1024
 
 void futexWait(uint64 addr, thread* th, TimeSpec2* ts);
 void futexWake(uint64 addr, int n);

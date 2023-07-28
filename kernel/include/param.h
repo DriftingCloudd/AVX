@@ -17,9 +17,10 @@
 #ifdef QEMU
 #define CLK_FREQ     10000000
 #else
-#define CLK_FREQ     1.5 * 1000000000
+#define CLK_FREQ     4000000
 #endif
 
 //#define INTERVAL     (390000000 / 200) // timer interrupt interval
-#define INTERVAL     CLK_FREQ / 5 // timer interrupt interval
+#define ticks_per_second 5
+#define INTERVAL     CLK_FREQ / ticks_per_second // timer interrupt interval
 #endif

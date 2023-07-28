@@ -34,7 +34,7 @@ acquire(struct spinlock *lk)
   // }
   if(holding(lk))
     panic("acquire");
-
+  // printstring("acquire:"); printstring(lk->name); printstring("\n");
   // On RISC-V, sync_lock_test_and_set turns into an atomic swap:
   //   a5 = 1
   //   s1 = &lk->locked

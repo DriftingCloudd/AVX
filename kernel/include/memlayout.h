@@ -76,7 +76,12 @@
 
 // #define PHYSTOP                 0x240000000
 // #define PHYSTOP                 0x80a00000
+//128M  0x800_0000  4G  0x10000_0000
+#ifdef QEMU
 #define PHYSTOP                 0x88a00000
+#else
+#define PHYSTOP                 0x100000000
+#endif
 
 // map the trampoline page to the highest address,
 // in both user and kernel space.
