@@ -513,9 +513,11 @@ uint64
 sys_set_tid_address(void)
 {
   uint64 address;
-  argaddr(0,&address);
-  myproc()->clear_child_tid = address;
-  int tid = 1;
+  if (argaddr(0,&address) < 0)
+    return -1;
+  struct proc *p = myproc();
+  p->main_thread->clear_child_tid = address;
+  int tid = p->main_thread->tid;
   copyout(myproc()->pagetable, address, (char*) &tid, sizeof(int));
   
   return tid;
@@ -621,22 +623,8 @@ uint64
 sys_gettid(void)
 {
   struct proc *p = myproc();
-  uint64 addr = p->clear_child_tid;
-  int tid;
-  if (addr)
-  {
-    if (either_copyin(&tid, 1, addr, sizeof(tid)) < 0)
-    {
-      return -1;
-    }
-    return tid;
-  }
-  else
-  {
-    return p->pid;
-  }
   
-  
+  return p->main_thread->tid;
 }
 
 

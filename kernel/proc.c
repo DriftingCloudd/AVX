@@ -249,6 +249,7 @@ found:
   p->vsw = 0;
   p->ivsw = 0;
   p->thread_num = 0;
+  p->char_count = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){

@@ -34,8 +34,8 @@ typedef struct thread {
     uint64 sz;   // 复制自进程的sz
     struct trapframe *trapframe;
     context context;  // 每个进程应该有自己的context
-    uint64 clear_child_tid;
     uint64 kstack_pa;
+    uint64 clear_child_tid;
 
     struct thread *next_thread;
     struct thread *pre_thread;
