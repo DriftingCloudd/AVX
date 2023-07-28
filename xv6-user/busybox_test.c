@@ -37,21 +37,21 @@ void test_busybox(){
 	wait4(pid, &status, 0);
 	printf("run busybox_testcode.sh\n");
 	int i;
-	// for(i = 0; busybox[i].name[1] ; i++){
-	// 	if(!busybox[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("busybox",busybox[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// 	if(status==0){
-	// 		printf("testcase busybox %d success\n",i);
-	// 	}else{
-	// 		printf("testcase busybox %d success\n",i);
-	// 		// printf("testcase busybox %d fail\n",i);
-	// 	}
-	// }
+	for(i = 0; busybox[i].name[1] ; i++){
+		if(!busybox[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("busybox",busybox[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+		if(status==0){
+			printf("testcase busybox %d success\n",i);
+		}else{
+			printf("testcase busybox %d success\n",i);
+			// printf("testcase busybox %d fail\n",i);
+		}
+	}
 		// pid = fork();
 		// if(pid==0){
 		// 	exec("busybox",busybox[21].name);
