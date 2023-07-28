@@ -136,6 +136,7 @@ void            userinit(void);
 int             wait(uint64);
 void            wakeup(void*);
 void            yield(void);
+void            exit_yield(void);
 void            t_yield(void);
 int             either_copyout(int user_dst, uint64 dst, void *src, uint64 len);
 int             either_copyin(void *dst, int user_src, uint64 src, uint64 len);
@@ -146,5 +147,6 @@ int             wait4pid(int pid,uint64 addr,int options);
 uint64            sys_yield();
 uint64          clone(uint64 new_stack, uint64 new_fn);
 uint64          thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid);
+void            exit_sched(void);
 
 #endif

@@ -36,6 +36,7 @@ typedef struct thread {
     context context;  // 每个进程应该有自己的context
     uint64 kstack_pa;
     uint64 clear_child_tid;
+    int xstate;     // 线程退出的状态
 
     struct thread *next_thread;
     struct thread *pre_thread;
@@ -45,5 +46,7 @@ typedef struct thread {
 
 void threadInit();
 thread *allocNewThread();
+void thread_free(thread *t);
+void thread_destroy(thread *t);
 
 #endif

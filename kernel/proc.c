@@ -281,7 +281,6 @@ found:
   p->thread_num++;
   p->main_thread->p = p;
   p->main_thread->sz = p->sz;
-  p->main_thread->clear_child_tid = p->clear_child_tid;
   p->main_thread->kstack = p->kstack;
   p->thread_queue = p->main_thread;
   if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
@@ -303,10 +302,12 @@ freeproc(struct proc *p)
 
   kfree((void*)p->exec_close);
   p->trapframe = 0;
-
+  /*
   thread *t = p->thread_queue;
   while (NULL != t) {
     thread *tmp = t->next_thread;
+    if (t_UNUSED == t)  // 这个线程已经被free掉了
+      t = tmp;
     if (NULL != t->next_thread)
       t->next_thread->pre_thread = NULL;
     t->state = t_UNUSED;
@@ -319,6 +320,7 @@ freeproc(struct proc *p)
       kfree((void*)t->kstack_pa);
     t = tmp;
   }
+  */
 
   if (p->kpagetable) {
     kvmfree(p->kpagetable, 1);
@@ -328,7 +330,6 @@ freeproc(struct proc *p)
     free_vma_list(p);
     proc_freepagetable(p->pagetable, p->sz);
   }
-  // TODO: free threads
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
@@ -565,16 +566,9 @@ reparent(struct proc *p)
   }
 }
 
-// Exit the current process.  Does not return.
-// An exited process remains in the zombie state
-// until its parent calls wait().
-void
-exit(int status)
-{
-  struct proc *p = myproc();
-
+void exitproc(struct proc *p){
   if(p == initproc)
-    panic("init exiting");
+  panic("init exiting");
 
   // Close all open files.
   for(int fd = 0; fd < NOFILE; fd++){
@@ -623,15 +617,22 @@ exit(int status)
     original_parent->state = RUNNABLE;
   }
 
-  p->xstate = status;
   p->state = ZOMBIE;
-  p->main_thread->state = t_ZOMBIE;
 
   release(&original_parent->lock);
+  
+}
 
-  // Jump into the scheduler, never to return.
-  sched();
-  panic("zombie exit");
+// Exit the current process.  Does not return.
+// An exited process remains in the zombie state
+// until its parent calls wait().
+void
+exit(int status)
+{
+  struct proc *p = myproc();
+  thread *t = p->main_thread;
+  t->xstate = status;
+  thread_destroy(t);
 }
 
 // Wait for a child process to exit and return its pid.
@@ -760,7 +761,8 @@ scheduler(void)
         w_satp(MAKE_SATP(p->kpagetable));
         sfence_vma();
         swtch(&c->context, &p->context);
-        copycontext(&p->main_thread->context,&p->context);
+        if (NULL != p->main_thread)  // 如果是线程退出引发的调度，不用拷贝
+          copycontext(&p->main_thread->context,&p->context);
         w_satp(MAKE_SATP(kernel_pagetable));
         sfence_vma();
         // Process is done running for now.
@@ -776,6 +778,46 @@ scheduler(void)
       asm volatile("wfi");
     }
   }
+}
+
+// 当主线程退出的时候进行的Yield,这个时候p的main_thread应该设置为NULL
+void
+exit_yield(void)
+{
+  struct proc *p = myproc();
+  acquire(&p->lock);
+  p->state = RUNNABLE;
+  p->main_thread = NULL;
+  int intena;
+  if(mycpu()->noff != 1){
+    printf("noff:%d\n", mycpu()->noff);
+    panic("exit sched locks");
+  }
+  if(intr_get())
+    panic("exit sched interruptible");
+  intena = mycpu()->intena;
+  swtch(&p->context, &mycpu()->context);
+  mycpu()->intena = intena;
+  release(&p->lock);
+}
+
+void
+exit_sched(void)
+{
+  int intena;
+  struct proc *p = myproc();
+  p->main_thread = NULL;
+  if(!holding(&p->lock))
+    panic("sched p->lock");
+  if(mycpu()->noff != 1){
+    printf("noff:%d\n", mycpu()->noff);
+    panic("sched locks");
+  }
+  if(intr_get())
+    panic("sched interruptible");
+  intena = mycpu()->intena;
+  swtch(&p->context, &mycpu()->context);
+  mycpu()->intena = intena;
 }
 
 // Switch to scheduler.  Must hold only p->lock
