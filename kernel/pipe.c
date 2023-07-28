@@ -122,3 +122,28 @@ piperead(struct pipe *pi, int user, uint64 addr, int n)
   release(&pi->lock);
   return i;
 }
+
+int pipe_full(struct pipe *pi){
+  int ans = 0;
+  acquire(&pi->lock);
+    // int ans = __pipe_full(pi);
+    if (pi->nwrite == pi->nread + PIPESIZE)
+    {
+      ans = 1;
+    }
+    
+    release(&pi->lock);
+    return ans;
+}
+
+int pipe_empty(struct pipe *pi) {
+    int ans = 0;
+    acquire(&pi->lock);
+    // int ans = __pipe_empty(pi);
+    if (pi->nread == pi->nwrite)
+    {
+      ans = 1;
+    }
+    release(&pi->lock);
+    return ans;
+}

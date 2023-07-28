@@ -20,5 +20,7 @@ int pipealloc(struct file **f0, struct file **f1);
 void pipeclose(struct pipe *pi, int writable);
 int pipewrite(struct pipe *pi, int user, uint64 addr, int n);
 int piperead(struct pipe *pi, int user, uint64 addr, int n);
+int pipe_full(struct pipe *pi);
+int pipe_empty(struct pipe *pi);
 
 #endif
