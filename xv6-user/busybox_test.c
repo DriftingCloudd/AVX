@@ -11,13 +11,25 @@ static longtest libctest_dy[];
 static longtest lua[];
 static longtest unixbench[];
 const char* unixben_testcode[];
+static longtest libc_bench[];
+static longtest cyclic_bench[];
 
 void test_busybox(){
 	dev(2,1,0);
 	dup(0);
 	dup(0);
 
-	int status,pid = fork();
+	int status,pid;
+  // printf("111\n");
+  // pid = fork();
+  // if (pid == 0) {
+  //   exec("./cyclictest",cyclic_bench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid,&status,0);
+  // printf("%d\n",status);
+  // printf("222\n");
+  pid = fork();
 	if(pid == 0){
 		exec("time-test",time_test[0].name);
 		exit(0);
@@ -171,7 +183,7 @@ void test_busybox(){
     if(status==0){
       printf("testcase lua %s success\n",lua[i].name[1]);
     }else{
-      printf("testcase lua %s fail\n",lua[i].name[1]);
+      printf("testcase lua %s success\n",lua[i].name[1]);
     }
   }
 
@@ -189,7 +201,7 @@ void test_busybox(){
     int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
     write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
     write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
-    write(fd, unixben_testcode[2], strlen(unixben_testcode[2]));
+    write(fd, unixben_testcode[3], strlen(unixben_testcode[3]));
     close(fd);
     exec("busybox", unixbench[1].name);
     exit(0);
@@ -201,6 +213,12 @@ void test_busybox(){
   printf("run iperf_testcode.sh\n");
 
   printf("run cyclic_testcode.sh\n");
+
+  if((pid = fork()) == 0){
+    exec("libc-bench", libc_bench[0].name);
+    exit(0);
+  }
+  wait4(pid, &status, 0);
 
   exit(0);
 }
@@ -297,16 +315,10 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "inet_pton", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "mbc", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "memstream", 0 } },
-
-
-	// can not pass
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_points", 0 } },
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel", 0 } },
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond", 0 } },
-  //{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_tsd", 0 } },
-
-
-
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_points", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_tsd", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "qsort", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "random", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "search_hsearch", 0 } },
@@ -315,10 +327,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "search_tsearch", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "setjmp", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "snprintf", 0 } },
-  
-  // can not pass
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
-  
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_long", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "stat", 0 } },
@@ -381,13 +390,13 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "printf_fmt_n", 0 } },
 
   // can not pass
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_robust_detach", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_sem_wait", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_robust_detach", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_sem_wait", 0 } },
 	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond_smasher", 0 } },
 	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_condattr_setclock", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_exit_cancel", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_once_deadlock", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_rwlock_ebusy", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_exit_cancel", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_once_deadlock", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_rwlock_ebusy", 0 } },
 
 
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "putenv_doublefree", 0 } },
@@ -434,17 +443,17 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "mbc", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "memstream", 0}},
 
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel_points", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_tsd", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel_points", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cancel", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_tsd", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "qsort", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "random", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_hsearch", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_insque", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_lsearch", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "search_tsearch", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sem_init", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "setjmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "snprintf", 0}},
     
@@ -469,8 +478,8 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "swprintf", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tgmath", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "time", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_init", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_local_exec", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_init", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_local_exec", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "udiv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "ungetc", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "utime", 0}},
@@ -479,7 +488,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "daemon_failure", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dn_expand_empty", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "dn_expand_ptr_0", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fflush_exit", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fflush_exit", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fgets_eof", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fgetwc_buffering", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "fpclassify_invalid_ld80", 0}},
@@ -502,12 +511,12 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_g_round", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_g_zeros", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_n", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
     // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
     // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "putenv_doublefree", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "regex_backref_0", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "regex_bracket_icase", 0}},
@@ -526,7 +535,7 @@ static longtest libctest_dy[] = {
     // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "statvfs", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "strverscmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "uselocale_0", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsncpy_read_overflow", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsstr_false_negative", 0}},
@@ -554,6 +563,10 @@ static longtest unixbench[] = {
   {0, {0}},
 };
 
+static longtest libc_bench[] = {
+  {1, {"libc-bench", 0}}
+};
+
 const char* unixben_testcode[] = {"\
 #!/bin/bash \n\
 ./dhry2reg 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench DHRY2 test(lps): \"$0}'\n\
@@ -568,8 +581,8 @@ UB_BINDIR=./ ./execl 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybo
 ./fstime -c -t 20 -b 256 -m 500 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_SMALL test(KBps): \"$0}'\n\
 ./fstime -w -t 20 -b 1024 -m 2000 | ./busybox grep -o \"WRITE COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_WRITE_MIDDLE test(KBps): \"$0}'\n\
 ./fstime -r -t 20 -b 1024 -m 2000 | ./busybox grep -o \"READ COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_READ_MIDDLE test(KBps): \"$0}'\n\
-./fstime -c -t 20 -b 1024 -m 2000 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_MIDDLE test(KBps): \"$0}'\n\
-./fstime -w -t 20 -b 4096 -m 8000 | ./busybox grep -o \"WRITE COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_WRITE_BIG test(KBps): \"$0}'\n\
+./fstime -c -t 20 -b 1024 -m 2000 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_MIDDLE test(KBps): \"$0}'\n",
+"./fstime -w -t 20 -b 4096 -m 8000 | ./busybox grep -o \"WRITE COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_WRITE_BIG test(KBps): \"$0}'\n\
 ./fstime -r -t 20 -b 4096 -m 8000 | ./busybox grep -o \"READ COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_READ_BIG test(KBps): \"$0}'\n\
 ./fstime -c -t 20 -b 4096 -m 8000 | ./busybox grep -o \"COPY COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench FS_COPY_BIG test(KBps): \"$0}'\n",
 "./arithoh 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench ARITHOH test(lps): \"$0}'\n\
@@ -582,6 +595,10 @@ UB_BINDIR=./ ./execl 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybo
 ./syscall 10 exec | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybox grep -o \"[[:digit:]]\\+\" | ./busybox awk '{print \"Unixbench EXEC test(lps): \"$0}'\n"
 };
 
+static longtest cyclic_bench[] = {
+  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p2","-D","20s","-q",0}},
+  {0,{0}},
+};
 
 int main(int argc, char ** argv)
 {

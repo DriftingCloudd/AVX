@@ -451,7 +451,7 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 			}
 			SD_IRQHandler(SDMMC);
 		}
-		printf("tt: %d\n", tt);
+		// printf("tt: %d\n", tt);
 	}
 	
 	return 0;

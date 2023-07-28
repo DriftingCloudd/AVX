@@ -17,6 +17,8 @@
 #include "include/disk.h"
 #include "include/buf.h"
 #include "include/sysinfo.h"
+#include "include/thread.h"
+#include "include/socket.h"
 #ifndef QEMU
 #include "include/sd_final.h"
 extern void _start(void);
@@ -56,12 +58,13 @@ main(unsigned long hartid, unsigned long dtb_pa)
     kvminithart();   // turn on paging
     timerinit();     // init a lock for timer
     trapinithart();  // install kernel trap vector, including interrupt handler
+    threadInit();  
     procinit();
     plicinit();
     plicinithart();
     // sd_test();
     disk_init();
-    // test_sdcard();
+    init_socket();
     binit();         // buffer cache
     initlogbuffer();
     fileinit();      // file table

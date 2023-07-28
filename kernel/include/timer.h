@@ -3,6 +3,7 @@
 
 #include "types.h"
 #include "spinlock.h"
+#include "param.h"
 
 #define ITIMER_REAL 0
 #define ITIMER_VIRTUAL 1
@@ -48,8 +49,18 @@ typedef struct timer{
     int ticks;
 }timer;
 
+static inline uint64 convert_from_timespec2(const struct timespec2 *ts)
+{
+	uint64 time = ts->tv_sec * CLK_FREQ
+					+ ts->tv_nsec * (CLK_FREQ / 1000 / 100) / 10 / 1000;
+	return time;
+}
+
+typedef struct timespec2 TimeSpec2;
+
 void timerinit();
 void set_next_timeout();
 void timer_tick();
 uint64 setitimer(int which, const struct itimerval *value, struct itimerval *ovalue);
+struct timeval get_timeval();
 #endif

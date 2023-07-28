@@ -76,8 +76,12 @@
 
 // #define PHYSTOP                 0x240000000
 // #define PHYSTOP                 0x80a00000
-//128M  0x800_0000
+//128M  0x800_0000  4G  0x10000_0000
+#ifdef QEMU
 #define PHYSTOP                 0x86a00000
+#else
+#define PHYSTOP                 0x100000000
+#endif
 
 // map the trampoline page to the highest address,
 // in both user and kernel space.
@@ -103,5 +107,7 @@
 #define MAXUVA                  0x80000000L
 #define USER_STACK_BOTTOM (MAXUVA - (2*PGSIZE))
 #define USER_MMAP_START (USER_STACK_BOTTOM - 0x10000000)
+
+#define KERNEL_PROCESS_SP_TOP (1UL << 36)
 
 #endif

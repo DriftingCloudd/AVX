@@ -23,6 +23,7 @@ int hastimer = 0;
 void timerinit() {
     initlock(&tickslock, "time");
     memset(timers, 0, sizeof(timers));
+    ticks = 0;
     hastimer = 0;
     #ifdef DEBUG
     printf("timerinit\n");
@@ -47,7 +48,7 @@ void timer_tick() {
     release(&tickslock);
     set_next_timeout();
     
-    //printf("ticks:%d\n",ticks);
+    // printf("ticks:%d\n",ticks);
     if(hastimer){
         // printf("begin timer\n");
         for(int i=0;i<NTIMERS;i++){
@@ -123,4 +124,12 @@ uint64 setitimer(int which, const struct itimerval *value, struct itimerval *ova
         hastimer = 1;
     }
     return 0;
+}
+
+struct timeval get_timeval(){
+   uint64 time = r_time();
+   return (struct timeval){
+     .tv_sec = time / (CLK_FREQ),
+     .tv_usec = time / (CLK_FREQ / 1000),
+   };
 }

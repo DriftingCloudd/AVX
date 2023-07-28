@@ -2,7 +2,7 @@
 #define __SYSNUM_H
 
 // System call numbers
-#define SYS_fork         1
+#define SYS_fork         300
 #define SYS_exit        93
 #define SYS_exit_group  94
 #define SYS_wait         3
@@ -102,4 +102,11 @@
 #define SYS_mprotect    226
 #define SYS_madvise     233
 #define SYS_getrusage   165
+#define SYS_sched_getscheduler 120
+#define SYS_sched_getparam 121
+#define SYS_sched_getaffinity 123
+#define SYS_sched_setscheduler 119
+#define SYS_clock_getres    114
+#define SYS_pselect6    72
+
 #endif

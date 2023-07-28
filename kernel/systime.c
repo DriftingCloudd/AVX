@@ -33,6 +33,21 @@ argfd(int n, int *pfd, struct file **pf)
 }
 
 uint64
+sys_clock_getres(void) {
+	uint64 addr;
+	if (argaddr(1,&addr) < 0)
+		return -1;
+	printf("addr: %p\n",addr);
+	struct timespec2 t;
+	t.tv_sec = 0;
+	t.tv_nsec = 1;
+	if (either_copyout(1,addr,(void*)&t,sizeof(struct timespec2)) < 0)
+		return -1;
+
+	return 0;
+}
+
+uint64
 sys_clock_gettime(void)
 {
   uint64 tid,addr;
@@ -46,7 +61,7 @@ sys_clock_gettime(void)
   if (tid == 0)
   {
     t.tv_sec = ticks / CLK_FREQ;
-    t.tv_nsec = ticks * 1000000000 / CLK_FREQ;
+    t.tv_nsec = (ticks % CLK_FREQ ) * 1000000000 / CLK_FREQ;
 	debug_print("t.tv_sec: %p\n", t.tv_sec);
 	debug_print("t.tv_nsec: %p\n", t.tv_nsec);
   }
@@ -54,6 +69,20 @@ sys_clock_gettime(void)
     return -1;
 
   return 0;
+}
+
+uint64
+sys_gettimeofday(void)
+{
+  uint64 tt;
+  if (argaddr(0, &tt) < 0) 
+		return -1;
+  uint64 t = r_time();
+  TimeSpec ts;
+  ts.second = t / CLK_FREQ;
+  ts.microSecond = (t % CLK_FREQ ) * 1000000 / CLK_FREQ;
+  // printf("second: %d, microSecond: %d\n", ts.second, ts.microSecond);
+  return copyout2(tt, (char*) &ts, sizeof(TimeSpec));
 }
 
 //todo

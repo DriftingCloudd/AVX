@@ -51,6 +51,9 @@ OBJS += \
   $K/socket.o \
   $K/syssocket.o \
   $K/SignalTrampoline.o \
+  $K/thread.o \
+  $K/futex.o \
+  $K/pselect.o \
 
 
 ifeq ($(platform), qemu)
@@ -154,7 +157,7 @@ all:
 
 qemu-run:
 	@make build platform=qemu mode=release
-	@make fs
+#	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
 $K/bin.S:$U/initcode $U/init-for-test

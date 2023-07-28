@@ -16,7 +16,7 @@ uint64 mmap(uint64 start,uint64 len,int prot,int flags,int fd,long int offset)
     if (offset < 0) {
         return -1;
     }
-    int perm = PTE_U | PTE_A | PTE_D;
+    int perm = PTE_U | PTE_A | PTE_D | PTE_R | PTE_W | PTE_X;
 
     if(prot & PROT_READ)
         perm |= PTE_R;
@@ -29,7 +29,8 @@ uint64 mmap(uint64 start,uint64 len,int prot,int flags,int fd,long int offset)
     if(fd != -1 && f == NULL)
         return -1;
     struct vma *vma = alloc_mmap_vma(p, flags, start, len, perm, fd, offset);
-    start = vma->addr;
+    if (!(flags & MAP_FIXED))
+        start = vma->addr;
     if (NULL == vma) {
         return -1;
     }

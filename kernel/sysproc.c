@@ -14,6 +14,7 @@
 #include "include/futex.h"
 #include "include/mmap.h"
 #include "include/rusage.h"
+#include "include/timer.h"
 
 extern int exec(char *path, char **argv, char ** env);
 
@@ -44,7 +45,10 @@ sys_clone(void)
   if(new_stack == 0){
     return fork();
   }
-  return clone(new_stack, new_fn);
+  if (new_fn & CLONE_VM)
+    return thread_clone(new_stack,ptid,tls,ctid);
+  else
+    return clone(new_stack, new_fn);
 }
 
 uint64
@@ -192,7 +196,39 @@ sys_exit(void)
   return 0;  // not reached
 }
 
+uint64
+sys_sched_getscheduler(void) {
+  // TODO
+  return 0;
+}
 
+uint64
+sys_sched_getparam(void) {
+  // TODO
+  return 0;
+}
+
+uint64
+sys_sched_getaffinity(void) {
+  int pid;
+  uint64 cpuset_size;
+  uint64 addr;
+  if (argint(0,&pid) < 0 || argaddr(1,&cpuset_size) < 0 || argaddr(2,&addr) < 0) {
+    return -1;
+  }
+  //printf("%p %p %p\n",pid,cpuset_size,addr);
+  uint64 affinity = 1;
+  if (either_copyout(1,addr,(void*)&affinity,sizeof(uint64)) < 0)
+    return -1;
+
+  return 0;
+}
+
+uint64
+sys_sched_setscheduler(void) {
+  // TODO
+  return 0;
+}
 
 uint64 sys_nanosleep(void) {
 	uint64 addr_sec, addr_usec;
@@ -320,6 +356,7 @@ sys_sleep(void)
   
   if(argint(0, &n) < 0)
     return -1;
+  n *= ticks_per_second;
   acquire(&tickslock);
   ticks0 = ticks;
   while(ticks - ticks0 < n){
@@ -379,19 +416,6 @@ sys_trace(void)
   return 0;
 }
 
-uint64
-sys_gettimeofday(void)
-{
-  uint64 tt;
-  if (argaddr(0, &tt) < 0) 
-		return -1;
-  uint64 t = r_time();
-  TimeSpec ts;
-  ts.second = t / 1000000;
-  ts.microSecond = t % 1000000;
-  // printf("second: %d, microSecond: %d\n", ts.second, ts.microSecond);
-  return copyout2(tt, (char*) &ts, sizeof(TimeSpec));
-}
 
 uint64
 sys_getuid(void)
@@ -460,11 +484,6 @@ sys_getegid(void)
   return myproc() ->gid;
 }
 
-uint64
-sys_ppoll(void)
-{
-  return 0;
-}
 
 uint64
 sys_chroot(void)
@@ -551,43 +570,38 @@ sys_uname(void)
 //                    uint32_t *uaddr2, uint32_t val3
 uint64 sys_futex(void)
 {
-  // int futex_op, val, val3, userVal;
-  
-  // uint64 uaddr, timeout, uaddr2;
-  // struct proc *p = myproc();
-  // TimeSpec t;
-  // if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
-	// 	return -1;
-  // futex_op &= (FUTEX_PRIVATE_FLAG - 1);
-  // switch (futex_op)
-  // {
-  //       case FUTEX_WAIT:
-  //           copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
-  //           if (timeout) {
-  //               if (copyin(p->pagetable, (char*)&t, timeout, sizeof(struct TimeSpec)) < 0) {
-  //                   panic("copy time error!\n");
-  //               }
-  //           }
-  //           // printf("val: %d\n", userVal);
-  //           if (userVal != val) {
-  //               return -1;
-  //           }
-  //           // TODO
-  //           // futexWait(uaddr, myThread(), timeout ? &t : 0);
-  //           break;
-  //       case FUTEX_WAKE:
-  //           // printf("val: %d\n", val);
-  //           // TODO
-  //           // futexWake(uaddr, val);
-  //           break;
-  //       case FUTEX_REQUEUE:
-  //           // printf("val: %d\n", val);
-  //           // TODO
-  //           // futexRequeue(uaddr, val, uaddr2);
-  //           break;
-  //       default:
-  //           panic("Futex type not support!\n");
-  // }
+  int futex_op, val, val3, userVal;
+  uint64 uaddr, timeout, uaddr2;
+  struct proc *p = myproc();
+  TimeSpec2 t;
+  if (argaddr(0, &uaddr) < 0 || argint(1, &futex_op) < 0 || argint(2, &val) < 0 || argaddr(3, &timeout) < 0 || argaddr(4, &uaddr2) || argint(5, &val3)) 
+		return -1;
+  futex_op &= (FUTEX_PRIVATE_FLAG - 1);
+  switch (futex_op)
+  {
+        case FUTEX_WAIT:
+            copyin(p->pagetable, (char*)&userVal, uaddr, sizeof(int));
+            if (timeout) {
+                if (copyin(p->pagetable, (char*)&t, timeout, sizeof(TimeSpec2)) < 0) {
+                    panic("copy time error!\n");
+                }
+            }
+            // printf("val: %d\n", userVal);
+            if (userVal != val) {
+                return -1;
+            }
+
+            futexWait(uaddr,myproc()->main_thread, timeout ? &t : 0);
+            break;
+        case FUTEX_WAKE:
+            futexWake(uaddr, val);
+            break;
+        case FUTEX_REQUEUE:
+            futexRequeue(uaddr, val, uaddr2);
+            break;
+        default:
+            panic("Futex type not support!\n");
+  }
   return 0;
 };
 
@@ -675,21 +689,11 @@ sys_getrusage(void)
   }
   
   rs = (struct rusage){
-    .ru_utime = {p->utime},
-    .ru_stime = {p->ktime},
+    .ru_utime = get_timeval(),
+    .ru_stime = get_timeval(),
   };
 
-  switch (who)
-  {
-  case RUSAGE_SELF:
-		case RUSAGE_THREAD:
-			rs.ru_nvcsw = p->vsw;
-			rs.ru_nivcsw = p->ivsw;
-      break;
-    default:
-      break;
-  }
-  if(either_copyout(1,addr,&rs,sizeof(rs))<0){
+  if(either_copyout(1,addr,(void*)&rs,sizeof(rs))<0){
     return -1;
   }
   return 0;

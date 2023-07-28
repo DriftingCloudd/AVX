@@ -181,6 +181,10 @@ extern uint64 sys_rt_sigtimedwait();
 extern uint64 sys_prlimit64();
 extern uint64 sys_statfs();
 extern uint64 sys_setitimer();
+extern uint64 sys_sched_getscheduler();
+extern uint64 sys_sched_getparam();
+extern uint64 sys_sched_getaffinity();
+extern uint64 sys_pselect6();
 
 // socket syscalls
 extern uint64 sys_socket(void);
@@ -196,6 +200,8 @@ extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
 extern uint64 sys_getrusage();
+extern uint64 sys_sched_setscheduler();
+extern uint64 sys_clock_getres();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -283,6 +289,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_fsync]       sys_fsync,
   [SYS_ftruncate]   sys_ftruncate,
   [SYS_setitimer]   sys_setitimer,
+  [SYS_pselect6]    sys_pselect6,
 
   // socket syscalls
   [SYS_socket]      sys_socket,
@@ -300,6 +307,11 @@ static uint64 (*syscalls[])(void) = {
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
   [SYS_getrusage]   sys_getrusage,
+  [SYS_sched_getscheduler]  sys_sched_getscheduler,
+  [SYS_sched_getparam]  sys_sched_getparam,
+  [SYS_sched_getaffinity]   sys_sched_getaffinity,
+  [SYS_sched_setscheduler]  sys_sched_setscheduler,
+  [SYS_clock_getres]  sys_clock_getres,
 };
 
 static char *sysnames[] = {
@@ -391,6 +403,7 @@ static char *sysnames[] = {
   [SYS_fsync]       "fsync",
   [SYS_sync]        "sync",
   [SYS_ftruncate]   "ftruncate",
+  [SYS_pselect6]    "pselect6",
 
   //socket syscalls
   [SYS_socket]      "socket",
@@ -403,7 +416,11 @@ static char *sysnames[] = {
   [SYS_getsockname] "getsockname",
   [SYS_setsockopt]  "setsockopt",
   [SYS_madvise]     "madvise",
-
+  [SYS_sched_getscheduler]  "sched_getscheduler",
+  [SYS_sched_getparam]  "sched_getparam",
+  [SYS_sched_getaffinity]   "sched_getaffinity",
+  [SYS_sched_setscheduler]  "sched_setscheduler",
+  [SYS_clock_getres]  "clock_getres",
 };
 
 void
@@ -414,7 +431,7 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    if(num != 64 && num != 63)
+    if(num != 64 && num != 63 && num != SYS_writev)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace
