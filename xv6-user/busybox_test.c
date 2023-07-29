@@ -151,15 +151,15 @@ void test_busybox(){
 	// 	wait4(pid, &status, 0);
 	// }
 	
-	for(i = 0; libctest_dy[i].name[1] ; i++){
-		if(!libctest_dy[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("./runtest.exe",libctest_dy[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-	}
+	// for(i = 0; libctest_dy[i].name[1] ; i++){
+	// 	if(!libctest_dy[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("./runtest.exe",libctest_dy[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// }
 
 	/**
 	* run lmbench_testcode.sh

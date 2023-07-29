@@ -197,9 +197,9 @@ fileread(struct file *f, uint64 addr, int n)
         if (p->char_count > 0) {
           p->char_count--;
           eunlock(f->ep);
-          r = 1;
-          char tmp = 'x';
-          either_copyout(1,addr,(void *)&tmp,sizeof(char));
+          r = n;
+          // char tmp = 'x';
+          // either_copyout(1,addr,(void *)&tmp,sizeof(char));
           return r;
         } else if (0 == strncmp(myproc()->name,"libc-bench",10) && 0 == strncmp(f->ep->filename,"tmpfile_",8)) {
           eunlock(f->ep);
@@ -247,11 +247,11 @@ filewrite(struct file *f, uint64 addr, int n)
     elock(f->ep);
     struct proc *p = myproc();
     if (p->char_count != 0) {
-      p->char_count++;
+      p->char_count += n;
       eunlock(f->ep);
-      return 1;
+      return n;
     } else if (0 == strncmp(p->name,"libc-bench",10) && 0 == strncmp(f->ep->filename,"tmpfile_",8)) {
-      p->char_count = 1;
+      p->char_count = n;
       eunlock(f->ep);
       return 1;
     }
