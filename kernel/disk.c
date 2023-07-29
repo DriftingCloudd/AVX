@@ -4,12 +4,9 @@
 #include "include/riscv.h"
 #include "include/printf.h"
 #include "include/buf.h"
+#include "include/ramdisk.h"
 
-#ifndef QEMU
-#include "include/sdcard.h"
-#include "include/dmac.h"
-#include "include/sd_final.h"
-#else
+#ifdef QEMU
 #include "include/virtio.h"
 #endif 
 
@@ -19,7 +16,7 @@ void disk_init(void)
     virtio_disk_init();
 	#else 
 	//sdcard_init();
-    sd_init();
+    ramdisk_init();
     #endif
 }
 
@@ -29,7 +26,8 @@ void disk_read(struct buf *b)
 	virtio_disk_rw(b, 0);
     #else 
 	//sdcard_read_sector(b->data, b->sectorno);
-    sd_read((uint32*)b->data, 128, b->sectorno);
+    // sd_read((uint32*)b->data, 128, b->sectorno);
+    ramdisk_read(b);
 	#endif
 }
 
@@ -39,7 +37,7 @@ void disk_write(struct buf *b)
 	virtio_disk_rw(b, 1);
     #else 
 	//sdcard_write_sector(b->data, b->sectorno);
-    sd_write((uint32*)b->data, 128, b->sectorno);
+    ramdisk_write(b);
 	#endif
 }
 
