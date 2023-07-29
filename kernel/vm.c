@@ -682,6 +682,10 @@ kvmfree(pagetable_t kpt, int stack_free)
     if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
       kfreewalk((pagetable_t) PTE2PA(pte));
     }
+    pte = kpt[PX(2, VKSTACK - PGSIZE)];
+    if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+      kfreewalk((pagetable_t) PTE2PA(pte));
+    }
   }
   kvmfreeusr(kpt);
   kfree(kpt);

@@ -31,6 +31,7 @@ typedef struct thread {
 
     // 使用下面这些变量的时候，thread的锁不需要持有
     uint64 kstack;   // 线程内核栈的地址,一个进程的不同线程所用的内核栈的地址应该不同
+    uint64 vtf;   // 线程的trapframe的虚拟地址
     uint64 sz;   // 复制自进程的sz
     struct trapframe *trapframe;
     context context;  // 每个进程应该有自己的context

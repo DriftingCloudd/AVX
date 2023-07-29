@@ -33,10 +33,8 @@ kinit()
   kmem.freelist = 0;
   kmem.npage = 0;
   freerange(kernel_end, (void*)PHYSTOP);
-  #ifdef DEBUG
   printf("kernel_end: %p, phystop: %p\n", kernel_end, (void*)PHYSTOP);
-  printf("kinit\n");
-  #endif
+  debug_print("kinit\n");
 }
 
 void
@@ -99,5 +97,9 @@ kalloc(void)
 uint64
 freemem_amount(void)
 {
-  return kmem.npage << PGSHIFT;
+  uint64 amount = 0;
+  acquire(&kmem.lock);
+  amount = kmem.npage;
+  release(&kmem.lock);
+  return amount << PGSHIFT;
 }

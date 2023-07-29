@@ -158,7 +158,7 @@ all:
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu mode=debug
+	@make build platform=qemu mode=release
 #	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
@@ -273,4 +273,6 @@ clean:
 	.gdbinit \
 	$U/usys.S \
 	$(UPROGS) \
+	os.bin \
+	sdcard.img \
 
