@@ -517,10 +517,8 @@ sys_set_tid_address(void)
     return -1;
   struct proc *p = myproc();
   p->main_thread->clear_child_tid = address;
-  int tid = p->main_thread->tid;
-  copyout(myproc()->pagetable, address, (char*) &tid, sizeof(int));
   
-  return tid;
+  return p->main_thread->tid;
 }
 
 uint64
@@ -623,7 +621,7 @@ uint64
 sys_gettid(void)
 {
   struct proc *p = myproc();
-  
+
   return p->main_thread->tid;
 }
 

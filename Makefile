@@ -156,7 +156,7 @@ all:
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu mode=release
+	@make build platform=qemu mode=debug
 #	@make fs
 	@$(QEMU) $(QEMUOPTS)
 

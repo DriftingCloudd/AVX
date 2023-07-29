@@ -81,6 +81,8 @@ void thread_free(thread *t) {
       kfree((void*)t->kstack_pa);
     // 更改链表情况
     t->state = t_UNUSED;
+    if (p->thread_queue == t)
+        p->thread_queue = t->next_thread;
     if (NULL != t->pre_thread)
         t->pre_thread->next_thread = t->next_thread;
     if (NULL != t->next_thread)

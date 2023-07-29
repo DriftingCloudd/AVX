@@ -1196,7 +1196,9 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   t->context.ra = (uint64)forkret;
   t->context.sp = t->trapframe->kernel_sp;
   if (ptid != 0) {
-    if (either_copyout(1,ptid,(void*)&t->tid,sizeof(int)) < 0)
+    // if (either_copyout(1,ptid,(void*)&t->tid,sizeof(int)) < 0)
+    //   panic("thread_clone: either_copyout");
+    if (copyout(p->pagetable,ptid,(char*)&t->tid,sizeof(int)) < 0)
       panic("thread_clone: either_copyout");
   }
   t->clear_child_tid = ctid;
