@@ -419,6 +419,7 @@ void SDIO_Setup_Callback(SDMMC_T *pSDMMC,
 //use cmd24, later can change to cmd25
 uint32 sd_write(uint32 *dat, int size, int addr){
 	int blk;
+	int tt = 0;
 	if ((size * 4) % 512)
 	{
 		blk = size * 4 / 512 + 1;
@@ -427,10 +428,11 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 	{
 		blk = size * 4 / 512;
 	}
-	
+	// printf("size %d, blk:%d\n", size, blk);
 	for (int i = 0; i < blk; i++)
 	{
-		int tt = 0;
+		tt = 0;
+		int ss = 1;
 		SDMMC->BLKSIZ = 512;
 		SDMMC->BYTCNT = 512;
 		SD_Send_Command(SDMMC, CMD24, addr + i);
@@ -452,6 +454,8 @@ uint32 sd_write(uint32 *dat, int size, int addr){
 			SD_IRQHandler(SDMMC);
 		}
 		// printf("tt: %d\n", tt);
+		// tt = 10;
+		// ss = tt;
 	}
 	
 	return 0;
@@ -471,10 +475,11 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 		blk = size * 4 / 512;
 	}
 	int tt = 0;
-	SDMMC->BLKSIZ = 512;
-	SDMMC->BYTCNT = 512;
+	
 	for (int i = 0; i < blk; i++)
 	{
+		SDMMC->BLKSIZ = 512;
+		SDMMC->BYTCNT = 512;
 		SD_Send_Command(SDMMC, CMD17, addr + i);
 		// while (SDMMC->RINTSTS & 0x20)
 		// {
@@ -496,17 +501,17 @@ uint32 sd_read(uint32 *dat, int size, int addr){
 		{
 			
 			dat[tt] = *(uint32 *)(SD_BASE_V + 0x200);
-			// printf("data: %p: %p\n", tt, dat[tt]);
+			printf("data: %d: %p\n", tt, dat[tt]);
 			tt++;
-			// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
-			// printf("data %d: %d\n", i, temp_data);
-			// for (int j = 0; j < 100000; j++)
-			// {
-			// 	/* code */
-			// }
+			// printf("rintst: %p\n", SDMMC->RINTSTS);
+			// printf("data %d: %d\n",tt, dat[tt]);
+			for (int j = 0; j < 100000; j++)
+			{
+				/* code */
+			}
 			
 		}
-		SD_IRQHandler(SDMMC);
+		// SD_IRQHandler(SDMMC);
 	}
 	//printf("tt: %d\n", tt);
 	return 0;
@@ -605,7 +610,7 @@ int sd_test(void){
 		}
 		SD_IRQHandler(SDMMC);
 	}
-	printf("tt: %d\n", tt);
+	// printf("tt: %d\n", tt);
 	
 	
 	printf("rintst: %p\n", SDMMC->RINTSTS);
@@ -646,20 +651,20 @@ int sd_test(void){
 
 void test_sdcard(void) {
 	int bsize = 512;
-	uint8 buf[bsize];
+	uint32 buf[bsize];
 
 	for (int sec = 1; sec < 6; sec ++) {
 		for (int i = 0; i < bsize; i ++) {
 			buf[i] = 0xaa;		// data to be written 
 		}
 
-		sd_write((uint32*)buf, 128,  sec);
+		sd_write((uint32*)buf, bsize,  sec);
 
 		for (int i = 0; i < bsize; i ++) {
 			buf[i] = 0xff;		// fill in junk
 		}
 
-		sd_read((uint32*)buf, 128, sec);
+		sd_read((uint32*)buf, bsize, sec);
 		for (int i = 0; i < bsize; i ++) {
 			if(buf[i] == 0xaa) {
 				printf("read back ok ");
