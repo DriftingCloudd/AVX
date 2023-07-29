@@ -1,6 +1,8 @@
 #ifndef __PRINTF_H
 #define __PRINTF_H
 
+#include "proc.h"
+
 void debug_print(char *fmt, ...);
 
 void printfinit(void);
@@ -16,4 +18,7 @@ void print_logo();
 void printstring(const char* s);
 
 void printint(int xx, int base, int sign);
+
+void checkup1(struct proc *p);
+
 #endif 
