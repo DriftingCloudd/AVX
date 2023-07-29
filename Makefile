@@ -1,7 +1,7 @@
 platform	:= visionfive
 #platform	:= qemu
- mode := debug
-# mode := release
+# mode := debug
+ mode := release
 K=kernel
 U=xv6-user
 T=target
@@ -156,7 +156,7 @@ all:
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu mode=release
+	@make build platform=qemu
 #	@make fs
 	@$(QEMU) $(QEMUOPTS)
 

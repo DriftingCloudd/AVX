@@ -389,6 +389,7 @@ sys_kill(void)
   }
   //出于目前的测评需求，kill命令我们直接杀死本进程
   pid = myproc()->pid;
+  // printf("kill pid %d, sig: %d\n", pid, sig);
   return kill(pid, sig);
 }
 
