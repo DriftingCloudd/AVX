@@ -28,6 +28,7 @@ int nextpid = 1;
 struct spinlock pid_lock;
 
 extern void forkret(void);
+extern int magic_count;
 extern void swtch(struct context*, struct context*);
 static void wakeup1(struct proc *chan);
 static void freeproc(struct proc *p);
@@ -71,7 +72,7 @@ void
 procinit(void)
 {
   struct proc *p;
-  
+  magic_count = 0;
   initlock(&pid_lock, "nextpid");
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
@@ -249,6 +250,7 @@ found:
   p->vsw = 0;
   p->ivsw = 0;
   p->thread_num = 0;
+  p->char_count = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -586,7 +588,7 @@ exit(int status)
 
   eput(p->cwd);
   p->cwd = 0;
-
+  checkup1(p);
   // we might re-parent a child to init. we can't be precise about
   // waking up init, since we can't acquire its lock once we've
   // acquired any other proc lock. so wake up init whether that's
