@@ -159,7 +159,7 @@ gdb-client:
 
 all:
 	@gunzip -k sdcard.img.gz
-	@make build platform=visionfive mode=release
+	@make build platform=visionfive mode=release exam=yes
 	@cp target/kernel.bin os.bin
 
 qemu-run:
