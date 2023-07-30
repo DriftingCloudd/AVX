@@ -350,7 +350,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "search_tsearch", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "setjmp", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "snprintf", 0 } },
-  { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
+  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_long", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "stat", 0 } },

@@ -13,6 +13,7 @@
 #include "include/printf.h"
 #include "include/string.h"
 #include "include/mmap.h"
+#include "include/vma.h"
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
@@ -219,21 +220,21 @@ load_elf_interp(pagetable_t pagetable, struct elfhdr* interp_elf_ex, struct dire
   return start_addr;
 }
 
-int
-create_user_stack(uint64 * sz, uint64 * sp, uint64 * stackbase, pagetable_t pagetable, pagetable_t kpagetable){
+// int
+// create_user_stack(uint64 * sz, uint64 * sp, uint64 * stackbase, pagetable_t pagetable, pagetable_t kpagetable){
 
-  *sz = PGROUNDUP(*sz);
-  uint64 sz1;
-  if((sz1 = uvmalloc(pagetable, kpagetable, *sz, *sz + STACK_SIZE, PTE_R | PTE_W)) == 0){
-    return -1;
-  }
-  *sz = sz1;
-  uvmclear(pagetable, *sz - STACK_SIZE);
-  *sp = *sz;
-  *stackbase = *sp - STACK_SIZE + PGSIZE;
-  // printf("create_user_stack success, start:%p, end:%p\n", *stackbase, *sp);
-  return 0;
-}
+//   *sz = PGROUNDUP(*sz);
+//   uint64 sz1;
+//   if((sz1 = uvmalloc(pagetable, kpagetable, *sz, *sz + STACK_SIZE, PTE_R | PTE_W)) == 0){
+//     return -1;
+//   }
+//   *sz = sz1;
+//   uvmclear(pagetable, *sz - STACK_SIZE);
+//   *sp = *sz;
+//   *stackbase = *sp - STACK_SIZE + PGSIZE;
+//   // printf("create_user_stack success, start:%p, end:%p\n", *stackbase, *sp);
+//   return 0;
+// }
 
 int
 user_stack_push_str(pagetable_t pt, uint64 * ustack, char * str, uint64 sp, uint64 stackbase){
@@ -374,10 +375,13 @@ int exec(char *path, char **argv, char ** env)
 
   p = myproc();
   uint64 oldsz = p->sz;
-  if(create_user_stack(&sz, &sp, &stackbase, pagetable, kpagetable) == -1){
-    printf("create_user_stack failed\n");
-    goto bad;
-  }
+  // if(create_user_stack(&sz, &sp, &stackbase, pagetable, kpagetable) == -1){
+  //   printf("create_user_stack failed\n");
+  //   goto bad;
+  // }
+  alloc_vma_stack(p);
+  sp = get_proc_sp(p);
+  stackbase = sp - INIT_STACK_SIZE;
   //printf("[exec] stackbase: %p stacktop: %p\n", stackbase, sz);
 
 

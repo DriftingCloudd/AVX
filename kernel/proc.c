@@ -414,14 +414,10 @@ userinit(void)
   uvminit(p->pagetable , p->kpagetable, initcode, initcodesize);
   p->sz = initcodesize;
   p->sz = PGROUNDUP(p->sz);
-  uint64 sz1;
-  uint64 stacksize = 2 * PGSIZE;
-  if((sz1 = uvmalloc(p->pagetable, p->kpagetable, p->sz, p->sz + stacksize, PTE_R | PTE_W)) == 0){
-    panic("userinit: out of memory");
-  }
-  p->sz = sz1;
+
   // uvmclear(p->pagetable, p->sz - stacksize);
-  p->trapframe->sp = p->sz; // user stack pointer
+  alloc_vma_stack(p);
+  p->trapframe->sp = get_proc_sp(p); // user stack pointer
 
   // prepare for the very first "return" from kernel to user.
   p->trapframe->epc = 0x0;      // user program counter

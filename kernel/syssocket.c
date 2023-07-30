@@ -55,7 +55,10 @@ sys_bind(void) {
         printf("sys_bind: argint(2, &addrlen) < 0\n");
         return -1;
     }
-    return do_bind(sockfd, addr, addrlen);
+    struct sockaddr in;
+    if(copyin(myproc()->pagetable,(char*)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
+        return -1;
+    return do_bind(sockfd, &in, addrlen);
 }
 
 uint64
@@ -90,14 +93,17 @@ sys_connect(void) {
         printf("sys_connect: argint(2, &addrlen) < 0\n");
         return -1;
     }
-    return do_connect(sockfd, addr, addrlen);
+    struct sockaddr in;
+    if(copyin(myproc()->pagetable,(char*)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
+        return -1;
+    return do_connect(sockfd, &in, addrlen);
 }
 
 uint64
 sys_accept(void) {
     int sockfd;
     struct sockaddr *addr;
-    socklen_t *addrlen;
+    socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_accept: argint(0, &sockfd) < 0\n");
         return -1;
@@ -110,7 +116,10 @@ sys_accept(void) {
         printf("sys_accept: argaddr(2, (int *)addrlen) < 0\n");
         return -1;
     }
-    return do_accept(sockfd, addr, addrlen);
+    struct sockaddr in;
+    if(copyin(myproc()->pagetable,(char*)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
+        return -1;
+    return do_accept(sockfd, &in, &addrlen);
 }
 
 uint64
@@ -187,7 +196,7 @@ uint64
 sys_getsockname(void) {
     int sockfd;
     struct sockaddr *addr;
-    socklen_t *addrlen;
+    socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_getsockname: argint(0, &sockfd) < 0\n");
         return -1;
@@ -200,7 +209,10 @@ sys_getsockname(void) {
         printf("sys_getsockname: argint(2, (int *)addrlen) < 0\n");
         return -1;
     }
-    return do_getsockname(sockfd, addr, addrlen);
+    struct sockaddr in;
+    if(copyin(myproc()->pagetable, (char *)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
+        return -1;
+    return do_getsockname(sockfd, &in, &addrlen);
 }
 
 uint64
