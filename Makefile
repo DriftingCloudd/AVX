@@ -2,6 +2,7 @@ platform	:= visionfive
 #platform	:= qemu
  mode := debug
 # mode := release
+exam := no
 K=kernel
 U=xv6-user
 T=target
@@ -92,6 +93,10 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 
 ifeq ($(mode), debug) 
 CFLAGS += -DDEBUG 
+endif 
+
+ifeq ($(exam), yes) 
+CFLAGS += -DEXAM 
 endif 
 
 ifeq ($(platform), qemu)

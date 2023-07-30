@@ -17,7 +17,7 @@
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
 
-#define STACK_SIZE 70*PGSIZE
+#define STACK_SIZE 10240*PGSIZE
 enum redir{
   REDIR_OUT,
   REDIR_APPEND,
@@ -231,6 +231,7 @@ create_user_stack(uint64 * sz, uint64 * sp, uint64 * stackbase, pagetable_t page
   uvmclear(pagetable, *sz - STACK_SIZE);
   *sp = *sz;
   *stackbase = *sp - STACK_SIZE + PGSIZE;
+  // printf("create_user_stack success, start:%p, end:%p\n", *stackbase, *sp);
   return 0;
 }
 

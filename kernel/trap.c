@@ -13,6 +13,7 @@
 #include "include/timer.h"
 #include "include/disk.h"
 #include "include/uart.h"
+#include "include/vm.h"
 
 extern char trampoline[], uservec[], userret[];
 
@@ -89,8 +90,10 @@ usertrap(void)
   }
   
   else {
-    printf("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
-    printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+    uint64 ir =0;
+    copyin(myproc()->pagetable, (char*)&ir, r_sepc(), 8);
+    serious_print("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
+    serious_print("            sepc=%p stval=%p ir: %p\n", r_sepc(), r_stval(), ir);
     trapframedump(p->trapframe);
     p->killed = SIGTERM;
   }
@@ -174,11 +177,11 @@ kerneltrap() {
     panic("kerneltrap: interrupts enabled");
 
   if((which_dev = devintr()) == 0){
-    printf("\nscause %p\n", scause);
-    printf("sepc=%p stval=%p hart=%d\n", r_sepc(), r_stval(), r_tp());
+    serious_print("\nscause %p\n", scause);
+    serious_print("sepc=%p stval=%p hart=%d\n", r_sepc(), r_stval(), r_tp());
     struct proc *p = myproc();
     if (p != 0) {
-      printf("pid: %d, name: %s\n", p->pid, p->name);
+      serious_print("pid: %d, name: %s\n", p->pid, p->name);
     }
     panic("kerneltrap");
   }
@@ -227,7 +230,7 @@ int devintr(void) {
 			disk_intr();
 		}
 		else if (irq) {
-			printf("unexpected interrupt irq = %d\n", irq);
+			serious_print("unexpected interrupt irq = %d\n", irq);
 		}
 
 		if (irq) { plic_complete(irq);}
@@ -244,44 +247,44 @@ int devintr(void) {
 		return 2;
 	}
 	else {
-    printf("scause: %p\n", scause);
-    printf("stval: %p\n", r_stval());
+    serious_print("scause: %p\n", scause);
+    serious_print("stval: %p\n", r_stval());
     return 0;
   }
 }
 
 void trapframedump(struct trapframe *tf)
 {
-  debug_print("a0: %p\t", tf->a0);
-  debug_print("a1: %p\t", tf->a1);
-  debug_print("a2: %p\t", tf->a2);
-  debug_print("a3: %p\n", tf->a3);
-  debug_print("a4: %p\t", tf->a4);
-  debug_print("a5: %p\t", tf->a5);
-  debug_print("a6: %p\t", tf->a6);
-  debug_print("a7: %p\n", tf->a7);
-  debug_print("t0: %p\t", tf->t0);
-  debug_print("t1: %p\t", tf->t1);
-  debug_print("t2: %p\t", tf->t2);
-  debug_print("t3: %p\n", tf->t3);
-  debug_print("t4: %p\t", tf->t4);
-  debug_print("t5: %p\t", tf->t5);
-  debug_print("t6: %p\t", tf->t6);
-  debug_print("s0: %p\n", tf->s0);
-  debug_print("s1: %p\t", tf->s1);
-  debug_print("s2: %p\t", tf->s2);
-  debug_print("s3: %p\t", tf->s3);
-  debug_print("s4: %p\n", tf->s4);
-  debug_print("s5: %p\t", tf->s5);
-  debug_print("s6: %p\t", tf->s6);
-  debug_print("s7: %p\t", tf->s7);
-  debug_print("s8: %p\n", tf->s8);
-  debug_print("s9: %p\t", tf->s9);
-  debug_print("s10: %p\t", tf->s10);
-  debug_print("s11: %p\t", tf->s11);
-  debug_print("ra: %p\n", tf->ra);
-  debug_print("sp: %p\t", tf->sp);
-  debug_print("gp: %p\t", tf->gp);
-  debug_print("tp: %p\t", tf->tp);
-  debug_print("epc: %p\n", tf->epc);
+  serious_print("a0: %p\t", tf->a0);
+  serious_print("a1: %p\t", tf->a1);
+  serious_print("a2: %p\t", tf->a2);
+  serious_print("a3: %p\n", tf->a3);
+  serious_print("a4: %p\t", tf->a4);
+  serious_print("a5: %p\t", tf->a5);
+  serious_print("a6: %p\t", tf->a6);
+  serious_print("a7: %p\n", tf->a7);
+  serious_print("t0: %p\t", tf->t0);
+  serious_print("t1: %p\t", tf->t1);
+  serious_print("t2: %p\t", tf->t2);
+  serious_print("t3: %p\n", tf->t3);
+  serious_print("t4: %p\t", tf->t4);
+  serious_print("t5: %p\t", tf->t5);
+  serious_print("t6: %p\t", tf->t6);
+  serious_print("s0: %p\n", tf->s0);
+  serious_print("s1: %p\t", tf->s1);
+  serious_print("s2: %p\t", tf->s2);
+  serious_print("s3: %p\t", tf->s3);
+  serious_print("s4: %p\n", tf->s4);
+  serious_print("s5: %p\t", tf->s5);
+  serious_print("s6: %p\t", tf->s6);
+  serious_print("s7: %p\t", tf->s7);
+  serious_print("s8: %p\n", tf->s8);
+  serious_print("s9: %p\t", tf->s9);
+  serious_print("s10: %p\t", tf->s10);
+  serious_print("s11: %p\t", tf->s11);
+  serious_print("ra: %p\n", tf->ra);
+  serious_print("sp: %p\t", tf->sp);
+  serious_print("gp: %p\t", tf->gp);
+  serious_print("tp: %p\t", tf->tp);
+  serious_print("epc: %p\n", tf->epc);
 }

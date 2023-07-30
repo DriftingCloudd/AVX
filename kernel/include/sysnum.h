@@ -87,6 +87,7 @@
 #define SYS_prlimit64   261
 #define SYS_statfs      43
 #define SYS_setitimer   103
+#define SYS_tkill       130
 
 // network syscall
 #define SYS_socket      198

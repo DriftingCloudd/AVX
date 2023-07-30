@@ -5,6 +5,8 @@
 
 void debug_print(char *fmt, ...);
 
+void serious_print(char *fmt, ...);
+
 void printfinit(void);
 
 void printf(char *fmt, ...);

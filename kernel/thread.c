@@ -2,6 +2,8 @@
 #include "include/memlayout.h"
 #include "include/kalloc.h"
 #include "include/vm.h"
+#include "include/printf.h"
+#include "include/syscall.h"
 
 int nexttid = 1;
 
@@ -64,6 +66,16 @@ thread *allocNewThread() {
     return tmp;
 }
 
+
+uint64 sys_tkill(){
+    int tid;
+    int signum;
+    if(argint(0, &tid) < 0 || argint(1, &signum) < 0)
+        return -1;
+    printf("sys_tkill: tid = %d, signum = %d\n", tid, signum);
+    // kill(myproc()->pid, SIGTERM);
+    return 0;
+}
 
 /*
 Thread threads[THREAD_TOTAL_NUMBER];  // 暂时先定义100个线程？
