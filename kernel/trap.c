@@ -108,7 +108,6 @@ usertrap(void)
   {
     p->utime++;
     yield();
-    p->ivsw += 1;
   }
 
   usertrapret();

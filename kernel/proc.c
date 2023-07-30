@@ -246,8 +246,6 @@ found:
   p->uid = 0;
   p->gid = 0;
   p->pgid = 0;
-  p->vsw = 0;
-  p->ivsw = 0;
   p->thread_num = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
@@ -789,7 +787,7 @@ sched(void)
 {
   int intena;
   struct proc *p = myproc();
-
+  // printf("sched p->pid %d\n", p->pid);
   if(!holding(&p->lock))
     panic("sched p->lock");
   if(mycpu()->noff != 1){
@@ -813,6 +811,7 @@ yield(void)
 {
   struct proc *p = myproc();
   acquire(&p->lock);
+  // printf("pid %d yield\n, epc: %p", p->pid, p->trapframe->epc);
   p->state = RUNNABLE;
   p->main_thread->state = t_RUNNABLE;
   sched();
@@ -863,7 +862,6 @@ sleep(void *chan, struct spinlock *lk)
 
   // Go to sleep.
   p->chan = chan;
-  p->vsw += 1;
   p->state = SLEEPING;
   p->main_thread->state = t_RUNNABLE;
 
@@ -914,7 +912,6 @@ int
 kill(int pid, int sig)
 { 
   struct proc *p;
-
   for(p = proc; p < &proc[NPROC]; p++){
     acquire(&p->lock);
     if(p->pid == pid){
@@ -1040,6 +1037,7 @@ struct proc *findchild(struct proc* p,int pid,struct proc** child) {
     if ((pid == -1 || np->pid == pid) && np->parent == p) {
       acquire(&np->lock);
       *child = np;
+      // printf("state : %d\n", np->state);
       if (np->state == ZOMBIE) {
         return np;
       }
@@ -1056,7 +1054,9 @@ int wait4pid(int pid,uint64 addr,int options)
   acquire(&p->lock);
   while (1) {
     kidpid = pid;
+    // printf("arrive a\n");
     child = findchild(p,pid,&tchild);
+    // printf("arrive b\n");
     if (NULL != child) {
       kidpid = child->pid;
       child->xstate <<= 8;
@@ -1065,6 +1065,7 @@ int wait4pid(int pid,uint64 addr,int options)
         release(&p->lock);
         return -1;
       }
+      // printf("arrive freeproc, child pid : %d\n", child->pid);
       freeproc(child);
       release(&child->lock);
       release(&p->lock);
@@ -1084,6 +1085,7 @@ int wait4pid(int pid,uint64 addr,int options)
    if (pid == -1) {
     sleep(p,&p->lock);
    } else {
+    // printf("arrive here: tchild: %d\n", tchild->pid);
     sleep(tchild,&p->lock);
     // pay attention!
    }
