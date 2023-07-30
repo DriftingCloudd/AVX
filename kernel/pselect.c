@@ -10,6 +10,7 @@
 #include "include/pipe.h"
 #include "include/pselect.h"
 #include "include/param.h"
+#include "include/socket.h"
 
 //后续可移动到util中
 
@@ -121,6 +122,10 @@ sys_pselect6(void)
 				}
 				// printf("arrive here!\n");
 			case FD_SOCK:
+				// if (f->sock->status == SOCK_ACCEPTED) {
+				// 	ret++;
+				// }
+				// break;
 			case FD_DEVICE:
 			case FD_ENTRY:
 				ret++;

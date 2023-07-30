@@ -74,6 +74,8 @@ int do_socket(int domain, int type, int protocol){
     // if (type & SOCK_NONBLOCK) {
     //     sock[i].type |= SOCK_NONBLOCK;
     // }
+    // sock[i].type |= SOCK_NONBLOCK;
+
     if (type & SOCK_CLOEXEC) {
         myproc()->exec_close[new_fd_num] = 1;
     }
@@ -88,11 +90,14 @@ int do_bind(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
+    // if (addrlen != sizeof(struct sockaddr)) {
+    //     return -EINVAL;
+    // }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
+    // if (strncmp(curr_proc->name,"netserver",9) == 0) {
+    //     addr->sin_port=12865;
+    // }
     sock[sock_num].addr = addr;
     release(&sock_lock);
     return 0;
@@ -103,9 +108,9 @@ int do_listen(int sockfd, int backlog){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK;
     }
-    if (backlog > MAX_WAIT_LIST) {
-        return -EINVAL;
-    }
+    // if (backlog > MAX_WAIT_LIST) {
+    //     return -EINVAL;
+    // }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
     sock[sock_num].status = SOCK_LISTEN;
@@ -121,7 +126,9 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK;
     }
-    if(addrlen != sizeof(struct sockaddr)) return -EINVAL;
+    // if (strncmp(curr_proc->name,"netperf",7) == 0)
+    //     addr->sin_port = 12865;
+    // if(addrlen != sizeof(struct sockaddr)) return -EINVAL;
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     int i, j;
     // debug_print("socket type:%p\n", curr_proc->ofile[sockfd]->sock->type);
@@ -142,8 +149,10 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
             acquire(&sock_lock);
             for (i=1;i<=MAX_SOCK_NUM;i++){
                 // printk("sock[%d]: addr = %x, status = %d\n",i,sock[i].addr->sin_addr,sock[i].status);
-                if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
-                    && sock[i].status == SOCK_LISTEN)
+                // if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
+                //     && sock[i].status == SOCK_LISTEN)
+                //     break;
+                if (sock[i].status == SOCK_LISTEN)
                     break;
             }
             if (i == MAX_SOCK_NUM + 1) {
@@ -186,22 +195,31 @@ int do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (*addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
+    // if (*addrlen != sizeof(struct sockaddr)) {
+    //     return -EINVAL;
+    // }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
-    if (addr != sock[sock_num].addr) {
-        return -EINVAL;
-    }
+    // if (addr != sock[sock_num].addr) {
+    //     return -EINVAL;
+    // }
     int i;
+    while (1) {
+        for (i = 0; i < sock[sock_num].backlog; i++) {
+            if (sock[sock_num].wait_list[i]) break;
+        }
+        // if (i == sock[sock_num].backlog) {
+        //     release(&sock_lock);
+        //     return -EWOULDBLOCK;
+        // }
+        if (i == sock[sock_num].backlog && (sock[sock_num].type & SOCK_NONBLOCK)) {
+            return -EWOULDBLOCK;
+        }
+        if (i < sock[sock_num].backlog)
+            break;
+        yield();
+    }
     acquire(&sock_lock);
-    for (i = 0; i < sock[sock_num].backlog; i++) {
-        if (sock[sock_num].wait_list[i]) break;
-    }
-    if (i == sock[sock_num].backlog) {
-        release(&sock_lock);
-        return -EWOULDBLOCK;
-    }
+
     sock[sock[sock_num].wait_list[i]].status = SOCK_ACCEPTED;
     sock[sock_num].wait_list[i] = 0;
     release(&sock_lock);
@@ -219,9 +237,9 @@ ssize_t do_sendto(int sockfd, void *buf, size_t len, int flags, struct sockaddr 
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
+    // if (addrlen != sizeof(struct sockaddr)) {
+    //     return -EINVAL;
+    // }
     int i;
     acquire(&sock_lock);
     for (i = 1; i <= MAX_SOCK_NUM; i++)
@@ -248,9 +266,9 @@ ssize_t do_recvfrom(int sockfd, void *buf, size_t len, int flags, struct sockadd
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (*addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
+    // if (*addrlen != sizeof(struct sockaddr)) {
+    //     return -EINVAL;
+    // }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
     int read_len = (len < ring_buffer_used(&sock[sock_num].data)) ?
@@ -276,9 +294,9 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (*addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
+    // if (*addrlen != sizeof(struct sockaddr)) {
+    //     return -EINVAL;
+    // }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
     memcpy(addr,sock[sock_num].addr,sizeof(struct sockaddr));
