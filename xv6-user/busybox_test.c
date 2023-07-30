@@ -17,6 +17,7 @@ static longtest lua[];
 static run_output unix_bench[];
 static longtest libc_bench[];
 static longtest cyclic_bench[];
+static longtest lmbench[];
 
 void test_busybox(){
 	dev(2,1,0);
@@ -171,6 +172,15 @@ void test_busybox(){
 	printf("run lmbench_testcode.sh\n");
   printf("latency measurements\n");
 
+    for(i = 0; lmbench[i].name[1] ; i++)
+    {
+      if(!lmbench[i].valid)continue;
+      int pid = fork();
+      if(pid==0){
+        exec(lmbench[i].name[0],lmbench[i].name);
+      }
+      wait4(pid,&status,0);
+  }
 	/**
 	* run lua_testcode.sh
 	*/
