@@ -80,7 +80,7 @@
 #ifdef QEMU
 #define PHYSTOP                 0x88a00000
 #else
-#define PHYSTOP                 0x180000000
+#define PHYSTOP                 0x140000000
 #endif
 
 // map the trampoline page to the highest address,

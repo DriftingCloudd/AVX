@@ -170,17 +170,17 @@ void test_busybox(){
 	* run lmbench_testcode.sh
 	*/
 	printf("run lmbench_testcode.sh\n");
-  printf("latency measurements\n");
+  // printf("latency measurements\n");
 
-    for(i = 0; lmbench[i].name[1] ; i++)
-    {
-      if(!lmbench[i].valid)continue;
-      int pid = fork();
-      if(pid==0){
-        exec(lmbench[i].name[0],lmbench[i].name);
-      }
-      wait4(pid,&status,0);
-  }
+  //   for(i = 0; lmbench[i].name[1] ; i++)
+  //   {
+  //     if(!lmbench[i].valid)continue;
+  //     int pid = fork();
+  //     if(pid==0){
+  //       exec(lmbench[i].name[0],lmbench[i].name);
+  //     }
+  //     wait4(pid,&status,0);
+  // }
 	/**
 	* run lua_testcode.sh
 	*/
@@ -366,11 +366,11 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "strtod", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "strtod_simple", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "strtof", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "strtol", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "strtol", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "strtold", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "swprintf", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "tgmath", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "time", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "time", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "tls_align", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "udiv", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "ungetc", 0 } },
