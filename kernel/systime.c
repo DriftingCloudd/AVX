@@ -56,14 +56,14 @@ sys_clock_gettime(void)
 
   uint64 ticks = r_time();
 
-  debug_print("ticks: %p\n", ticks);
+//   debug_print("ticks: %p\n", ticks);
   struct timespec2 t;
   if (tid == 0)
   {
     t.tv_sec = ticks / CLK_FREQ;
     t.tv_nsec = (ticks % CLK_FREQ ) * 1000000000 / CLK_FREQ;
-	debug_print("t.tv_sec: %p\n", t.tv_sec);
-	debug_print("t.tv_nsec: %p\n", t.tv_nsec);
+	// debug_print("t.tv_sec: %p\n", t.tv_sec);
+	// debug_print("t.tv_nsec: %p\n", t.tv_nsec);
   }
   if (either_copyout(1,addr,(char*)&t,sizeof(struct timespec2)) < 0)
     return -1;

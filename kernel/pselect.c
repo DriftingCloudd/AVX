@@ -136,7 +136,7 @@ sys_pselect6(void)
 			{
 				continue;
 			}
-			printf("enter write: fd %d\n", i);
+			// printf("enter write: fd %d\n", i);
 			struct file *f = p->ofile[i];
 			switch (f->type)
 			{

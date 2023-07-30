@@ -406,6 +406,7 @@ static char *sysnames[] = {
   [SYS_sync]        "sync",
   [SYS_ftruncate]   "ftruncate",
   [SYS_pselect6]    "pselect6",
+  [SYS_readlinkat]  "readlinkat",
   [SYS_tkill]       "tkill",
 
   //socket syscalls
@@ -434,7 +435,7 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    if(num != 64 && num != 63 && num != SYS_writev)
+    if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     // trace

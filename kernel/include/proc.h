@@ -86,8 +86,6 @@ struct proc {
   struct vma *vma;
   int ktime;
   int utime;
-  int vsw;  //volunteer context switch
-  int ivsw; //involunteer context switch
   int thread_num;
   int char_count;   // not used
   uint64 clear_child_tid;
