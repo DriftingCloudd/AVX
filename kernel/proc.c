@@ -1129,6 +1129,7 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   t->p = p;
   if (mappages(p->kpagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
     panic("thread_clone: mappages");
+  t->vtf = p->kstack-PGSIZE * p->thread_num * 2;
   void *kstack_pa = kalloc();
   if (NULL == kstack_pa)
     panic("thread_clone: kalloc kstack failed");
