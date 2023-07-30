@@ -11,6 +11,7 @@
 #include "include/vm.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/sbi.h"
 
 // Fetch the uint64 at addr from the current process.
 int
@@ -94,6 +95,13 @@ argstr(int n, char *buf, int max)
   if(argaddr(n, &addr) < 0)
     return -1;
   return fetchstr(addr, buf, max);
+}
+
+uint64
+sys_shutdown()
+{
+  sbi_shut_down();
+  return 0;
 }
 
 extern uint64 sys_chdir(void);
@@ -314,6 +322,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sched_getaffinity]   sys_sched_getaffinity,
   [SYS_sched_setscheduler]  sys_sched_setscheduler,
   [SYS_clock_getres]  sys_clock_getres,
+  [SYS_shutdown]      sys_shutdown,
 };
 
 static char *sysnames[] = {
@@ -425,6 +434,7 @@ static char *sysnames[] = {
   [SYS_sched_getaffinity]   "sched_getaffinity",
   [SYS_sched_setscheduler]  "sched_setscheduler",
   [SYS_clock_getres]  "clock_getres",
+  [SYS_shutdown]       "shutdown",
 };
 
 void

@@ -141,7 +141,7 @@ image = $T/kernel.bin
 QEMU = qemu-system-riscv64
 CPUS := 1
 
-QEMUOPTS = -machine virt -m 2G -nographic -kernel target/kernel 
+QEMUOPTS = -machine virt -m 128M -nographic -kernel target/kernel 
 # use multi-core 
 QEMUOPTS += -smp $(CPUS)
 QEMUOPTS += -bios default

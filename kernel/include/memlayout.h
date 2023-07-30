@@ -78,7 +78,7 @@
 // #define PHYSTOP                 0x80a00000
 //128M  0x800_0000  4G  0x10000_0000
 #ifdef QEMU
-#define PHYSTOP                 0x88a00000
+#define PHYSTOP                 0x88000000
 #else
 #define PHYSTOP                 0x140000000
 #endif
