@@ -387,8 +387,8 @@ sys_kill(void)
     debug_print("[kill]sig < 0 || sig >= SIGRTMAX\n");
     return -1;
   }
-  //出于目前的测评需求，kill命令我们直接杀死本进程
   pid = myproc()->pid;
+  // printf("kill pid %d, sig: %d\n", pid, sig);
   return kill(pid, sig);
 }
 
@@ -501,9 +501,11 @@ uint64
 sys_set_tid_address(void)
 {
   uint64 address;
-  argaddr(0,&address);
-  myproc()->clear_child_tid = address;
-  int tid = 1;
+  if (argaddr(0,&address) < 0)
+    return -1;
+  struct proc *p = myproc();
+  p->main_thread->clear_child_tid = address;
+  int tid = p->main_thread->tid;
   copyout(myproc()->pagetable, address, (char*) &tid, sizeof(int));
   
   return tid;
@@ -609,22 +611,8 @@ uint64
 sys_gettid(void)
 {
   struct proc *p = myproc();
-  uint64 addr = p->clear_child_tid;
-  int tid;
-  if (addr)
-  {
-    if (either_copyin(&tid, 1, addr, sizeof(tid)) < 0)
-    {
-      return -1;
-    }
-    return tid;
-  }
-  else
-  {
-    return p->pid;
-  }
   
-  
+  return p->main_thread->tid;
 }
 
 
@@ -676,7 +664,6 @@ sys_getrusage(void)
   int who;
   uint64 addr;
   struct rusage rs;
-  struct proc* p = myproc();
 
   if (argint(0, &who) < 0)
   {

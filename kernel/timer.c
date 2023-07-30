@@ -53,7 +53,7 @@ void timer_tick() {
         // printf("begin timer\n");
         for(int i=0;i<NTIMERS;i++){
             if(timers[i].pid == 0) continue;
-            if(ticks -timers[i].ticks >= 100){
+            if(ticks -timers[i].ticks >= 5){
                 // printf("timer pid %d\n",timers[i].pid);
                 kill(timers[i].pid, SIGALRM);
                 timers[i].pid = 0;
@@ -82,7 +82,7 @@ sys_times()
         }
         release(&p->lock);
     }
-    copyout2(utms, (char*)&ptms, sizeof(ptms));
+    copyout(myproc()->pagetable, utms, (char*)&ptms, sizeof(ptms));
     return 0;
 }
 
@@ -97,7 +97,7 @@ uint64 setitimer(int which, const struct itimerval *value, struct itimerval *ova
         }
     }
     if (ovalue != NULL && timer != NULL) {
-        copyout2((uint64)ovalue, (char*)&((timer->itimer)), sizeof(struct itimerval));
+        copyout(myproc()->pagetable, (uint64)ovalue, (char*)&((timer->itimer)), sizeof(struct itimerval));
     }
     
     if (value != NULL) {

@@ -43,3 +43,4 @@ entry("trace");
 entry("sysinfo");
 entry("rename");
 entry("wait4");
+entry("shutdown");

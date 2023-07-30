@@ -28,6 +28,7 @@ int nextpid = 1;
 struct spinlock pid_lock;
 
 extern void forkret(void);
+extern int magic_count;
 extern void swtch(struct context*, struct context*);
 static void wakeup1(struct proc *chan);
 static void freeproc(struct proc *p);
@@ -71,7 +72,7 @@ void
 procinit(void)
 {
   struct proc *p;
-  
+  magic_count = 0;
   initlock(&pid_lock, "nextpid");
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
@@ -239,6 +240,8 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
+  freemem_amount();
+  // printf("alloc proc:%d freemem_mount:%p\n", p->pid, freemem_amount());
   p->vma = NULL;
   p->filelimit = NOFILE;
   p->ktime = 1;
@@ -246,9 +249,8 @@ found:
   p->uid = 0;
   p->gid = 0;
   p->pgid = 0;
-  p->vsw = 0;
-  p->ivsw = 0;
   p->thread_num = 0;
+  p->char_count = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -283,11 +285,9 @@ found:
   p->main_thread->clear_child_tid = p->clear_child_tid;
   p->main_thread->kstack = p->kstack;
   p->thread_queue = p->main_thread;
-  if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
-    panic("allocproc: map thread trapframe failed");
   if (mappages(p->kpagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
     panic("allocproc: map thread trapframe failed");
-  
+  p->main_thread->vtf = p->kstack - PGSIZE;
   return p;
 }
 
@@ -314,8 +314,10 @@ freeproc(struct proc *p)
       free_thread->pre_thread = t;
     free_thread = t;
     kfree((void*)t->trapframe);
-    if (t->kstack != p->kstack)
+    if (t->kstack != p->kstack){
+      vmunmap(p->kpagetable, t->kstack, 1, 0);
       kfree((void*)t->kstack_pa);
+    }
     t = tmp;
   }
 
@@ -328,6 +330,8 @@ freeproc(struct proc *p)
     proc_freepagetable(p->pagetable, p->sz);
   }
   // TODO: free threads
+  freemem_amount();
+  // printf("free proc : %d freemem_mount:%p\n",p->pid, freemem_amount());
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
@@ -410,14 +414,10 @@ userinit(void)
   uvminit(p->pagetable , p->kpagetable, initcode, initcodesize);
   p->sz = initcodesize;
   p->sz = PGROUNDUP(p->sz);
-  uint64 sz1;
-  uint64 stacksize = 2 * PGSIZE;
-  if((sz1 = uvmalloc(p->pagetable, p->kpagetable, p->sz, p->sz + stacksize, PTE_R | PTE_W)) == 0){
-    panic("userinit: out of memory");
-  }
-  p->sz = sz1;
+
   // uvmclear(p->pagetable, p->sz - stacksize);
-  p->trapframe->sp = p->sz; // user stack pointer
+  alloc_vma_stack(p);
+  p->trapframe->sp = get_proc_sp(p); // user stack pointer
 
   // prepare for the very first "return" from kernel to user.
   p->trapframe->epc = 0x0;      // user program counter
@@ -586,7 +586,7 @@ exit(int status)
 
   eput(p->cwd);
   p->cwd = 0;
-
+  checkup1(p);
   // we might re-parent a child to init. we can't be precise about
   // waking up init, since we can't acquire its lock once we've
   // acquired any other proc lock. so wake up init whether that's
@@ -661,7 +661,7 @@ wait(uint64 addr)
         if(np->state == ZOMBIE){
           // Found one.
           pid = np->pid;
-          if(addr != 0 && copyout2(addr, (char *)&np->xstate, sizeof(np->xstate)) < 0) {
+          if(addr != 0 && copyout(p->pagetable, addr, (char *)&np->xstate, sizeof(np->xstate)) < 0) {
             release(&np->lock);
             release(&p->lock);
             return -1;
@@ -789,7 +789,7 @@ sched(void)
 {
   int intena;
   struct proc *p = myproc();
-
+  // printf("sched p->pid %d\n", p->pid);
   if(!holding(&p->lock))
     panic("sched p->lock");
   if(mycpu()->noff != 1){
@@ -813,6 +813,7 @@ yield(void)
 {
   struct proc *p = myproc();
   acquire(&p->lock);
+  // printf("pid %d yield\n, epc: %p", p->pid, p->trapframe->epc);
   p->state = RUNNABLE;
   p->main_thread->state = t_RUNNABLE;
   sched();
@@ -863,7 +864,6 @@ sleep(void *chan, struct spinlock *lk)
 
   // Go to sleep.
   p->chan = chan;
-  p->vsw += 1;
   p->state = SLEEPING;
   p->main_thread->state = t_RUNNABLE;
 
@@ -914,7 +914,6 @@ int
 kill(int pid, int sig)
 { 
   struct proc *p;
-
   for(p = proc; p < &proc[NPROC]; p++){
     acquire(&p->lock);
     if(p->pid == pid){
@@ -1040,6 +1039,7 @@ struct proc *findchild(struct proc* p,int pid,struct proc** child) {
     if ((pid == -1 || np->pid == pid) && np->parent == p) {
       acquire(&np->lock);
       *child = np;
+      // printf("state : %d\n", np->state);
       if (np->state == ZOMBIE) {
         return np;
       }
@@ -1056,7 +1056,9 @@ int wait4pid(int pid,uint64 addr,int options)
   acquire(&p->lock);
   while (1) {
     kidpid = pid;
+    // printf("arrive a\n");
     child = findchild(p,pid,&tchild);
+    // printf("arrive b\n");
     if (NULL != child) {
       kidpid = child->pid;
       child->xstate <<= 8;
@@ -1065,6 +1067,7 @@ int wait4pid(int pid,uint64 addr,int options)
         release(&p->lock);
         return -1;
       }
+      // printf("arrive freeproc, child pid : %d\n", child->pid);
       freeproc(child);
       release(&child->lock);
       release(&p->lock);
@@ -1084,6 +1087,7 @@ int wait4pid(int pid,uint64 addr,int options)
    if (pid == -1) {
     sleep(p,&p->lock);
    } else {
+    // printf("arrive here: tchild: %d\n", tchild->pid);
     sleep(tchild,&p->lock);
     // pay attention!
    }
@@ -1125,6 +1129,7 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   t->p = p;
   if (mappages(p->kpagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
     panic("thread_clone: mappages");
+  t->vtf = p->kstack-PGSIZE * p->thread_num * 2;
   void *kstack_pa = kalloc();
   if (NULL == kstack_pa)
     panic("thread_clone: kalloc kstack failed");

@@ -50,6 +50,10 @@ static inline void sbi_hart_start(unsigned long hartid, unsigned long start_addr
 	SBI_CALL_3(SBI_HSM_EXTION, SBI_HART_START, hartid, start_addr, opaque);
 }
 
+static inline void sbi_shut_down()
+{
+	SBI_CALL_0(SBI_SHUTDOWN, 0);
+}
 static inline void sbi_console_putchar(int ch)
 {
 	SBI_CALL_1(SBI_CONSOLE_PUTCHAR, 0, ch);

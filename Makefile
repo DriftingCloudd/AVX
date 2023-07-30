@@ -2,6 +2,7 @@ platform	:= visionfive
 #platform	:= qemu
  mode := debug
 # mode := release
+exam := no
 K=kernel
 U=xv6-user
 T=target
@@ -94,12 +95,17 @@ ifeq ($(mode), debug)
 CFLAGS += -DDEBUG 
 endif 
 
+ifeq ($(exam), yes) 
+CFLAGS += -DEXAM 
+endif 
+
 ifeq ($(platform), qemu)
 CFLAGS += -D QEMU
 else ifeq ($(platform), k210)
 CFLAGS += -D k210
 else ifeq ($(platform), visionfive)
 CFLAGS += -D visionfive
+OBJS += $K/sddata.o $K/ramdisk.o
 endif
 
 LDFLAGS = -z max-page-size=4096
@@ -135,7 +141,7 @@ image = $T/kernel.bin
 QEMU = qemu-system-riscv64
 CPUS := 1
 
-QEMUOPTS = -machine virt -m 128m -nographic -kernel target/kernel 
+QEMUOPTS = -machine virt -m 128M -nographic -kernel target/kernel 
 # use multi-core 
 QEMUOPTS += -smp $(CPUS)
 QEMUOPTS += -bios default
@@ -152,8 +158,9 @@ gdb-client:
 	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 all:
-	@make build platform=qemu mode=release
-	@cp target/kernel kernel-qemu
+	@gunzip -k sdcard.img.gz
+	@make build platform=visionfive mode=release exam=yes
+	@cp target/kernel.bin os.bin
 
 qemu-run:
 	@make build platform=qemu mode=release
@@ -271,4 +278,6 @@ clean:
 	.gdbinit \
 	$U/usys.S \
 	$(UPROGS) \
+	os.bin \
+	sdcard.img \
 
