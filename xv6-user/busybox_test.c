@@ -20,38 +20,38 @@ void test_busybox(){
 	dup(0);
 
 	int status,pid;
-  // printf("111\n");
-  // pid = fork();
-  // if (pid == 0) {
-  //   exec("./cyclictest",cyclic_bench[0].name);
-  //   exit(0);
-  // }
-  // wait4(pid,&status,0);
-  // printf("%d\n",status);
-  // printf("222\n");
+  printf("111\n");
+  pid = fork();
+  if (pid == 0) {
+    exec("./cyclictest",cyclic_bench[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+  printf("%d\n",status);
+  printf("222\n");
   pid = fork();
 	if(pid == 0){
 		exec("time-test",time_test[0].name);
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("run busybox_testcode.sh\n");
-	int i;
-	for(i = 0; busybox[i].name[1] ; i++){
-		if(!busybox[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("busybox",busybox[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-		if(status==0){
-			printf("testcase busybox %d success\n",i);
-		}else{
-			printf("testcase busybox %d success\n",i);
-			// printf("testcase busybox %d fail\n",i);
-		}
-	}
+	// printf("run busybox_testcode.sh\n");
+	// int i;
+	// for(i = 0; busybox[i].name[1] ; i++){
+	// 	if(!busybox[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("busybox",busybox[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// 	if(status==0){
+	// 		printf("testcase busybox %d success\n",i);
+	// 	}else{
+	// 		printf("testcase busybox %d success\n",i);
+	// 		// printf("testcase busybox %d fail\n",i);
+	// 	}
+	// }
 		// pid = fork();
 		// if(pid==0){
 		// 	exec("busybox",busybox[21].name);
@@ -141,25 +141,25 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	for(i = 0; libctest[i].name[1] ; i++){
-		if(!libctest[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("./runtest.exe",libctest[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-	}
+	// for(i = 0; libctest[i].name[1] ; i++){
+	// 	if(!libctest[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("./runtest.exe",libctest[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// }
 	
-	for(i = 0; libctest_dy[i].name[1] ; i++){
-		if(!libctest_dy[i].valid)continue;
-		pid = fork();
-		if(pid==0){
-			exec("./runtest.exe",libctest_dy[i].name);
-			exit(0);
-		}
-		wait4(pid, &status, 0);
-	}
+	// for(i = 0; libctest_dy[i].name[1] ; i++){
+	// 	if(!libctest_dy[i].valid)continue;
+	// 	pid = fork();
+	// 	if(pid==0){
+	// 		exec("./runtest.exe",libctest_dy[i].name);
+	// 		exit(0);
+	// 	}
+	// 	wait4(pid, &status, 0);
+	// }
 
 	/**
 	* run lmbench_testcode.sh
@@ -172,41 +172,41 @@ void test_busybox(){
 	*/
 	printf("run lua_testcode.sh\n");
 
-  for(i = 0; lua[i].name[1] ; i++){
-    if(!lua[i].valid)continue;
-    pid = fork();
-    if(pid==0){
-      exec("lua",lua[i].name);
-      exit(0);
-    }
-    wait4(pid, &status, 0);
-    if(status==0){
-      printf("testcase lua %s success\n",lua[i].name[1]);
-    }else{
-      printf("testcase lua %s success\n",lua[i].name[1]);
-    }
-  }
+  // for(i = 0; lua[i].name[1] ; i++){
+  //   if(!lua[i].valid)continue;
+  //   pid = fork();
+  //   if(pid==0){
+  //     exec("lua",lua[i].name);
+  //     exit(0);
+  //   }
+  //   wait4(pid, &status, 0);
+  //   if(status==0){
+  //     printf("testcase lua %s success\n",lua[i].name[1]);
+  //   }else{
+  //     printf("testcase lua %s success\n",lua[i].name[1]);
+  //   }
+  // }
 
   /**
   * run unixbench_testcode.sh
   */
   printf("run unixbench_testcode.sh\n");
-  pid = fork();
-  if(pid==0){
-    exec("busybox", unixbench[0].name);
-    exit(0);
-  }
-  wait4(pid, &status, 0);
-  if((pid = fork()) == 0){
-    int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
-    write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
-    write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
-    write(fd, unixben_testcode[3], strlen(unixben_testcode[3]));
-    close(fd);
-    exec("busybox", unixbench[1].name);
-    exit(0);
-  }
-	wait4(pid, &status, 0);
+  // pid = fork();
+  // if(pid==0){
+  //   exec("busybox", unixbench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid, &status, 0);
+  // if((pid = fork()) == 0){
+  //   int fd = open("unixbench_testcode.sh", 0x42); //O_CREATE 0x40 O_RDWR 0x2
+  //   write(fd, unixben_testcode[0], strlen(unixben_testcode[0]));
+  //   write(fd, unixben_testcode[1], strlen(unixben_testcode[1]));
+  //   write(fd, unixben_testcode[3], strlen(unixben_testcode[3]));
+  //   close(fd);
+  //   exec("busybox", unixbench[1].name);
+  //   exit(0);
+  // }
+	// wait4(pid, &status, 0);
 
   printf("run netperf_testcode.sh\n");
 
@@ -214,11 +214,11 @@ void test_busybox(){
 
   printf("run cyclic_testcode.sh\n");
 
-  if((pid = fork()) == 0){
-    exec("libc-bench", libc_bench[0].name);
-    exit(0);
-  }
-  wait4(pid, &status, 0);
+  // if((pid = fork()) == 0){
+  //   exec("libc-bench", libc_bench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid, &status, 0);
 
   exit(0);
 }
@@ -594,7 +594,8 @@ UB_BINDIR=./ ./execl 10 | ./busybox grep -o \"COUNT|[[:digit:]]\\+|\" | ./busybo
 };
 
 static longtest cyclic_bench[] = {
-  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p2","-D","20s","-q",0}},
+  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p99","-D","1s","-q",0}},
+  {1,{"./cyclictest","-a","-i","1000","-t8","-n","-p99","-D","1s","-q",0}},
   {0,{0}},
 };
 

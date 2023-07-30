@@ -120,6 +120,7 @@ sys_pselect6(void)
 					break;
 				}
 				// printf("arrive here!\n");
+			case FD_SOCK:
 			case FD_DEVICE:
 			case FD_ENTRY:
 				ret++;
@@ -146,6 +147,7 @@ sys_pselect6(void)
 					clear_bit(i, &wfds);
 					break;
 				}
+			case FD_SOCK:
 			case FD_DEVICE:
 			case FD_ENTRY:
 				ret++;
