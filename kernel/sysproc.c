@@ -387,7 +387,6 @@ sys_kill(void)
     debug_print("[kill]sig < 0 || sig >= SIGRTMAX\n");
     return -1;
   }
-  //出于目前的测评需求，kill命令我们直接杀死本进程
   pid = myproc()->pid;
   return kill(pid, sig);
 }
@@ -664,7 +663,6 @@ sys_getrusage(void)
   int who;
   uint64 addr;
   struct rusage rs;
-  struct proc* p = myproc();
 
   if (argint(0, &who) < 0)
   {

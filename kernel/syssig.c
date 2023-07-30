@@ -4,6 +4,7 @@
 #include "include/vm.h"
 #include "include/signal.h"
 #include "include/proc.h"
+#include "include/printf.h"
 /**
 * syscall rt_sigaction将会调用此函数
 * @param signum 信号编号
@@ -29,7 +30,7 @@ uint64 sys_rt_sigaction(void){
 	sigaction oldact = {0};
 
 	if (ptr_act){
-		if(copyin2((char*)&(act), (uint64)ptr_act, sizeof(sigaction)) < 0 ) {
+		if(copyin(myproc()->pagetable, (char*)&(act), (uint64)ptr_act, sizeof(sigaction)) < 0 ) {
 			return -1;
 		}
 	}
@@ -39,11 +40,11 @@ uint64 sys_rt_sigaction(void){
 	}
 
 	if (ptr_oldact) {
-        if (copyout2((uint64)ptr_oldact, (char*)&(oldact), sizeof(sigaction)) < 0 ){
+        if (copyout(myproc()->pagetable, (uint64)ptr_oldact, (char*)&(oldact), sizeof(sigaction)) < 0 ){
 			return -1;
 		}
 	}
-
+	debug_print("sys_rt_sigaction: signum = %d, act fp:%p \n", signum, act.__sigaction_handler.sa_handler);
 	return 0;
 }
 
@@ -64,7 +65,7 @@ uint64 sys_rt_sigprocmask(void){
 	argaddr(1, &uptr_set);
 	argaddr(2, &uptr_oldset);
 
-	if (uptr_set && copyin2((char*)&set, uptr_set, SIGSET_LEN * 8) < 0) {
+	if (uptr_set && copyin(myproc()->pagetable, (char*)&set, uptr_set, SIGSET_LEN * 8) < 0) {
 		return -1;
 	}
 
@@ -72,10 +73,10 @@ uint64 sys_rt_sigprocmask(void){
 		return -1;
 	}
 
-	if (uptr_oldset && copyout2(uptr_oldset, (char*)&oldset, SIGSET_LEN * 8) < 0) {
+	if (uptr_oldset && copyout(myproc()->pagetable, uptr_oldset, (char*)&oldset, SIGSET_LEN * 8) < 0) {
 		return -1;
 	}
-
+	debug_print("sys_rt_sigprocmask: how = %d, set = %p\n", how, set.__val[0]);
 	return 0;
 
 }

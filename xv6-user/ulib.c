@@ -150,3 +150,42 @@ memcpy(void *dst, const void *src, uint n)
 {
   return memmove(dst, src, n);
 }
+
+int extractCountNumber(const char* str, const char * target) {
+    const char* countStr = target;
+    int num = -1;
+    int i = 0;
+
+    while (str[i] != '\0') {
+        // 检查是否匹配"COUNT"模式
+        int countIndex = 0;
+        while (countStr[countIndex] != '\0' && str[i + countIndex] == countStr[countIndex]) {
+            countIndex++;
+        }
+
+        if (countStr[countIndex] == '\0') {
+            // "COUNT"匹配成功，查找数字部分
+            num = 0;
+            i += countIndex;
+            while (str[i] != '\0') {
+                if (str[i] >= '0' && str[i] <= '9') {
+                    num = num * 10 + (str[i] - '0');
+                } else {
+                    break;
+                }
+                i++;
+            }
+            break;
+        }
+
+        // 没有匹配"COUNT"，继续查找下一行
+        while (str[i] != '\0' && str[i] != '\n') {
+            i++;
+        }
+        if (str[i] == '\n') {
+            i++;
+        }
+    }
+
+    return num;
+}

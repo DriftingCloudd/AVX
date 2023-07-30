@@ -41,6 +41,7 @@ int ftruncate(int fd, int len);
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
 char* strcat(char*, const char*);
+int extractCountNumber(const char* str, const char * target) ;
 void *memmove(void*, const void*, int);
 char* strchr(const char*, char c);
 int strcmp(const char*, const char*);

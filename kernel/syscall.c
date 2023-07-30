@@ -185,6 +185,7 @@ extern uint64 sys_sched_getscheduler();
 extern uint64 sys_sched_getparam();
 extern uint64 sys_sched_getaffinity();
 extern uint64 sys_pselect6();
+extern uint64 sys_tkill();
 
 // socket syscalls
 extern uint64 sys_socket(void);
@@ -290,6 +291,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_ftruncate]   sys_ftruncate,
   [SYS_setitimer]   sys_setitimer,
   [SYS_pselect6]    sys_pselect6,
+  [SYS_tkill]       sys_tkill,
 
   // socket syscalls
   [SYS_socket]      sys_socket,
@@ -404,6 +406,7 @@ static char *sysnames[] = {
   [SYS_sync]        "sync",
   [SYS_ftruncate]   "ftruncate",
   [SYS_pselect6]    "pselect6",
+  [SYS_tkill]       "tkill",
 
   //socket syscalls
   [SYS_socket]      "socket",
@@ -437,6 +440,7 @@ syscall(void)
     // trace
     if(num != SYS_read && num != SYS_write && num != SYS_writev)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
+    // printf("pid %d call %d: %s a0:%p sp:%p\n", p->pid, num, sysnames[num], p->trapframe->a0, p->trapframe->sp);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }
