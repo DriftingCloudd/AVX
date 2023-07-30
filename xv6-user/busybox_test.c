@@ -178,6 +178,7 @@ void test_busybox(){
       int pid = fork();
       if(pid==0){
         exec(lmbench[i].name[0],lmbench[i].name);
+        exit(0);
       }
       wait4(pid,&status,0);
   }

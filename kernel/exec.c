@@ -17,7 +17,7 @@
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
 
-#define STACK_SIZE 1024*PGSIZE
+#define STACK_SIZE 64*PGSIZE
 enum redir{
   REDIR_OUT,
   REDIR_APPEND,
