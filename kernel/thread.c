@@ -72,7 +72,7 @@ uint64 sys_tkill(){
     int signum;
     if(argint(0, &tid) < 0 || argint(1, &signum) < 0)
         return -1;
-    printf("sys_tkill: tid = %d, signum = %d\n", tid, signum);
+    debug_print("sys_tkill: tid = %d, signum = %d\n", tid, signum);
     // kill(myproc()->pid, SIGTERM);
     return 0;
 }

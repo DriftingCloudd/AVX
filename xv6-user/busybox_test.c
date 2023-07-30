@@ -41,21 +41,21 @@ void test_busybox(){
 	wait4(pid, &status, 0);
 	printf("run busybox_testcode.sh\n");
 	int i;
-	// for(i = 0; busybox[i].name[1] ; i++){
-	// 	if(!busybox[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("busybox",busybox[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// 	if(status==0){
-	// 		printf("testcase busybox %d success\n",i);
-	// 	}else{
-	// 		printf("testcase busybox %d success\n",i);
-	// 		// printf("testcase busybox %d fail\n",i);
-	// 	}
-	// }
+	for(i = 0; busybox[i].name[1] ; i++){
+		if(!busybox[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("busybox",busybox[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+		if(status==0){
+			printf("testcase busybox %d success\n",i);
+		}else{
+			printf("testcase busybox %d success\n",i);
+			// printf("testcase busybox %d fail\n",i);
+		}
+	}
 		// pid = fork();
 		// if(pid==0){
 		// 	exec("busybox",busybox[21].name);
@@ -145,25 +145,25 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	// for(i = 0; libctest[i].name[1] ; i++){
-	// 	if(!libctest[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest[i].name[1] ; i++){
+		if(!libctest[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 	
-	// for(i = 0; libctest_dy[i].name[1] ; i++){
-	// 	if(!libctest_dy[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest_dy[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest_dy[i].name[1] ; i++){
+		if(!libctest_dy[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest_dy[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 
 	/**
 	* run lmbench_testcode.sh
@@ -176,20 +176,20 @@ void test_busybox(){
 	*/
 	printf("run lua_testcode.sh\n");
 
-  // for(i = 0; lua[i].name[1] ; i++){
-  //   if(!lua[i].valid)continue;
-  //   pid = fork();
-  //   if(pid==0){
-  //     exec("lua",lua[i].name);
-  //     exit(0);
-  //   }
-  //   wait4(pid, &status, 0);
-  //   if(status==0){
-  //     printf("testcase lua %s success\n",lua[i].name[1]);
-  //   }else{
-  //     printf("testcase lua %s success\n",lua[i].name[1]);
-  //   }
-  // }
+  for(i = 0; lua[i].name[1] ; i++){
+    if(!lua[i].valid)continue;
+    pid = fork();
+    if(pid==0){
+      exec("lua",lua[i].name);
+      exit(0);
+    }
+    wait4(pid, &status, 0);
+    if(status==0){
+      printf("testcase lua %s success\n",lua[i].name[1]);
+    }else{
+      printf("testcase lua %s success\n",lua[i].name[1]);
+    }
+  }
 
   /**
   * run unixbench_testcode.sh
@@ -232,6 +232,7 @@ void test_busybox(){
     exit(0);
   }
   wait4(pid, &status, 0);
+  printf(" !TEST FINISH! \n");
 
   exit(0);
 }

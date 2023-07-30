@@ -446,7 +446,7 @@ syscall(void)
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }
   } else {
-    printf("pid %d %s: unknown sys call %d\n",
+    debug_print("pid %d %s: unknown sys call %d\n",
             p->pid, p->name, num);
     p->trapframe->a0 = -1;
   }

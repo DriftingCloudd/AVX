@@ -44,7 +44,7 @@ argfd(int n, int *pfd, struct file **pf)
   struct file *f;
 
   if(argint(n, &fd) < 0){
-    printf("argfd: argint error\n");
+    debug_print("argfd: argint error\n");
     return -1;
   }
   //mmap映射匿名区域的时候会需要fd为-1
@@ -58,7 +58,7 @@ argfd(int n, int *pfd, struct file **pf)
   }
 
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
-    printf("fd: %d argfd: fd error\n", fd); 
+    debug_print("fd: %d argfd: fd error\n", fd); 
     return -1;
   }
   
