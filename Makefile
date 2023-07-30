@@ -100,6 +100,7 @@ else ifeq ($(platform), k210)
 CFLAGS += -D k210
 else ifeq ($(platform), visionfive)
 CFLAGS += -D visionfive
+OBJS += $K/sddata.o $K/ramdisk.o
 endif
 
 LDFLAGS = -z max-page-size=4096
@@ -152,6 +153,7 @@ gdb-client:
 	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 all:
+	@gunzip -k sdcard.img.gz
 	@make build platform=visionfive mode=release
 	@cp target/kernel.bin os.bin
 
@@ -271,4 +273,6 @@ clean:
 	.gdbinit \
 	$U/usys.S \
 	$(UPROGS) \
+	os.bin \
+	sdcard.img \
 

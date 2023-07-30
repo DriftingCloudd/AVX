@@ -89,8 +89,8 @@ usertrap(void)
   }
   
   else {
-    debug_print("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
-    debug_print("            sepc=%p stval=%p\n", r_sepc(), r_stval());
+    printf("\nusertrap(): unexpected scause %p pid=%d %s\n", r_scause(), p->pid, p->name);
+    printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     trapframedump(p->trapframe);
     p->killed = SIGTERM;
   }

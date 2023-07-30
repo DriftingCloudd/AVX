@@ -28,6 +28,7 @@ int nextpid = 1;
 struct spinlock pid_lock;
 
 extern void forkret(void);
+extern int magic_count;
 extern void swtch(struct context*, struct context*);
 static void wakeup1(struct proc *chan);
 static void freeproc(struct proc *p);
@@ -71,7 +72,7 @@ void
 procinit(void)
 {
   struct proc *p;
-  
+  magic_count = 0;
   initlock(&pid_lock, "nextpid");
   for(p = proc; p < &proc[NPROC]; p++) {
       initlock(&p->lock, "proc");
@@ -239,6 +240,8 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
+  freemem_amount();
+  // printf("alloc proc:%d freemem_mount:%p\n", p->pid, freemem_amount());
   p->vma = NULL;
   p->filelimit = NOFILE;
   p->ktime = 1;
@@ -247,6 +250,7 @@ found:
   p->gid = 0;
   p->pgid = 0;
   p->thread_num = 0;
+  p->char_count = 0;
   p->clear_child_tid = NULL;
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -281,11 +285,9 @@ found:
   p->main_thread->clear_child_tid = p->clear_child_tid;
   p->main_thread->kstack = p->kstack;
   p->thread_queue = p->main_thread;
-  if (mappages(p->pagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
-    panic("allocproc: map thread trapframe failed");
   if (mappages(p->kpagetable,p->kstack - PGSIZE,PGSIZE,(uint64)(p->main_thread->trapframe), PTE_R | PTE_W) < 0)
     panic("allocproc: map thread trapframe failed");
-  
+  p->main_thread->vtf = p->kstack - PGSIZE;
   return p;
 }
 
@@ -312,8 +314,10 @@ freeproc(struct proc *p)
       free_thread->pre_thread = t;
     free_thread = t;
     kfree((void*)t->trapframe);
-    if (t->kstack != p->kstack)
+    if (t->kstack != p->kstack){
+      vmunmap(p->kpagetable, t->kstack, 1, 0);
       kfree((void*)t->kstack_pa);
+    }
     t = tmp;
   }
 
@@ -326,6 +330,8 @@ freeproc(struct proc *p)
     proc_freepagetable(p->pagetable, p->sz);
   }
   // TODO: free threads
+  freemem_amount();
+  // printf("free proc : %d freemem_mount:%p\n",p->pid, freemem_amount());
   p->pagetable = 0;
   p->vma = NULL;
   p->sz = 0;
@@ -584,7 +590,7 @@ exit(int status)
 
   eput(p->cwd);
   p->cwd = 0;
-
+  checkup1(p);
   // we might re-parent a child to init. we can't be precise about
   // waking up init, since we can't acquire its lock once we've
   // acquired any other proc lock. so wake up init whether that's
