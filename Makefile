@@ -158,9 +158,8 @@ gdb-client:
 	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 all:
-	@gunzip -k sdcard.img.gz
-	@make build platform=visionfive mode=release exam=yes
-	@cp target/kernel.bin os.bin
+	@make build platform=qemu mode=release
+	@cp target/kernel kernel-qemu
 
 qemu-run:
 	@make build platform=qemu mode=release
