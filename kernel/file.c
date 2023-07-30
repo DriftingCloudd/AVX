@@ -212,7 +212,7 @@ fileread(struct file *f, uint64 addr, int n)
           r = 1;
           char tmp = 0;
           either_copyout(1,addr,(void *)&tmp,sizeof(char));
-          return r;
+          // return r;
         }
         else if((r = eread(f->ep, 1, addr, f->off, n)) > 0)
           f->off += r;
