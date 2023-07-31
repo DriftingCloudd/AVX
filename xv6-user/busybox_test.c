@@ -189,6 +189,12 @@ void test_busybox(){
     }
   }
 
+  if((pid = fork()) == 0){
+    exec("libc-bench", libc_bench[0].name);
+    exit(0);
+  }
+  wait4(pid, &status, 0);
+
   /**
   * run unixbench_testcode.sh
   */
@@ -225,11 +231,6 @@ void test_busybox(){
 
   printf("run cyclic_testcode.sh\n");
 
-  if((pid = fork()) == 0){
-    exec("libc-bench", libc_bench[0].name);
-    exit(0);
-  }
-  wait4(pid, &status, 0);
 
 	printf("run lmbench_testcode.sh\n");
   printf("latency measurements\n");
