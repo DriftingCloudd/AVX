@@ -276,9 +276,6 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (*addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
     memcpy(addr,sock[sock_num].addr,sizeof(struct sockaddr));
