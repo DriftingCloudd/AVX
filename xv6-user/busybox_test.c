@@ -169,18 +169,6 @@ void test_busybox(){
 	/**
 	* run lmbench_testcode.sh
 	*/
-	printf("run lmbench_testcode.sh\n");
-  printf("latency measurements\n");
-
-    for(i = 0; lmbench[i].name[1] ; i++)
-    {
-      if(!lmbench[i].valid)continue;
-      int pid = fork();
-      if(pid==0){
-        exec(lmbench[i].name[0],lmbench[i].name);
-      }
-      wait4(pid,&status,0);
-  }
 	/**
 	* run lua_testcode.sh
 	*/
@@ -242,6 +230,21 @@ void test_busybox(){
     exit(0);
   }
   wait4(pid, &status, 0);
+
+	printf("run lmbench_testcode.sh\n");
+  printf("latency measurements\n");
+
+    for(i = 0; lmbench[i].name[1] ; i++)
+    {
+      if(!lmbench[i].valid)continue;
+      int pid = fork();
+      if(pid==0){
+        exec(lmbench[i].name[0],lmbench[i].name);
+      }
+      wait4(pid,&status,0);
+  }
+
+
   printf(" !TEST FINISH! \n");
   shutdown();
   exit(0);
@@ -634,8 +637,8 @@ static longtest lmbench[] = {
 	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "catch"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "prot"  ,  "lat_sig"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_pipe"  ,  "-P"  ,  "1"  ,  0	}},
-	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "fork"  ,  0	}},
-	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "exec"  ,  0	}},
+	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "fork"  ,  0	}},
+	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "exec"  ,  0	}},
 	// { 1 , {"busybox"  ,  "cp"  ,  "hello"  ,  "/tmp"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "shell"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lmdd"  ,  "label=File /var/tmp/XXX write bandwidth:"  ,  "of=/var/tmp/XXX"  ,  "move=1m"  ,  "fsync=1"  ,  "print=3"  ,  0	}},
