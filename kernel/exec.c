@@ -289,12 +289,23 @@ loadaux(pagetable_t pagetable,uint64 sp,uint64 stackbase,uint64* aux){
   return sp;
 }
 
+int is_sh_script(char * path){
+  int len = strlen(path);
+  if(len < 3){
+    return 0;
+  }
+  if(path[len-1] == 'h' && path[len-2] == 's' && path[len-3] == '.'){
+    return 1;
+  }
+  return 0;
+}
+
 int exec(char *path, char **argv, char ** env)
 {
   char *s, *last;
   uint64 argc, sz = 0, sp, ustack[MAXARG+1], stackbase;
   struct elfhdr elf;
-  struct dirent *ep;
+  struct dirent *ep = NULL;
   struct proghdr ph;
   pagetable_t pagetable = 0, oldpagetable;
   pagetable_t kpagetable = 0, oldkpagetable;
@@ -314,6 +325,10 @@ int exec(char *path, char **argv, char ** env)
   if(kpagetable == 0){
     debug_print("[exec]create_kpagetable failed\n");
     return -1;
+  }
+  int is_shell_script = is_sh_script(path);
+  if(is_shell_script){
+    goto bad;
   }
   // printf("coming 1\n");
   if((ep = ename(path)) == NULL) {
@@ -554,5 +569,9 @@ int exec(char *path, char **argv, char ** env)
     eunlock(ep);
     eput(ep);
   }
+  if(is_shell_script){
+    exit(0);
+  }
   return -1;
 }
+
