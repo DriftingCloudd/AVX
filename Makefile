@@ -158,7 +158,7 @@ gdb-client:
 	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 all:
-	@make build platform=qemu mode=release
+	@make build platform=qemu mode=release exam=yes
 	@cp target/kernel kernel-qemu
 
 qemu-run:
