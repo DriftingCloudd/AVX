@@ -57,7 +57,7 @@ struct socket {
 	uint8 wait_list[MAX_WAIT_LIST];
 	uint8 used;
 	uint8 status;
-	struct sockaddr *addr;
+	struct sockaddr addr;
 	struct ring_buffer data;
 };
 
