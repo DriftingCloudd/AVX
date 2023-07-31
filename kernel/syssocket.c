@@ -41,25 +41,24 @@ sys_socket(void) {
 uint64
 sys_bind(void) {
     int sockfd;
-    struct sockaddr saddr;
-    uint64 addr;
+    struct sockaddr *addr;
     socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_bind: argint(0, &sockfd) < 0\n");
         return -1;
     }
-    if (argaddr(1, &addr) < 0) {
+    if (argaddr(1,(void *) &addr) < 0) {
         printf("sys_bind: argaddr(1, (void *)&addr) < 0\n");
         return -1;
     }
 
-    either_copyin((void*)&saddr,1,addr,sizeof(struct sockaddr));
+    // either_copyin((void*)&saddr,1,addr,sizeof(struct sockaddr));
 
     if (argint(2, (int*)&addrlen) < 0) {
         printf("sys_bind: argint(2, &addrlen) < 0\n");
         return -1;
     }
-    return do_bind(sockfd, &saddr, addrlen);
+    return do_bind(sockfd, addr, addrlen);
 }
 
 uint64

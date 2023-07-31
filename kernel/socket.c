@@ -186,21 +186,25 @@ int do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK; 
     }
-    if (*addrlen != sizeof(struct sockaddr)) {
-        return -EINVAL;
-    }
+    // if (*addrlen != sizeof(struct sockaddr)) {
+    //     return -EINVAL;
+    // }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
-    if (addr != sock[sock_num].addr) {
-        return -EINVAL;
-    }
+    // if (addr != sock[sock_num].addr) {
+    //     return -EINVAL;
+    // }
     int i;
-    acquire(&sock_lock);
-    for (i = 0; i < sock[sock_num].backlog; i++) {
-        if (sock[sock_num].wait_list[i]) break;
-    }
-    if (i == sock[sock_num].backlog) {
-        release(&sock_lock);
-        return -EWOULDBLOCK;
+    while (1) {
+        acquire(&sock_lock);
+        for (i = 0; i < sock[sock_num].backlog; i++) {
+            if (sock[sock_num].wait_list[i]) break;
+        }
+        if (i == sock[sock_num].backlog) {
+            release(&sock_lock);
+            yield();
+        }
+        if (i < sock[sock_num].backlog)
+            break;
     }
     sock[sock[sock_num].wait_list[i]].status = SOCK_ACCEPTED;
     sock[sock_num].wait_list[i] = 0;

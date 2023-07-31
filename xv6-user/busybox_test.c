@@ -18,23 +18,22 @@ void test_busybox(){
 	dev(2,1,0);
 	dup(0);
 	dup(0);
-
-	int status,pid;
-  printf("111\n");
-  pid = fork();
-  if (pid == 0) {
-    exec("./cyclictest",cyclic_bench[0].name);
-    exit(0);
-  }
-  wait4(pid,&status,0);
-  printf("%d\n",status);
-  printf("222\n");
-  pid = fork();
-	if(pid == 0){
-		exec("time-test",time_test[0].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+	int status,pid,i;
+  // printf("111\n");
+  // pid = fork();
+  // if (pid == 0) {
+  //   exec("./cyclictest",cyclic_bench[0].name);
+  //   exit(0);
+  // }
+  // wait4(pid,&status,0);
+  // printf("%d\n",status);
+  // printf("222\n");
+  // pid = fork();
+	// if(pid == 0){
+	// 	exec("time-test",time_test[0].name);
+	// 	exit(0);
+	// }
+	// wait4(pid, &status, 0);
 	// printf("run busybox_testcode.sh\n");
 	// int i;
 	// for(i = 0; busybox[i].name[1] ; i++){
@@ -70,70 +69,70 @@ void test_busybox(){
 	
 	printf("run iozone_testcode.sh\n");
 	
-	// printf("iozone automatic measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[0].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone automatic measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[0].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
 
-	// printf("iozone throughput write/read measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[1].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput write/read measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[1].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput random-read measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[2].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput random-read measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[2].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput read-backwards measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[3].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput read-backwards measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[3].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput stride-read measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[4].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput stride-read measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[4].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput fwrite/fread measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[5].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput fwrite/fread measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[5].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput pwrite/pread measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[6].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput pwrite/pread measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[6].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput pwritev/preadv measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[7].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput pwritev/preadv measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[7].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
 
 	/**
@@ -141,25 +140,25 @@ void test_busybox(){
 	 */
 	printf("run libctest_testcode.sh\n");
 
-	// for(i = 0; libctest[i].name[1] ; i++){
-	// 	if(!libctest[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest[i].name[1] ; i++){
+		if(!libctest[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 	
-	// for(i = 0; libctest_dy[i].name[1] ; i++){
-	// 	if(!libctest_dy[i].valid)continue;
-	// 	pid = fork();
-	// 	if(pid==0){
-	// 		exec("./runtest.exe",libctest_dy[i].name);
-	// 		exit(0);
-	// 	}
-	// 	wait4(pid, &status, 0);
-	// }
+	for(i = 0; libctest_dy[i].name[1] ; i++){
+		if(!libctest_dy[i].valid)continue;
+		pid = fork();
+		if(pid==0){
+			exec("./runtest.exe",libctest_dy[i].name);
+			exit(0);
+		}
+		wait4(pid, &status, 0);
+	}
 
 	/**
 	* run lmbench_testcode.sh
@@ -391,8 +390,8 @@ static longtest libctest[] = {
   // can not pass
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_robust_detach", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_sem_wait", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond_smasher", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_condattr_setclock", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond_smasher", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_condattr_setclock", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_exit_cancel", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_once_deadlock", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_rwlock_ebusy", 0 } },
@@ -407,7 +406,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "regexec_nosub", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "rewind_clear_error", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "rlimit_open_files", 0 } },
-{ 1, {"./runtest.exe", "-w", "entry-static.exe", "scanf_bytes_consumed", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "scanf_bytes_consumed", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "scanf_match_literal_eof", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "scanf_nullbyte_char", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "setvbuf_unget", 0 } },
@@ -415,7 +414,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_eof", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "statvfs", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "strverscmp", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "syscall_sign_extend", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "syscall_sign_extend", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "uselocale_0", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "wcsncpy_read_overflow", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "wcsstr_false_negative", 0 } },
@@ -510,8 +509,8 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_g_zeros", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_n", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
@@ -532,7 +531,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf_eof", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "statvfs", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "strverscmp", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "uselocale_0", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsncpy_read_overflow", 0}},

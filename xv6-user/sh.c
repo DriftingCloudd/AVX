@@ -12,7 +12,7 @@
 #define BACK  5
 
 #define NENVS 16
-#define MAXARGS 10
+#define MAXARGS 100
 
 struct env{
   char name[32];
