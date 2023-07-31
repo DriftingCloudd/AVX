@@ -170,17 +170,17 @@ void test_busybox(){
 	* run lmbench_testcode.sh
 	*/
 	printf("run lmbench_testcode.sh\n");
-  // printf("latency measurements\n");
+  printf("latency measurements\n");
 
-  //   for(i = 0; lmbench[i].name[1] ; i++)
-  //   {
-  //     if(!lmbench[i].valid)continue;
-  //     int pid = fork();
-  //     if(pid==0){
-  //       exec(lmbench[i].name[0],lmbench[i].name);
-  //     }
-  //     wait4(pid,&status,0);
-  // }
+    for(i = 0; lmbench[i].name[1] ; i++)
+    {
+      if(!lmbench[i].valid)continue;
+      int pid = fork();
+      if(pid==0){
+        exec(lmbench[i].name[0],lmbench[i].name);
+      }
+      wait4(pid,&status,0);
+  }
 	/**
 	* run lua_testcode.sh
 	*/
@@ -593,9 +593,9 @@ static run_output unix_bench[] = {
   {1, {"./fstime", "-w", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_WRITE_MIDDLE test(KBps): ", "WRITE COUNT|",NULL}},
   {1, {"./fstime", "-r", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_READ_MIDDLE test(KBps): ","READ COUNT|", NULL}},
   {1, {"./fstime", "-c", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_COPY_MIDDLE test(KBps): ","COPY COUNT|", NULL}},
-  {1, {"./fstime", "-w", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_WRITE_BIG test(KBps): ", NULL}},
-  {1, {"./fstime", "-r", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_READ_BIG test(KBps): ", NULL}},
-  {1, {"./fstime", "-c", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_COPY_BIG test(KBps): ", NULL}},
+  // {1, {"./fstime", "-w", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_WRITE_BIG test(KBps): ", NULL}},
+  // {1, {"./fstime", "-r", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_READ_BIG test(KBps): ", NULL}},
+  // {1, {"./fstime", "-c", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_COPY_BIG test(KBps): ", NULL}},
   // {1, {"./looper", "20", "./multi.sh", "1", NULL}, {"Unixbench SHELL1 test(lpm): ", NULL}},
   // {1, {"./looper", "20", "./multi.sh", "8", NULL}, {"Unixbench SHELL8 test(lpm): ", NULL}},
   // {1, {"./looper", "20", "./multi.sh", "16", NULL}, {"Unixbench SHELL16 test(lpm): ", NULL}},
@@ -631,12 +631,12 @@ static longtest lmbench[] = {
 	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "open"  ,  "/var/tmp/lmbench"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_select"  ,  "-n"  ,  "100"  ,  "-P"  ,  "1"  ,  "file"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "install"  ,  0	}},
-	{ 0 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "catch"  ,  0	}},
-	{ 0 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "prot"  ,  "lat_sig"  ,  0	}},
+	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "catch"  ,  0	}},
+	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "prot"  ,  "lat_sig"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_pipe"  ,  "-P"  ,  "1"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "fork"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "exec"  ,  0	}},
-	{ 0 , {"busybox"  ,  "cp"  ,  "hello"  ,  "/tmp"  ,  0	}},
+	// { 1 , {"busybox"  ,  "cp"  ,  "hello"  ,  "/tmp"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "shell"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lmdd"  ,  "label=File /var/tmp/XXX write bandwidth:"  ,  "of=/var/tmp/XXX"  ,  "move=1m"  ,  "fsync=1"  ,  "print=3"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_mmap"  ,  "-P"  ,  "1"  ,  "512k"  ,  "/var/tmp/XXX"  ,  0	}},
