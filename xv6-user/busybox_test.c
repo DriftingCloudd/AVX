@@ -609,6 +609,7 @@ static run_output unix_bench[] = {
   {1, {"./double", "10", NULL}, {"Unixbench DOUBLE test(lps): ","COUNT|", NULL}},
   {1, {"./hanoi", "10", NULL}, {"Unixbench HANOI test(lps): ", "COUNT|",NULL}},
   {1, {"./syscall", "10", "exec", NULL}, {"Unixbench EXEC test(lps): ","COUNT|", NULL}},
+  {0, {0}, {0}},
 };
 
 static longtest libc_bench[] = {
