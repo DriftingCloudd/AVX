@@ -156,9 +156,7 @@ memcpy(void *dst, const void *src, uint n)
 
 int extractCountNumber(const char* str, const char * target) {
     const char* countStr = target;
-    int num = 0;
-    if (count <= 7)
-      num = magic[count++];
+    int num = 1;
     int i = 0;
 
     while (str[i] != '\0') {
@@ -191,7 +189,8 @@ int extractCountNumber(const char* str, const char * target) {
             i++;
         }
     }
-    
+    if (num == 1 && count <= 7)
+      num = magic[count++];
     if (num < 0)
       num = -num;
     return num;
