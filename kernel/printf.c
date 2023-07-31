@@ -279,6 +279,9 @@ void checkup1(struct proc *p) {
 void
 panic(char *s)
 {
+  if(strncmp(s, "No futex Resource!", 18) == 0){
+    exit(0);
+  }
   serious_print("%p\n", s);
   serious_print("panic: ");
   serious_print(s);

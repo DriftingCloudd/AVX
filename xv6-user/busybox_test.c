@@ -189,7 +189,11 @@ void test_busybox(){
     }
   }
 
-
+  if((pid = fork()) == 0){
+    exec("libc-bench", libc_bench[0].name);
+    exit(0);
+  }
+  wait4(pid, &status, 0);
   /**
   * run unixbench_testcode.sh
   */
@@ -239,12 +243,6 @@ void test_busybox(){
       }
       wait4(pid,&status,0);
   }
-
-  if((pid = fork()) == 0){
-    exec("libc-bench", libc_bench[0].name);
-    exit(0);
-  }
-  wait4(pid, &status, 0);
 
 
   printf(" !TEST FINISH! \n");

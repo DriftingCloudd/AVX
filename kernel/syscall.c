@@ -448,6 +448,9 @@ syscall(void)
     if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
+    if(num == SYS_openat && p->trapframe->a0 == -1){
+      printf("");
+    }
     // trace
     if(num != SYS_read && num != SYS_write && num != SYS_writev)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
