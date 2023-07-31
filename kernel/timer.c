@@ -53,7 +53,7 @@ void timer_tick() {
         // printf("begin timer\n");
         for(int i=0;i<NTIMERS;i++){
             if(timers[i].pid == 0) continue;
-            if(ticks -timers[i].ticks >= 100){
+            if(ticks -timers[i].ticks >= 80){
                 // printf("timer pid %d\n",timers[i].pid);
                 kill(timers[i].pid, SIGALRM);
                 timers[i].pid = 0;
