@@ -251,9 +251,7 @@ int free_vma_list(struct proc *p)
       if(PTE_FLAGS(*pte) == PTE_V)
         continue;
       uint64 pa = PTE2PA(*pte);
-      //__debug_warn("[free single vma]free:%p\n",pa);
       kfree((void*)pa);
-      //__debug_warn("[free vma list]free end\n");
       *pte = 0;
     }
     vma = vma->next;
