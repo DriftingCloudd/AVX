@@ -18,7 +18,7 @@
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
 
-#define STACK_SIZE 10240*PGSIZE
+#define STACK_SIZE 64*PGSIZE
 enum redir{
   REDIR_OUT,
   REDIR_APPEND,
@@ -551,7 +551,7 @@ int exec(char *path, char **argv, char ** env)
   sfence_vma();
   kvmfree(oldkpagetable, 0);
   
-  return argc; // this ends up in a0, the first argument to main(argc, argv)
+  return 0; // this ends up in a0, the first argument to main(argc, argv)
 
  bad:
   #ifdef DEBUG

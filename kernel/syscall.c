@@ -445,14 +445,14 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
+    // if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     if(num == SYS_openat && p->trapframe->a0 == -1){
       printf("");
     }
     // trace
-    if(num != SYS_read && num != SYS_write && num != SYS_writev)
+    // if(num != SYS_read && num != SYS_write && num != SYS_writev)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     // printf("pid %d call %d: %s a0:%p sp:%p\n", p->pid, num, sysnames[num], p->trapframe->a0, p->trapframe->sp);
     if ((p->tmask & (1 << num)) != 0) {
