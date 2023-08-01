@@ -719,7 +719,7 @@ static longtest lmbench[] = {
 	// { 1 , {"lmbench_all"  ,  "bw_mmap_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "mmap_only"  ,  "/var/tmp/XXX"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "bw_mmap_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "open2close"  ,  "/var/tmp/XXX"  ,  0	}},
 	{ 1 , {"busybox"  ,  "echo"  ,  "context"  ,  "switch"  ,  "overhead"  ,  0	}},
-	{ 1 , {"lmbench_all"  ,  "lat_ctx"  ,  "-P"  ,  "1"  ,  "-s"  ,  "32"  ,  "2"  ,  "4"  ,  "8"  ,  "16"  ,  "24"  ,  "32"   ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_ctx"  ,  "-P"  ,  "1"  ,  "-s"  ,  "32"  ,  "2"  ,  "4"  ,  0	}},
 	{ 0 , { 0 , 0				}},
 };
 

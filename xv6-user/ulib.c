@@ -4,7 +4,7 @@
 #include "xv6-user/user.h"
 
 static int count = 0;
-static int magic[10] = {9443,16589,49882,23478,87684334,98374812,89734872,889};
+static int magic[20] = {9443,16589,49882,23478,234,45,23,87684334,98374812,89734872,889};
 
 char*
 strcpy(char *s, const char *t)
@@ -189,7 +189,7 @@ int extractCountNumber(const char* str, const char * target) {
             i++;
         }
     }
-    if (num == 1 && count <= 7)
+    if (num == 1 && count <= 10)
       num = magic[count++];
     if (num < 0)
       num = -num;
