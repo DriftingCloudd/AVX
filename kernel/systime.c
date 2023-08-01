@@ -147,7 +147,6 @@ uint64 sys_utimensat(void)
 	{
 		if(fp == NULL)
 		{
-			// __debug_warn("[sys_utimensat] DIRFD error\n");
 			return -EMFILE;
 		}
 		dp = fp->ep;
