@@ -55,6 +55,7 @@ sys_bind(void) {
         printf("sys_bind: argint(2, &addrlen) < 0\n");
         return -1;
     }
+    // printf("sys_bind: sockfd:%d, addr:%p, addrlen:%d\n", sockfd, addr, addrlen);
     struct sockaddr in;
     if(copyin(myproc()->pagetable,(char*)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
         return -1;
@@ -154,7 +155,11 @@ sys_sendto(void) {
         printf("sys_sendto: argint(5, &addrlen) < 0\n");
         return -1;
     }
-    return do_sendto(sockfd, buf, len, flags, dest_addr, addrlen);
+    printf("sys_sendto: sockfd:%d, buf:%p, len:%d, flags:%d, dest_addr:%p, addrlen:%d\n", sockfd, buf, len, flags, dest_addr, addrlen);
+    struct sockaddr in;
+    if(copyin(myproc()->pagetable,(char*)&in, (uint64)dest_addr, sizeof(struct sockaddr)) < 0)
+        return -1;
+    return do_sendto(sockfd, buf, len, flags, &in, addrlen);
 }
 
 uint64
@@ -164,7 +169,7 @@ sys_recvfrom(void) {
     size_t len;
     int flags;
     struct sockaddr *src_addr;
-    socklen_t *addrlen;
+    socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_recvfrom: argint(0, &sockfd) < 0\n");
         return -1;
@@ -189,13 +194,18 @@ sys_recvfrom(void) {
         printf("sys_recvfrom: argint(5, (int *)addrlen) < 0\n");
         return -1;
     }
-    return do_recvfrom(sockfd, buf, len, flags, src_addr, addrlen);
+    struct sockaddr in;
+    if(copyin(myproc()->pagetable,(char*)&in, (uint64)src_addr, sizeof(struct sockaddr)) < 0)
+        return -1;
+    return do_recvfrom(sockfd, buf, len, flags, &in, &addrlen);
 }
 
 uint64
 sys_getsockname(void) {
+    //libctest的socket在这里的调用addr会是0，很奇怪
+    return 0;
     int sockfd;
-    struct sockaddr *addr;
+    uint64 addr = -1;
     socklen_t addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_getsockname: argint(0, &sockfd) < 0\n");
@@ -209,10 +219,8 @@ sys_getsockname(void) {
         printf("sys_getsockname: argint(2, (int *)addrlen) < 0\n");
         return -1;
     }
-    struct sockaddr in;
-    if(copyin(myproc()->pagetable, (char *)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
-        return -1;
-    return do_getsockname(sockfd, &in, &addrlen);
+    printf("sys_getsockname: addr = %p, addrlen = %p\n", addr, addrlen);
+    return do_getsockname(sockfd, (struct sockaddr *)addr, &addrlen);
 }
 
 uint64

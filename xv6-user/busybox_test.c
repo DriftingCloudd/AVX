@@ -33,7 +33,7 @@ void test_busybox(){
   // }
   // wait4(pid,&status,0);
   // printf("%d\n",status);
-  printf("222\n");
+  // printf("222\n");
   pid = fork();
 	if(pid == 0){
 		exec("time-test",time_test[0].name);
@@ -75,70 +75,70 @@ void test_busybox(){
 	
 	printf("run iozone_testcode.sh\n");
 	
-	// printf("iozone automatic measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[0].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone automatic measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[0].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
 
-	// printf("iozone throughput write/read measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[1].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput write/read measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[1].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput random-read measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[2].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput random-read measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[2].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput read-backwards measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[3].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput read-backwards measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[3].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput stride-read measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[4].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput stride-read measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[4].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput fwrite/fread measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[5].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput fwrite/fread measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[5].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput pwrite/pread measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[6].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput pwrite/pread measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[6].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
-	// printf("iozone throughput pwritev/preadv measurements\n");
-	// pid = fork();
-	// if(pid == 0){
-	// 	exec("iozone",iozone[7].name);
-	// 	exit(0);
-	// }
-	// wait4(pid, &status, 0);
+	printf("iozone throughput pwritev/preadv measurements\n");
+	pid = fork();
+	if(pid == 0){
+		exec("iozone",iozone[7].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
 
 
 	/**
@@ -350,7 +350,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "search_tsearch", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "setjmp", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "snprintf", 0 } },
-  // { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
+  { 1, {"./runtest.exe", "-w", "entry-static.exe", "socket", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_long", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "stat", 0 } },
@@ -415,8 +415,8 @@ static longtest libctest[] = {
   // can not pass
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_robust_detach", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cancel_sem_wait", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond_smasher", 0 } },
-	//   { 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_condattr_setclock", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_cond_smasher", 0 } },
+	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_condattr_setclock", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_exit_cancel", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_once_deadlock", 0 } },
 	{ 1, {"./runtest.exe", "-w", "entry-static.exe", "pthread_rwlock_ebusy", 0 } },
@@ -480,7 +480,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "setjmp", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "snprintf", 0}},
     
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "socket", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf_long", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "stat", 0}},
@@ -535,8 +535,8 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_g_zeros", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "printf_fmt_n", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_robust_detach", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
-    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_cond_smasher", 0}},
+    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_condattr_setclock", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_exit_cancel", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_once_deadlock", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "pthread_rwlock_ebusy", 0}},
@@ -593,12 +593,12 @@ static run_output unix_bench[] = {
   {1, {"./fstime", "-w", "-t", "20", "-b", "256", "-m", "500", NULL}, {"Unixbench FS_WRITE_SMALL test(KBps): ", "WRITE COUNT|",NULL}},
   {1, {"./fstime", "-r", "-t", "20", "-b", "256", "-m", "500", NULL}, {"Unixbench FS_READ_SMALL test(KBps): ", "READ COUNT|",NULL}},
   {1, {"./fstime", "-c", "-t", "20", "-b", "256", "-m", "500", NULL}, {"Unixbench FS_COPY_SMALL test(KBps): ", "COPY COUNT|",NULL}},
-  // {1, {"./fstime", "-w", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_WRITE_MIDDLE test(KBps): ", "WRITE COUNT|",NULL}},
-  // {1, {"./fstime", "-r", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_READ_MIDDLE test(KBps): ","READ COUNT|", NULL}},
-  // {1, {"./fstime", "-c", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_COPY_MIDDLE test(KBps): ","COPY COUNT|", NULL}},
-  // {1, {"./fstime", "-w", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_WRITE_BIG test(KBps): ", NULL}},
-  // {1, {"./fstime", "-r", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_READ_BIG test(KBps): ", NULL}},
-  // {1, {"./fstime", "-c", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_COPY_BIG test(KBps): ", NULL}},
+  {1, {"./fstime", "-w", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_WRITE_MIDDLE test(KBps): ", "WRITE COUNT|",NULL}},
+  {1, {"./fstime", "-r", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_READ_MIDDLE test(KBps): ","READ COUNT|", NULL}},
+  {1, {"./fstime", "-c", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_COPY_MIDDLE test(KBps): ","COPY COUNT|", NULL}},
+  {1, {"./fstime", "-w", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_WRITE_BIG test(KBps): ", NULL}},
+  {1, {"./fstime", "-r", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_READ_BIG test(KBps): ", NULL}},
+  {1, {"./fstime", "-c", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_COPY_BIG test(KBps): ", NULL}},
   // {1, {"./looper", "20", "./multi.sh", "1", NULL}, {"Unixbench SHELL1 test(lpm): ", NULL}},
   // {1, {"./looper", "20", "./multi.sh", "8", NULL}, {"Unixbench SHELL8 test(lpm): ", NULL}},
   // {1, {"./looper", "20", "./multi.sh", "16", NULL}, {"Unixbench SHELL16 test(lpm): ", NULL}},
