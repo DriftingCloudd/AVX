@@ -89,6 +89,8 @@
 #define SYS_setitimer   103
 #define SYS_tkill       130
 
+#define SYS_shutdown    1000
+
 // network syscall
 #define SYS_socket      198
 #define SYS_bind        200

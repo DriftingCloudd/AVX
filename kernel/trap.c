@@ -14,6 +14,7 @@
 #include "include/disk.h"
 #include "include/uart.h"
 #include "include/vm.h"
+#include "include/vma.h"
 
 extern char trampoline[], uservec[], userret[];
 
@@ -79,6 +80,11 @@ usertrap(void)
     intr_on();
     syscall();
   } 
+  else if((r_scause() == 13 || r_scause() == 15) && (handle_stack_page_fault(myproc(), r_stval()) == 0)){
+    //load page fault or store page fault
+    //check if the page fault is caused by stack growth
+    printf("handle stack page fault\n");
+  }
   else if((which_dev = devintr()) != 0){
     // ok
   } 

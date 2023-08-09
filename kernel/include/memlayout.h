@@ -78,9 +78,9 @@
 // #define PHYSTOP                 0x80a00000
 //128M  0x800_0000  4G  0x10000_0000
 #ifdef QEMU
-#define PHYSTOP                 0x88a00000
+#define PHYSTOP                 0x88000000
 #else
-#define PHYSTOP                 0x180000000
+#define PHYSTOP                 0x140000000
 #endif
 
 // map the trampoline page to the highest address,
@@ -107,6 +107,10 @@
 #define MAXUVA                  0x80000000L
 #define USER_STACK_BOTTOM (MAXUVA - (2*PGSIZE))
 #define USER_MMAP_START (USER_STACK_BOTTOM - 0x10000000)
+
+//注意，上面的user_stack_bottom定义不管他，目前用下面这个
+#define USER_STACK_TOP MAXUVA - PGSIZE
+#define USER_STACK_DOWN USER_MMAP_START + PGSIZE
 
 #define KERNEL_PROCESS_SP_TOP (1UL << 36)
 

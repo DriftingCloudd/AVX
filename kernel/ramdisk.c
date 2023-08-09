@@ -15,7 +15,7 @@ void
 ramdisk_init(void)
 {
     initlock(&ramdisklock, "ramdisk lock");
-    ramdisk = sddata_start;
+    ramdisk = (char*)sddata_start;
     debug_print("ramdiskinit ram start:%p\n",ramdisk);
 }
 

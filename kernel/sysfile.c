@@ -44,7 +44,7 @@ argfd(int n, int *pfd, struct file **pf)
   struct file *f;
 
   if(argint(n, &fd) < 0){
-    printf("argfd: argint error\n");
+    debug_print("argfd: argint error\n");
     return -1;
   }
   //mmap映射匿名区域的时候会需要fd为-1
@@ -58,7 +58,7 @@ argfd(int n, int *pfd, struct file **pf)
   }
 
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
-    printf("fd: %d argfd: fd error\n", fd); 
+    debug_print("fd: %d argfd: fd error\n", fd); 
     return -1;
   }
   
@@ -554,18 +554,20 @@ sys_pipe(void)
     return -1;
   if(pipealloc(&rf, &wf) < 0)
     return -1;
+  debug_print("pip get arg success\n");
   fd0 = -1;
   if((fd0 = fdalloc(rf)) < 0 || (fd1 = fdalloc(wf)) < 0){
     if(fd0 >= 0)
       p->ofile[fd0] = 0;
     fileclose(rf);
     fileclose(wf);
+    debug_print("pip fdalloc fail\n");
     return -1;
   }
-  // if(copyout(p->pagetable, fdarray, (char*)&fd0, sizeof(fd0)) < 0 ||
-  //    copyout(p->pagetable, fdarray+sizeof(fd0), (char *)&fd1, sizeof(fd1)) < 0){
-  if(copyout2(fdarray, (char*)&fd0, sizeof(fd0)) < 0 ||
-     copyout2(fdarray+sizeof(fd0), (char *)&fd1, sizeof(fd1)) < 0){
+  if(copyout(p->pagetable, fdarray, (char*)&fd0, sizeof(fd0)) < 0 ||
+     copyout(p->pagetable, fdarray+sizeof(fd0), (char *)&fd1, sizeof(fd1)) < 0){
+  // if(copyout2(fdarray, (char*)&fd0, sizeof(fd0)) < 0 ||
+  //    copyout2(fdarray+sizeof(fd0), (char *)&fd1, sizeof(fd1)) < 0){
     p->ofile[fd0] = 0;
     p->ofile[fd1] = 0;
     fileclose(rf);

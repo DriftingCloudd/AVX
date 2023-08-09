@@ -30,8 +30,13 @@ struct vma *vma_init(struct proc *p)
     
     if (NULL == alloc_mmap_vma(p,0,USER_MMAP_START,0,0,0,0)) {
         //free_vma_list(p);
+        kfree(vma);
         return NULL;
     }
+    // if(alloc_vma_stack(p) != 0){
+    //     kfree(vma);
+    //     return NULL;
+    // }
 
     return vma;
 }
@@ -155,6 +160,7 @@ failure:
     return NULL;
 }
 
+//拷贝vma实际的内容
 int vma_map(pagetable_t old,pagetable_t new,struct vma *vma) 
 {
   uint64 start = vma->addr;
@@ -245,9 +251,7 @@ int free_vma_list(struct proc *p)
       if(PTE_FLAGS(*pte) == PTE_V)
         continue;
       uint64 pa = PTE2PA(*pte);
-      //__debug_warn("[free single vma]free:%p\n",pa);
       kfree((void*)pa);
-      //__debug_warn("[free vma list]free end\n");
       *pte = 0;
     }
     vma = vma->next;
@@ -256,4 +260,93 @@ int free_vma_list(struct proc *p)
   kfree(vma);
   p->vma = NULL;
   return 1;
+}
+
+
+//stack从maxuva - pgsize 开始向下分配，最多分配到USER_MMAP_START
+uint64
+alloc_vma_stack(struct proc * p){
+  //起始分配100个page
+  uint64 end = USER_STACK_TOP;
+  uint64 start = end - INIT_STACK_SIZE;
+  struct vma * find_vma = p->vma->next;
+  //stack 放到链表的最后端
+  while(find_vma != p->vma && find_vma->next != p->vma){
+    find_vma = find_vma->next;
+  }
+
+  struct vma* vma = (struct vma*)kalloc();
+  if (NULL == vma) {
+      printf("vma kalloc failed\n");
+      return -1;
+  }
+
+  if(uvmalloc1(p->pagetable, start, end, PTE_R | PTE_W | PTE_U) != 0){
+    printf("user stack vma alloc failed\n");
+    kfree(vma);
+    return -1;
+  }
+  vma->type = STACK;
+  vma->perm = PTE_R | PTE_W;
+  vma->addr = start;
+  vma->end = end;
+  vma->sz = INIT_STACK_SIZE;
+  vma->flags = 0;
+  vma->fd = -1;
+  vma->f_off = -1;
+  vma->prev = find_vma;
+  vma->next = find_vma->next;
+  find_vma->next->prev = vma;
+  find_vma->next = vma;
+  return 0;
+}
+
+//栈空间不足，需要分配新的栈空间，至多分配到USER_MMAP_START
+uint64 handle_stack_page_fault(struct proc *p, uint64 va){
+  
+  if(!(va >= USER_STACK_DOWN && va < USER_STACK_TOP)){
+    return -1;
+  }
+  struct vma *vma = p->vma->next;
+  while(vma != p->vma){
+    if(vma->type == STACK){
+      break;
+    }
+    vma = vma->next;
+  }
+  if(vma->type != STACK){
+    printf("handle_stack_page_fault: vma type is not stack\n");
+    return -1;
+  }
+  printf("handle stack page fault now start %p, now end :%p, va:%p\n", vma->addr, vma->end, va);
+  uint64 start = vma->addr - INCREASE_STACK_SIZE_PER_FAULT;
+  if(start > va){
+    start = PGROUNDDOWN(va);
+  }
+  uint64 end = vma->addr;
+  
+
+  if(uvmalloc1(p->pagetable, start, end, PTE_R | PTE_W | PTE_U) != 0){
+    printf("user stack vma alloc failed\n");
+    return -1;
+  }
+  vma->addr = start;
+  vma->sz = vma->sz + INCREASE_STACK_SIZE_PER_FAULT;
+
+  return 0;
+}
+
+uint64 get_proc_sp(struct proc * p){
+  struct vma *vma = p->vma->next;
+  while(vma != p->vma){
+    if(vma->type == STACK){
+      break;
+    }
+    vma = vma->next;
+  }
+  if(vma->type != STACK){
+    printf("get_proc_sp: vma type is not stack\n");
+    return -1;
+  }
+  return vma->end;
 }

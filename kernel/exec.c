@@ -13,6 +13,7 @@
 #include "include/printf.h"
 #include "include/string.h"
 #include "include/mmap.h"
+#include "include/vma.h"
 
 #define min(x, y) ((x) < (y) ? (x) : (y))
 #define max(x, y) ((x) > (y) ? (x) : (y))
@@ -220,22 +221,6 @@ load_elf_interp(pagetable_t pagetable, struct elfhdr* interp_elf_ex, struct dire
 }
 
 int
-create_user_stack(uint64 * sz, uint64 * sp, uint64 * stackbase, pagetable_t pagetable, pagetable_t kpagetable){
-
-  *sz = PGROUNDUP(*sz);
-  uint64 sz1;
-  if((sz1 = uvmalloc(pagetable, kpagetable, *sz, *sz + STACK_SIZE, PTE_R | PTE_W)) == 0){
-    return -1;
-  }
-  *sz = sz1;
-  uvmclear(pagetable, *sz - STACK_SIZE);
-  *sp = *sz;
-  *stackbase = *sp - STACK_SIZE + PGSIZE;
-  // printf("create_user_stack success, start:%p, end:%p\n", *stackbase, *sp);
-  return 0;
-}
-
-int
 user_stack_push_str(pagetable_t pt, uint64 * ustack, char * str, uint64 sp, uint64 stackbase){
   uint64 argc = ++ustack[0];
   if(argc>MAXARG+1){
@@ -288,12 +273,23 @@ loadaux(pagetable_t pagetable,uint64 sp,uint64 stackbase,uint64* aux){
   return sp;
 }
 
+int is_sh_script(char * path){
+  int len = strlen(path);
+  if(len < 3){
+    return 0;
+  }
+  if(path[len-1] == 'h' && path[len-2] == 's' && path[len-3] == '.'){
+    return 1;
+  }
+  return 0;
+}
+
 int exec(char *path, char **argv, char ** env)
 {
   char *s, *last;
   uint64 argc, sz = 0, sp, ustack[MAXARG+1], stackbase;
   struct elfhdr elf;
-  struct dirent *ep;
+  struct dirent *ep = NULL;
   struct proghdr ph;
   pagetable_t pagetable = 0, oldpagetable;
   pagetable_t kpagetable = 0, oldkpagetable;
@@ -313,6 +309,10 @@ int exec(char *path, char **argv, char ** env)
   if(kpagetable == 0){
     debug_print("[exec]create_kpagetable failed\n");
     return -1;
+  }
+  int is_shell_script = is_sh_script(path);
+  if(is_shell_script){
+    goto bad;
   }
   // printf("coming 1\n");
   if((ep = ename(path)) == NULL) {
@@ -374,10 +374,9 @@ int exec(char *path, char **argv, char ** env)
 
   p = myproc();
   uint64 oldsz = p->sz;
-  if(create_user_stack(&sz, &sp, &stackbase, pagetable, kpagetable) == -1){
-    printf("create_user_stack failed\n");
-    goto bad;
-  }
+  alloc_vma_stack(p);
+  sp = get_proc_sp(p);
+  stackbase = sp - INIT_STACK_SIZE;
   //printf("[exec] stackbase: %p stacktop: %p\n", stackbase, sz);
 
 
@@ -532,7 +531,7 @@ int exec(char *path, char **argv, char ** env)
   sfence_vma();
   kvmfree(oldkpagetable, 0);
   
-  return argc; // this ends up in a0, the first argument to main(argc, argv)
+  return 0; // this ends up in a0, the first argument to main(argc, argv)
 
  bad:
   #ifdef DEBUG
@@ -550,5 +549,9 @@ int exec(char *path, char **argv, char ** env)
     eunlock(ep);
     eput(ep);
   }
+  if(is_shell_script){
+    exit(0);
+  }
   return -1;
 }
+

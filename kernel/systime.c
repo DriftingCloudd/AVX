@@ -82,7 +82,7 @@ sys_gettimeofday(void)
   ts.second = t / CLK_FREQ;
   ts.microSecond = (t % CLK_FREQ ) * 1000000 / CLK_FREQ;
   // printf("second: %d, microSecond: %d\n", ts.second, ts.microSecond);
-  return copyout2(tt, (char*) &ts, sizeof(TimeSpec));
+  return copyout(myproc()->pagetable, tt, (char*) &ts, sizeof(TimeSpec));
 }
 
 //todo
@@ -147,7 +147,6 @@ uint64 sys_utimensat(void)
 	{
 		if(fp == NULL)
 		{
-			// __debug_warn("[sys_utimensat] DIRFD error\n");
 			return -EMFILE;
 		}
 		dp = fp->ep;

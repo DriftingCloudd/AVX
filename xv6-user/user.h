@@ -36,6 +36,7 @@ int trace(int mask);
 int sysinfo(struct sysinfo *);
 int rename(char *old, char *new);
 int ftruncate(int fd, int len);
+int shutdown(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

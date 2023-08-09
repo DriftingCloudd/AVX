@@ -11,6 +11,7 @@
 #include "include/vm.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/sbi.h"
 
 // Fetch the uint64 at addr from the current process.
 int
@@ -94,6 +95,13 @@ argstr(int n, char *buf, int max)
   if(argaddr(n, &addr) < 0)
     return -1;
   return fetchstr(addr, buf, max);
+}
+
+uint64
+sys_shutdown()
+{
+  sbi_shut_down();
+  return 0;
 }
 
 extern uint64 sys_chdir(void);
@@ -314,6 +322,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sched_getaffinity]   sys_sched_getaffinity,
   [SYS_sched_setscheduler]  sys_sched_setscheduler,
   [SYS_clock_getres]  sys_clock_getres,
+  [SYS_shutdown]      sys_shutdown,
 };
 
 static char *sysnames[] = {
@@ -425,6 +434,7 @@ static char *sysnames[] = {
   [SYS_sched_getaffinity]   "sched_getaffinity",
   [SYS_sched_setscheduler]  "sched_setscheduler",
   [SYS_clock_getres]  "clock_getres",
+  [SYS_shutdown]       "shutdown",
 };
 
 void
@@ -435,18 +445,21 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
+    // if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
+    if(num == SYS_openat && p->trapframe->a0 == -1){
+      printf("");
+    }
     // trace
-    if(num != SYS_read && num != SYS_write && num != SYS_writev)
+    // if(num != SYS_read && num != SYS_write && num != SYS_writev)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     // printf("pid %d call %d: %s a0:%p sp:%p\n", p->pid, num, sysnames[num], p->trapframe->a0, p->trapframe->sp);
     if ((p->tmask & (1 << num)) != 0) {
       printf("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     }
   } else {
-    printf("pid %d %s: unknown sys call %d\n",
+    debug_print("pid %d %s: unknown sys call %d\n",
             p->pid, p->name, num);
     p->trapframe->a0 = -1;
   }

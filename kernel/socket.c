@@ -1,5 +1,5 @@
 #include "include/socket.h"
-
+#include "include/ring_buffer.h"
 
 struct socket sock[MAX_SOCK_NUM + 1]; // 0: unused ; 1~MAX_SOCK_NUM: avaliable
 struct spinlock sock_lock;
@@ -27,6 +27,19 @@ int init_socket(){
         memset(&sock[i],0,sizeof(struct socket));
         init_ring_buffer(&sock[i].data);
     }
+    acquire(&sock_lock);
+    sock[1].used = 1;
+    sock[1].domain = AF_INET;
+    sock[1].status = SOCK_CLOSED;
+    sock[1].type = SOCK_DGRAM;
+    sock[1].protocol =  IPPROTO_UDP;
+    sock[1].socknum = 1;
+    struct sockaddr addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = 0;
+    addr.sin_addr.s_addr = 16777343; //127.0.0.1的大端序
+    sock[1].addr = addr;
+    release(&sock_lock);
     return 0;
 }
 
@@ -79,6 +92,7 @@ int do_socket(int domain, int type, int protocol){
     }
     
     release(&sock_lock);
+    printf("socket: new %d socket %d\n",i, new_fd_num);
     return new_fd_num;
 }
 
@@ -93,7 +107,7 @@ int do_bind(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
-    sock[sock_num].addr = addr;
+    sock[sock_num].addr = *addr;
     release(&sock_lock);
     return 0;
 }
@@ -129,7 +143,7 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
         acquire(&sock_lock);
         for (i=1;i<=MAX_SOCK_NUM;i++){
             // printk("sock[%d]: addr = %x, status = %d\n",i,sock[i].addr->sin_addr,sock[i].status);
-            if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
+            if (!memcmp(addr,&sock[i].addr,sizeof(struct sockaddr))
                 && sock[i].status == SOCK_LISTEN)
                 break;
         }
@@ -142,7 +156,7 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
             acquire(&sock_lock);
             for (i=1;i<=MAX_SOCK_NUM;i++){
                 // printk("sock[%d]: addr = %x, status = %d\n",i,sock[i].addr->sin_addr,sock[i].status);
-                if (!memcmp(addr,sock[i].addr,sizeof(struct sockaddr))
+                if (!memcmp(addr,&sock[i].addr,sizeof(struct sockaddr))
                     && sock[i].status == SOCK_LISTEN)
                     break;
             }
@@ -190,9 +204,9 @@ int do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
         return -EINVAL;
     }
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
-    if (addr != sock[sock_num].addr) {
-        return -EINVAL;
-    }
+    // if (addr != sock[sock_num].addr) {
+    //     return -EINVAL;
+    // }
     int i;
     acquire(&sock_lock);
     for (i = 0; i < sock[sock_num].backlog; i++) {
@@ -214,6 +228,7 @@ int do_accept(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
 
 // 向sockaddr对应的socket发送数据（实际上是向其缓冲区写入数据）
 ssize_t do_sendto(int sockfd, void *buf, size_t len, int flags, struct sockaddr *dest_addr, socklen_t addrlen){
+    printf("do_sendto dest sock: %d %d %d\n", dest_addr->sin_family, dest_addr->sin_port, dest_addr->sin_addr.s_addr);
     // for here, sockfd and flags are trivial because of the leak of network function
     struct proc *curr_proc = myproc();
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
@@ -224,14 +239,18 @@ ssize_t do_sendto(int sockfd, void *buf, size_t len, int flags, struct sockaddr 
     }
     int i;
     acquire(&sock_lock);
-    for (i = 1; i <= MAX_SOCK_NUM; i++)
-        if (!memcmp(dest_addr, sock[i].addr, sizeof(struct sockaddr)) && 
+    for (i = 1; i <= MAX_SOCK_NUM; i++){
+        printf("sock[%d], %d %d %d\n", i, sock[i].addr.sin_family, sock[i].addr.sin_port, sock[i].addr.sin_addr.s_addr);
+        if (!memcmp(dest_addr, &sock[i].addr, sizeof(struct sockaddr)) && 
             ((sock[i].protocol == IPPROTO_UDP) || (sock[i].protocol == IPPROTO_TCP && sock[i].status == SOCK_ESTABLISHED))) break;
+    }
+
+        
     if (i == MAX_SOCK_NUM + 1) {
         release(&sock_lock);
         return -ENOTCONN;
     }
-    //printk("ready to write ringbuffer! ringbuffer:%lx, buf = %lx, len = %d\n",&sock[i].data,buf,len);
+    // printf("ready to write ringbuffer! ringbuffer:%lx, buf = %lx, len = %d\n",&sock[i].data,buf,len);
     int old_len = len;
     while (len > 0) {
 		int write_len = write_ring_buffer(&sock[i].data,buf, len);
@@ -270,7 +289,7 @@ int close_socket(uint32 sock_num){
     return 0;
 }
 
-// 获取socket的addr
+// 获取socket的addr addr是用户空间地址
 int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
     struct proc *curr_proc = myproc();
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
@@ -279,10 +298,12 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
     if (*addrlen != sizeof(struct sockaddr)) {
         return -EINVAL;
     }
+    printf("sockfd = %d\n",sockfd);
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
     acquire(&sock_lock);
-    memcpy(addr,sock[sock_num].addr,sizeof(struct sockaddr));
+    copyout(curr_proc->pagetable, (uint64)addr, (char*)&sock[sock_num].addr, sizeof(struct sockaddr));
     release(&sock_lock);
+    printf("sock[sock_num].addr = %lx\n",sock[sock_num].addr);
     return 0;
 }
 

@@ -4,7 +4,11 @@
 #include "types.h"
 #include "proc.h"
 
-enum segtype {NONE, MMAP};
+#define INIT_STACK_SIZE 100 * PGSIZE
+#define INCREASE_STACK_SIZE_PER_FAULT 100 * PGSIZE
+
+
+enum segtype {NONE, MMAP, STACK};
 
 struct proc;
 
@@ -28,5 +32,8 @@ struct vma *find_mmap_vma(struct vma *head);
 int free_vma_list(struct proc *p);
 struct vma* vma_copy(struct proc *np, struct vma *head);
 int vma_map(pagetable_t old,pagetable_t new,struct vma *vma);
+uint64  alloc_vma_stack(struct proc * p);
+uint64 get_proc_sp(struct proc * p);
+uint64 handle_stack_page_fault(struct proc *p, uint64 va);
 #endif
 

@@ -414,14 +414,10 @@ userinit(void)
   uvminit(p->pagetable , p->kpagetable, initcode, initcodesize);
   p->sz = initcodesize;
   p->sz = PGROUNDUP(p->sz);
-  uint64 sz1;
-  uint64 stacksize = 2 * PGSIZE;
-  if((sz1 = uvmalloc(p->pagetable, p->kpagetable, p->sz, p->sz + stacksize, PTE_R | PTE_W)) == 0){
-    panic("userinit: out of memory");
-  }
-  p->sz = sz1;
+
   // uvmclear(p->pagetable, p->sz - stacksize);
-  p->trapframe->sp = p->sz; // user stack pointer
+  alloc_vma_stack(p);
+  p->trapframe->sp = get_proc_sp(p); // user stack pointer
 
   // prepare for the very first "return" from kernel to user.
   p->trapframe->epc = 0x0;      // user program counter
@@ -665,7 +661,7 @@ wait(uint64 addr)
         if(np->state == ZOMBIE){
           // Found one.
           pid = np->pid;
-          if(addr != 0 && copyout2(addr, (char *)&np->xstate, sizeof(np->xstate)) < 0) {
+          if(addr != 0 && copyout(p->pagetable, addr, (char *)&np->xstate, sizeof(np->xstate)) < 0) {
             release(&np->lock);
             release(&p->lock);
             return -1;
@@ -1133,6 +1129,7 @@ uint64 thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid) {
   t->p = p;
   if (mappages(p->kpagetable,p->kstack-PGSIZE * p->thread_num * 2,PGSIZE,(uint64)(t->trapframe),PTE_R | PTE_W) < 0)
     panic("thread_clone: mappages");
+  t->vtf = p->kstack-PGSIZE * p->thread_num * 2;
   void *kstack_pa = kalloc();
   if (NULL == kstack_pa)
     panic("thread_clone: kalloc kstack failed");

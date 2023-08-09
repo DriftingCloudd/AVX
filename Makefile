@@ -141,7 +141,7 @@ image = $T/kernel.bin
 QEMU = qemu-system-riscv64
 CPUS := 1
 
-QEMUOPTS = -machine virt -m 2G -nographic -kernel target/kernel 
+QEMUOPTS = -machine virt -m 128M -nographic -kernel target/kernel 
 # use multi-core 
 QEMUOPTS += -smp $(CPUS)
 QEMUOPTS += -bios default
@@ -159,11 +159,11 @@ gdb-client:
 
 all:
 	@gunzip -k sdcard.img.gz
-	@make build platform=visionfive mode=release
+	@make build platform=visionfive mode=release exam=yes
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu
+	@make build platform=qemu mode=release exam=yes
 #	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
