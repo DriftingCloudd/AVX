@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "error.h"
 
+#define AF_UNSPEC 0
 #define PF_INET 2
 // 套接字的通信域(domain)的常用宏定义
 #define AF_INET PF_INET  // IPv4 网络协议
@@ -60,6 +61,11 @@ struct socket {
 	struct sockaddr addr;
 	struct ring_buffer data;
 };
+
+uint16 htons(uint16 hostshort);
+uint32 htonl(uint32 hostlong);
+uint16 ntohs(uint16 netshort);
+uint32 ntohl(uint32 netlong);
 
 int init_socket();
 int do_socket(int domain, int type, int protocol);

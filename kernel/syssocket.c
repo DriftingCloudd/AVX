@@ -104,7 +104,7 @@ uint64
 sys_accept(void) {
     int sockfd;
     struct sockaddr *addr;
-    socklen_t addrlen;
+    socklen_t *addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_accept: argint(0, &sockfd) < 0\n");
         return -1;
@@ -120,7 +120,10 @@ sys_accept(void) {
     struct sockaddr in;
     if(copyin(myproc()->pagetable,(char*)&in, (uint64)addr, sizeof(struct sockaddr)) < 0)
         return -1;
-    return do_accept(sockfd, &in, &addrlen);
+    socklen_t inlen;
+    if(copyin(myproc()->pagetable,(char*)&inlen, (uint64)addrlen, sizeof(socklen_t)) < 0)
+        return -1;
+    return do_accept(sockfd, &in, &inlen);
 }
 
 uint64
@@ -169,7 +172,7 @@ sys_recvfrom(void) {
     size_t len;
     int flags;
     struct sockaddr *src_addr;
-    socklen_t addrlen;
+    socklen_t *addrlen;
     if (argint(0, &sockfd) < 0) {
         printf("sys_recvfrom: argint(0, &sockfd) < 0\n");
         return -1;
@@ -197,7 +200,10 @@ sys_recvfrom(void) {
     struct sockaddr in;
     if(copyin(myproc()->pagetable,(char*)&in, (uint64)src_addr, sizeof(struct sockaddr)) < 0)
         return -1;
-    return do_recvfrom(sockfd, buf, len, flags, &in, &addrlen);
+    socklen_t inlen;
+    if(copyin(myproc()->pagetable,(char*)&inlen, (uint64)addrlen, sizeof(socklen_t)) < 0)
+        return -1;
+    return do_recvfrom(sockfd, buf, len, flags, &in, &inlen);
 }
 
 uint64
