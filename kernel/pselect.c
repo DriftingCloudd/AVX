@@ -122,6 +122,7 @@ sys_pselect6(void)
 				// printf("arrive here!\n");
 			case FD_DEVICE:
 			case FD_ENTRY:
+			case FD_SOCK:
 				ret++;
 			break;
 
@@ -148,6 +149,7 @@ sys_pselect6(void)
 				}
 			case FD_DEVICE:
 			case FD_ENTRY:
+			case FD_SOCK:
 				ret++;
 			break;
 
