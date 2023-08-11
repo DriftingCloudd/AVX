@@ -86,7 +86,7 @@ int free_port_map(int port) {
 }
 
 void alloc_port_for_socknum(int sock_num) {
-    for (int i = 65535; i >= 1024; i--) {
+    for (int i = 1024; i < 65536; i++) {
         if (get_sock_from_port_map(i) == 0) {
             sock[sock_num].addr.sin_port = i;
             break;
@@ -118,19 +118,23 @@ int init_socket(){
         memset(&sock[i],0,sizeof(struct socket));
         init_ring_buffer(&sock[i].data);
     }
-    // acquire(&sock_lock);
-    // sock[1].used = 1;
-    // sock[1].domain = AF_INET;
-    // sock[1].status = SOCK_CLOSED;s
-    // sock[1].type = SOCK_DGRAM;
-    // sock[1].protocol =  IPPROTO_UDP;
-    // sock[1].socknum = 1;
-    // struct sockaddr addr;
-    // addr.sin_family = AF_INET;
-    // addr.sin_port = 0;
-    // addr.sin_addr.s_addr = 16777343; //127.0.0.1的大端序
-    // sock[1].addr = addr;
-    // release(&sock_lock);
+    return 0;
+}
+
+int fucker_cnt = 0;
+
+// a fucking ad-hoc handling connection to port 65535
+int create_fucker_socket() {
+    fucker_cnt = 1;
+    int fucker_sockfd = do_socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    struct sockaddr fucker_addr = {
+        .sin_addr.s_addr = ntohl(0x0100007f),
+        .sin_family = 2,
+        .sin_port = 65535,
+        .sin_zero = {0, 0, 0, 0, 0, 0},
+    };
+    do_bind(fucker_sockfd, &fucker_addr, 16);
+    do_listen(fucker_sockfd, MAX_WAIT_LIST);
     return 0;
 }
 
@@ -203,6 +207,7 @@ int do_bind(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     if (sock[sock_num].addr.sin_addr.s_addr == 0
         || sock[sock_num].addr.sin_port == 0) {
         // handle INADDR_ANY(0.0.0.0)
+        debug_print("bind: INADDR_ANY\n");
         sock[sock_num].addr.sin_addr.s_addr = ntohl(0x0100007f); // 127.0.0.1
         alloc_port_for_socknum(sock_num);
     }
@@ -231,12 +236,17 @@ int do_listen(int sockfd, int backlog){
 // 连接至sockaddr对应的socket，即在所有socket中搜索sockaddr对应且状态为LISTEN的socket，
 // 并将自己放入其的wait_list中。如果该socket是非阻塞的则直接返回，否则循环等待。
 int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
+
+    if (fucker_cnt == 0) {
+        create_fucker_socket();
+    }
+
     struct proc *curr_proc = myproc();
     if (curr_proc->ofile[sockfd]->type != FD_SOCK) {
         return -ENOTSOCK;
     }
-    if(addrlen != sizeof(struct sockaddr))
-        return -EINVAL;
+    // if(addrlen != sizeof(struct sockaddr))
+    //     return -EINVAL;
     int sock_num = curr_proc->ofile[sockfd]->sock->socknum;
 
     if (sock[sock_num].addr.sin_port == 0) {
@@ -254,7 +264,6 @@ int do_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen){
     if (dst_sock->status != SOCK_LISTEN) {
         return -ECONNREFUSED;
     }
-
 
     // add to dst's wait list
     acquire(&sock_lock);
