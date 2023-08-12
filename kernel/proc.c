@@ -252,6 +252,9 @@ found:
   p->thread_num = 0;
   p->char_count = 0;
   p->clear_child_tid = NULL;
+  memset(p->sigaction, 0, sizeof(p->sigaction));
+  memset(p->sig_set.__val, 0, sizeof(p->sig_set));
+  memset(p->sig_pending.__val, 0, sizeof(p->sig_pending));
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
     release(&p->lock);
@@ -571,6 +574,7 @@ void
 exit(int status)
 {
   struct proc *p = myproc();
+  // if(p->pid == 3){ printf("pid 3 exit status %d ra:%p\n", r_ra());}
 
   if(p == initproc)
     panic("init exiting");
