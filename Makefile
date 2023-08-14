@@ -14,6 +14,8 @@ else
 OBJS += $K/entry_qemu.o
 endif
 
+OBJS += $K/liblwip.a
+
 OBJS += \
   $K/printf.o \
   $K/uart.o \
@@ -118,6 +120,9 @@ ifeq ($(platform), qemu)
 linker = ./linker/qemu.ld
 endif
 
+$K/liblwip.a:
+	@cd kernel && make -f net.mk liblwip.a
+
 # Compile Kernel
 $T/kernel: $(OBJS) $(linker) $U/initcode
 	@if [ ! -d "./target" ]; then mkdir target; fi
@@ -163,7 +168,7 @@ all:
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu mode=release
+	@make build platform=qemu mode=debug
 #	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
@@ -280,4 +285,9 @@ clean:
 	$(UPROGS) \
 	os.bin \
 	sdcard.img \
+	$K/lwip/*/*.o \
+	$K/lwip/*/*.d \
+	$K/lwip/*/*/*.o \
+	$K/lwip/*/*/*.d \
+	$K/*.a \
 
