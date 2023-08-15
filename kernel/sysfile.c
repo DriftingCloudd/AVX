@@ -1342,8 +1342,8 @@ sys_fcntl(void)
     // handle O_NONBLOCK here; we just need special handling
     uint64 ret = 0;
     if (f->type == FD_SOCK) {
-      if (f->sock->type & SOCK_NONBLOCK)
-        ret |= O_NONBLOCK;
+      // if (f->sock->type & SOCK_NONBLOCK)
+      //   ret |= O_NONBLOCK;
     }
     return ret;
   }

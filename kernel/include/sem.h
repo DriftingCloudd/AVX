@@ -1,8 +1,8 @@
 #ifndef SEM_H
 #define SEM_H
 
-#include "spinlock.h"
 #include "types.h"
+#include "spinlock.h"
 
 struct semaphore {
     int value;

@@ -93,7 +93,7 @@ fileclose(struct file *f)
   } else if (ff.type == FD_DEVICE) {
 
   } else if (ff.type == FD_SOCK) {
-    close_socket(ff.sock->socknum);
+    // close_socket(ff.sock->socknum);
   }
 }
 

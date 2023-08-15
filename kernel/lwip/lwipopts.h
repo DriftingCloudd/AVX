@@ -2,7 +2,7 @@
 #define __LWIPOPTS_H__
 
 #define NO_SYS 0
-// #define LWIP_TIMERS 1
+#define LWIP_TIMERS 1
 // #define NO_SYS_NO_TIMERS 1
 #define 	LWIP_TCPIP_CORE_LOCKING   1
 #define     LWIP_COMPAT_MUTEX_ALLOWED 1
@@ -35,6 +35,7 @@
 #define LWIP_HAVE_SLIPIF     0
 #define LWIP_NETCONN         1
 #define LWIP_SOCKET          1
+#define LWIP_SOCKET_OFFSET   4
 #define PPP_SUPPORT          0
 #define LWIP_IPV4            1
 #define LWIP_IPV6            0

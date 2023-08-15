@@ -87,6 +87,9 @@ LWIP_PLATFORM_HTONL(u32_t n)
 
 #define LWIP_PROVIDE_ERRNO 1
 #define LWIP_ERR_T s16_t
+#define LWIP_ERRNO_INCLUDE "../include/errno.h"
 
+#include "rand.h"
+#define LWIP_RAND() (u32_t)rand()
 
 #endif

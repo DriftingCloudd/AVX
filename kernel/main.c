@@ -63,7 +63,8 @@ main(unsigned long hartid, unsigned long dtb_pa)
     plicinithart();
     // sd_test();
     disk_init();
-    init_socket();
+    // init_socket();
+    tcpip_init_with_loopback();
     binit();         // buffer cache
     initlogbuffer();
     fileinit();      // file table

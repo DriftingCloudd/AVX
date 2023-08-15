@@ -1231,3 +1231,39 @@ clone(uint64 new_stack, uint64 new_fn)
 
   return pid;
 }
+
+void
+threadhelper(void (*fn)(void *), void *arg)
+{
+  release(&myproc()->lock);
+  fn(arg);
+  exit(0);
+}
+
+extern void threadstub(void);
+
+struct proc *
+threadalloc(void (*fn)(void *), void *arg)
+{
+  struct proc *p;
+
+  p = allocproc();
+
+  safestrcpy(p->name, "net", sizeof(p->name));
+
+  p->tmask = 0;
+
+  copytrapframe(p->main_thread->trapframe,p->trapframe);
+
+  uint64 *sp = (uint64*)p->context.sp;
+
+  p->context.ra = (uint64)threadstub;
+  sp -= sizeof(fn);
+  *sp = (uint64)fn;
+  sp -= sizeof(arg);
+  *sp = (uint64)arg;
+
+
+  release(&p->lock);
+  return p;
+}

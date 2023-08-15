@@ -17,6 +17,9 @@
 #include "include/mmap.h"
 #include "include/sysinfo.h"
 
+#include "lwip/sockets.h"
+
+
 uint64
 sys_socket(void) {
     int domain, type, protocol;

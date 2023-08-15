@@ -2,6 +2,27 @@
 #include "../include/lwip/err.h"
 #include "../include/lwip/sys.h"
 
+
+// sys thread
+sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg,
+                            int stacksize, int prio) {
+  LWIP_UNUSED_ARG(name);
+  LWIP_UNUSED_ARG(stacksize);
+  LWIP_UNUSED_ARG(prio);
+  
+  sys_thread_t t = threadalloc(thread, arg);
+  if (t == NULL) {
+    panic("sys_thread_new: threadalloc failed\n");
+    return NULL;
+  }
+  safestrcpy(t->name, name, sizeof t->name);
+  acquire(&t->lock);
+  t->state = RUNNABLE;
+  t->main_thread->state = t_RUNNABLE;
+  release(&t->lock);
+  return t;
+}
+
 // sys protect
 
 static struct {
@@ -151,6 +172,21 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg) {
   release(&mbox->s);
   return r;
 }
+
+err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg) {
+  u32_t r = ERR_MEM;
+
+  if (mbox->head - mbox->tail < MBOXSLOTS) {
+    mbox->msg[mbox->head % MBOXSLOTS] = msg;
+    mbox->head++;
+    sem_post(&mbox->sem);
+    r = ERR_OK;
+  }
+  return r;
+}
+
+// sys time
+u32_t sys_now(void) { return get_timeval().tv_usec / 1000; }
 
 // init
 void sys_init(void) { initlock(&lwprot.lk, "lwIP lwprot"); }
