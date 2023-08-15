@@ -17,6 +17,8 @@ kernel/*.o
 kernel/liblwip.a
 kernel/lwip/*/*.d
 kernel/lwip/*/*.o
+kernel/lwip/*/*/*.d
+kernel/lwip/*/*/*.o
 kernel/include/*.back.h
 kernel/include/*.example.h
 target/*
