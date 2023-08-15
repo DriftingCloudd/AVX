@@ -64,11 +64,11 @@ main(unsigned long hartid, unsigned long dtb_pa)
     // sd_test();
     disk_init();
     // init_socket();
-    tcpip_init_with_loopback();
     binit();         // buffer cache
     initlogbuffer();
     fileinit();      // file table
     userinit();      // first user process
+    tcpip_init_with_loopback();
     debug_print("hart %d init done\n", hartid);
     
     for(int i = 0; i < NCPU; i++) {

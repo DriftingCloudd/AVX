@@ -5,7 +5,8 @@
 #define LWIP_TIMERS 1
 // #define NO_SYS_NO_TIMERS 1
 #define 	LWIP_TCPIP_CORE_LOCKING   1
-#define     LWIP_COMPAT_MUTEX_ALLOWED 1
+#define  LWIP_COMPAT_MUTEX_ALLOWED 1
+#define  LWIP_COMPAT_SOCKETS       0
 
 
 /*
