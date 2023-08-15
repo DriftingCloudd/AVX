@@ -1258,10 +1258,8 @@ threadalloc(void (*fn)(void *), void *arg)
   uint64 *sp = (uint64*)p->context.sp;
 
   p->context.ra = (uint64)threadstub;
-  sp -= sizeof(fn);
-  *sp = (uint64)fn;
-  sp -= sizeof(arg);
-  *sp = (uint64)arg;
+  copyout(p->kpagetable, (uint64)(sp - sizeof(fn)), (char*)&fn, sizeof(fn));
+  copyout(p->kpagetable, (uint64)(sp - sizeof(fn) - sizeof(arg)), (char*)&arg, sizeof(arg));
 
 
   release(&p->lock);
