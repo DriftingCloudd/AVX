@@ -389,6 +389,9 @@ sys_kill(void)
   }
   pid = myproc()->pid;
   // printf("kill pid %d, sig: %d\n", pid, sig);
+  if(sig == 0){
+    return 0;
+  }
   return kill(pid, sig);
 }
 
