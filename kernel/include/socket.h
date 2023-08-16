@@ -72,6 +72,15 @@
 // uint16 ntohs(uint16 netshort);
 // uint32 ntohl(uint32 netlong);
 
+
+// struct sockaddr_in_compat
+struct sockaddr_in_compat {
+	sa_family_t sin_family;
+	in_port_t sin_port;
+	struct in_addr sin_addr;
+	uint8 sin_zero[8];
+};
+
 // int init_socket();
 void tcpip_init_with_loopback(void);
 int do_socket(int domain, int type, int protocol);
