@@ -118,8 +118,11 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg) {
 
 void sys_mbox_post(sys_mbox_t *mbox, void *msg) {
   acquire(&mbox->s);
-  while (mbox->head - mbox->tail == MBOXSLOTS)
+  while (mbox->head - mbox->tail == MBOXSLOTS) {
+    release(&mbox->s);
     sem_wait(&mbox->sem);
+    acquire(&mbox->s);
+  }
   mbox->msg[mbox->head % MBOXSLOTS] = msg;
   mbox->head++;
   sem_post(&mbox->sem);
@@ -139,6 +142,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout) {
   start = get_timeval().tv_usec;
   to = (u64_t)timeout * 1000 + start;
   while (mbox->head - mbox->tail == 0) {
+    release(&mbox->s);
     if (timeout != 0) {
       if (to < get_timeval().tv_usec) {
         r = SYS_ARCH_TIMEOUT;
@@ -148,6 +152,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout) {
     } else {
       sem_wait(&mbox->sem);
     }
+    acquire(&mbox->s);
   }
   r = get_timeval().tv_usec - start;
   if (msg)
