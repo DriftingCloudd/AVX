@@ -42,6 +42,4 @@ swtch:
 	
 .globl threadstub
 threadstub:
-        ld a0, -8(sp)
-        ld a1, -16(sp)
         call threadhelper

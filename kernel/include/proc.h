@@ -94,6 +94,10 @@ struct proc {
   __sigset_t sig_set; // signal mask
   __sigset_t sig_pending; // pending signal
   struct trapframe *sig_tf; // trapframe for signal
+
+  //kernel thread
+  void (*fn)(void *);
+  void *arg;
 };
 
 typedef struct rlimit {

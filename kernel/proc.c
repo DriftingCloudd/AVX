@@ -751,6 +751,7 @@ scheduler(void)
         p->main_thread = t;
         copycontext(&p->context,&p->main_thread->context);
         copytrapframe(p->trapframe,p->main_thread->trapframe);
+        printf("run proc %d ra %p sp %p kpt %p\n", p->pid, p->context.ra, p->context.sp, p->kpagetable);
         p->main_thread->state = t_RUNNING;
         p->main_thread->awakeTime = 0;
         p->state = RUNNING;
@@ -789,7 +790,7 @@ sched(void)
 {
   int intena;
   struct proc *p = myproc();
-  // printf("sched p->pid %d\n", p->pid);
+  printf("sched p->pid %d\n", p->pid);
   if(!holding(&p->lock))
     panic("sched p->lock");
   if(mycpu()->noff != 1){
@@ -1233,9 +1234,12 @@ clone(uint64 new_stack, uint64 new_fn)
 }
 
 void
-threadhelper(void (*fn)(void *), void *arg)
+threadhelper()
 {
   release(&myproc()->lock);
+  void (*fn)(void*) = (void (*)(void*))myproc()->fn;
+  void *arg = myproc()->arg;
+  printf("threadhelper fn %p arg %p\n", fn, arg);
   fn(arg);
   exit(0);
 }
@@ -1249,18 +1253,14 @@ threadalloc(void (*fn)(void *), void *arg)
 
   p = allocproc();
 
-  safestrcpy(p->name, "net", sizeof(p->name));
-
   p->tmask = 0;
 
   copytrapframe(p->main_thread->trapframe,p->trapframe);
 
-  uint64 *sp = (uint64*)p->context.sp;
-
-  p->context.ra = (uint64)threadstub;
-  copyout(p->kpagetable, (uint64)(sp - sizeof(fn)), (char*)&fn, sizeof(fn));
-  copyout(p->kpagetable, (uint64)(sp - sizeof(fn) - sizeof(arg)), (char*)&arg, sizeof(arg));
-
+  p->main_thread->context.ra = (uint64)threadhelper;
+  
+  p->fn = fn;
+  p->arg = arg;
 
   release(&p->lock);
   return p;

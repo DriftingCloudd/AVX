@@ -19,6 +19,8 @@ kernel/lwip/*/*.d
 kernel/lwip/*/*.o
 kernel/lwip/*/*/*.d
 kernel/lwip/*/*/*.o
+kernel/lwip/core/ipv4/*.d
+kernel/lwip/core/ipv4/*.o
 kernel/include/*.back.h
 kernel/include/*.example.h
 target/*
