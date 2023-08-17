@@ -14,13 +14,40 @@
 #include "include/spinlock.h"
 #include "include/types.h"
 
+uint32 lwip_optnames[] = {
+        0,
+        SO_DEBUG,
+        SO_REUSEADDR,
+        SO_TYPE	,
+        SO_ERROR,
+        SO_DONTROUTE,
+        SO_BROADCAST,
+        SO_SNDBUF,
+        SO_RCVBUF,
+        SO_KEEPALIVE,
+        SO_OOBINLINE,
+        SO_NO_CHECK,
+        0,
+        SO_LINGER,
+        0,
+        SO_REUSEPORT,
+        0,
+        0,
+        SO_RCVLOWAT,
+        SO_SNDLOWAT,
+        SO_RCVTIMEO,
+        SO_SNDTIMEO,
+    };
+static uint32
+convert_common_optname_to_lwip(uint32 common) {
+    return lwip_optnames[common];
+}
+
 static void
 tcpip_init_done(void *arg) {
   volatile int *tcpip_done = arg;
   *tcpip_done = 1;
 }
-
-
 
 void tcpip_init_with_loopback(void) {
   // Initialize the lwIP stack
@@ -86,7 +113,8 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
 }
 
 int do_setsockopt(int sockfd, int level, int optname, void *optval, socklen_t optlen){
-    return lwip_setsockopt(sockfd, level, optname, optval, optlen); //unused
+    return lwip_setsockopt(sockfd, level == 1? 0xfff : level,
+                           convert_common_optname_to_lwip(optname), optval, optlen); //unused
     // return 0;
 }
 
