@@ -22,7 +22,7 @@ void sem_wait(struct semaphore *sem) {
 uint32 sem_wait_with_milli_timeout(struct semaphore *sem, time_t milli_timeout) {
     time_t begin, end;
     begin = get_timeval().tv_usec;
-    end = begin + milli_timeout;
+    end = begin + milli_timeout * 1000;
     acquire(&sem->lock);
     while (sem->value <= 0) {
         end = get_timeval().tv_usec;

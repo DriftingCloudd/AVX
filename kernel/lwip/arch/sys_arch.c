@@ -148,7 +148,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout) {
         r = SYS_ARCH_TIMEOUT;
         goto done;
       }
-      sem_wait_with_milli_timeout(&mbox->sem, to);
+      sem_wait_with_milli_timeout(&mbox->sem, timeout);
     } else {
       sem_wait(&mbox->sem);
     }
