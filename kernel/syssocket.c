@@ -343,5 +343,12 @@ sys_setsockopt(void) {
         printf("sys_setsockopt: argint(4, &optlen) < 0\n");
         return -1;
     }
-    return do_setsockopt(f->socketnum, level, optname, optval, optlen);
+    void *koptval = kalloc();
+    if(copyin(myproc()->pagetable, koptval, (uint64)optval, optlen) < 0) {
+        kfree(koptval);
+        return -1;
+    }
+    int ret = do_setsockopt(f->socketnum, level, optname, koptval, optlen);
+    kfree(koptval);
+    return ret;
 }
