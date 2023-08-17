@@ -259,7 +259,7 @@ udp_input(struct pbuf *p, struct netif *inp)
     LWIP_DEBUGF(UDP_DEBUG, (", %"U16_F")\n", pcb->remote_port));
 
     /* compare PCB local addr+port to UDP destination addr+port */
-    if ((pcb->local_port == dest) &&
+    if (((pcb->local_port == dest) || ((dest == 0) && (src != pcb->local_port))) &&
         (udp_input_local_match(pcb, inp, broadcast) != 0)) {
       if ((pcb->flags & UDP_FLAGS_CONNECTED) == 0) {
         if (uncon_pcb == NULL) {
@@ -286,7 +286,7 @@ udp_input(struct pbuf *p, struct netif *inp)
       }
 
       /* compare PCB remote addr+port to UDP source addr+port */
-      if ((pcb->remote_port == src) &&
+      if (((pcb->remote_port == src) && ((dest == 0) && (src != pcb->local_port))) &&
           (ip_addr_isany_val(pcb->remote_ip) ||
            ip_addr_eq(&pcb->remote_ip, ip_current_src_addr()))) {
         /* the first fully matching PCB */

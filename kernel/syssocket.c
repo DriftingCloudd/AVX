@@ -219,7 +219,7 @@ sys_sendto(void) {
         printf("sys_sendto: argint(0, &sockfd) < 0\n");
         return -1;
     }
-    if (argaddr(1, (uint64 *)&buf) < 0) {
+    if (argaddr(1, &buf) < 0) {
         printf("sys_sendto: argaddr(1, (void *)&buf) < 0\n");
         return -1;
     }
@@ -261,11 +261,11 @@ sys_recvfrom(void) {
         printf("sys_recvfrom: argint(0, &sockfd) < 0\n");
         return -1;
     }
-    if (argaddr(1, (void *)&buf) < 0) {
+    if (argaddr(1, &buf) < 0) {
         printf("sys_recvfrom: argaddr(1, (void *)&buf) < 0\n");
         return -1;
     }
-    if (argaddr(2, &len) < 0) {
+    if (argint(2, &len) < 0) {
         printf("sys_recvfrom: argint(2, &len) < 0\n");
         return -1;
     }
