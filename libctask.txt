@@ -2,3 +2,4 @@
 ./runtest.exe -w entry-static.exe pthread_condattr_setclock
 ./runtest.exe -w entry-dynamic.exe pthread_cond_smasher
 ./runtest.exe -w entry-dynamic.exe pthread_condattr_setclock
+./runtest.exe -w entry-static.exe socket

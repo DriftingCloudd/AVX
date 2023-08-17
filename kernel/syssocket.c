@@ -165,7 +165,7 @@ sys_connect(void) {
         return -1;
     struct sockaddr_in in = {.sin_len = 16, .sin_family = in_compat.sin_family, .sin_port = in_compat.sin_port,
                              .sin_addr = in_compat.sin_addr, .sin_zero = {0}};
-    return do_connect(f->socketnum, &in, addrlen);
+    return do_connect(f->socketnum, &in, 16);
 }
 
 uint64
