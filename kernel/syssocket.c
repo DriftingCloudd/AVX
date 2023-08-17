@@ -17,6 +17,21 @@
 #include "include/mmap.h"
 #include "include/sysinfo.h"
 
+static int
+fdalloc(struct file *f)
+{
+  int fd;
+  struct proc *p = myproc();
+
+  for(fd = 0; fd < NOFILEMAX(p); fd++){
+    if(p->ofile[fd] == 0){
+      p->ofile[fd] = f;
+      return fd;
+    }
+  }
+  return -1;
+}
+
 uint64
 sys_socket(void) {
     int domain, type, protocol;
@@ -34,7 +49,21 @@ sys_socket(void) {
         printf("sys_socket: argint(2, &protocol) < 0\n");
         return -1;
     }
-    return do_socket(domain, type, protocol);
+    struct file *f;
+    int fd;
+    if ((f = filealloc()) == NULL || (fd = fdalloc(f)) < 0) {
+        if (f) {
+            fileclose(f);
+        }
+    }
+    f->type = FD_SOCK;
+    f->off = 0;
+    f->ep = 0;
+    f->readable = 1;
+    f->writable = 1;
+    do_socket(domain, type, protocol);
+
+    return fd;
 }
 
 

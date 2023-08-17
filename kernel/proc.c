@@ -751,7 +751,7 @@ scheduler(void)
         p->main_thread = t;
         copycontext(&p->context,&p->main_thread->context);
         copytrapframe(p->trapframe,p->main_thread->trapframe);
-        printf("run proc %d ra %p sp %p kpt %p\n", p->pid, p->context.ra, p->context.sp, p->kpagetable);
+        //debug_print("run proc %d ra %p sp %p kpt %p\n", p->pid, p->context.ra, p->context.sp, p->kpagetable);
         p->main_thread->state = t_RUNNING;
         p->main_thread->awakeTime = 0;
         p->state = RUNNING;
@@ -790,11 +790,11 @@ sched(void)
 {
   int intena;
   struct proc *p = myproc();
-  printf("sched p->pid %d\n", p->pid);
+  //debug_print("sched p->pid %d\n", p->pid);
   if(!holding(&p->lock))
     panic("sched p->lock");
   if(mycpu()->noff != 1){
-    printf("noff:%d\n", mycpu()->noff);
+    debug_print("noff:%d\n", mycpu()->noff);
     panic("sched locks");
   }
   if(p->state == RUNNING || p->main_thread->state == t_RUNNING)
