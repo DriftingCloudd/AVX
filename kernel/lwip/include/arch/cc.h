@@ -45,11 +45,11 @@ typedef int64 ptrdiff_t;
 #define PACK_STRUCT_END
 
 #define S16_F	"d"
-#define U16_F	"u"
+#define U16_F	"d"
 #define X16_F	"x"
 
 #define S32_F	"d"
-#define U32_F	"u"
+#define U32_F	"d"
 #define X32_F	"x"
 
 #define S64_F	"lld"
@@ -58,7 +58,7 @@ typedef int64 ptrdiff_t;
 
 #define X8_F   "02" "x"
 
-#define SZT_F   "zu"
+#define SZT_F   "d"
 
 #define SSIZE_MAX  0x7fffffffL
 
