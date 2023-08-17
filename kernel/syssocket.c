@@ -165,7 +165,13 @@ sys_connect(void) {
         return -1;
     struct sockaddr_in in = {.sin_len = 16, .sin_family = in_compat.sin_family, .sin_port = in_compat.sin_port,
                              .sin_addr = in_compat.sin_addr, .sin_zero = {0}};
-    return do_connect(f->socketnum, &in, 16);
+    // in.sin_family = 2;
+    // if (in.sin_port == 0 && in.sin_addr.s_addr == 0) {
+    //     in.sin_port = 65535;
+    //     in.sin_addr.s_addr = 16777343;
+    // }
+    
+    return do_connect(f->socketnum, &in, addrlen);
 }
 
 uint64
