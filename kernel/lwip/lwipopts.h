@@ -19,7 +19,7 @@
 #define LWIP_ARP             1
 #define ARP_QUEUEING         0
 #define IP_FORWARD           0
-#define LWIP_ICMP            1
+#define LWIP_ICMP            0
 #define LWIP_RAW             0
 #define LWIP_DHCP            0
 #define LWIP_AUTOIP          0
@@ -89,8 +89,8 @@
    ------------------------------------
 */
 
-#define LWIP_DEBUG         0
-#define LWIP_DBG_TYPES_ON  LWIP_DBG_OFF
+#define LWIP_DEBUG         1
+#define LWIP_DBG_TYPES_ON  LWIP_DBG_ON
 #define LWIP_DBG_MIN_LEVEL LWIP_DBG_LEVEL_ALL
 
 #define ETHARP_DEBUG     LWIP_DBG_OFF
