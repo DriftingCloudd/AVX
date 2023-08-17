@@ -874,15 +874,9 @@ lwip_connect(int s, const struct sockaddr *name, socklen_t namelen)
     u16_t remote_port;
 
     /* check size, family and alignment of 'name' */
-    LWIP_ERROR("lwip_connect: invalid address", IS_SOCK_ADDR_LEN_VALID(namelen),set_errno(err_to_errno(ERR_ARG)); done_socket(sock); return -1;);
-
-    LWIP_ERROR("lwip_connect: invalid address", IS_SOCK_ADDR_TYPE_VALID_OR_UNSPEC(name),set_errno(err_to_errno(ERR_ARG)); done_socket(sock); return -1;);
-
-    LWIP_ERROR("lwip_connect: invalid address", IS_SOCK_ADDR_ALIGNED(name),set_errno(err_to_errno(ERR_ARG)); done_socket(sock); return -1;);
-
-    // LWIP_ERROR("lwip_connect: invalid address", IS_SOCK_ADDR_LEN_VALID(namelen) &&
-    //            IS_SOCK_ADDR_TYPE_VALID_OR_UNSPEC(name) && IS_SOCK_ADDR_ALIGNED(name),
-    //            set_errno(err_to_errno(ERR_ARG)); done_socket(sock); return -1;);
+    LWIP_ERROR("lwip_connect: invalid address", IS_SOCK_ADDR_LEN_VALID(namelen) &&
+               IS_SOCK_ADDR_TYPE_VALID_OR_UNSPEC(name) && IS_SOCK_ADDR_ALIGNED(name),
+               set_errno(err_to_errno(ERR_ARG)); done_socket(sock); return -97;);
 
     SOCKADDR_TO_IPADDR_PORT(name, &remote_addr, remote_port);
     LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_connect(%d, addr=", s));
