@@ -85,7 +85,8 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
 }
 
 int do_setsockopt(int sockfd, int level, int optname, void *optval, socklen_t optlen){
-    return lwip_setsockopt(sockfd, level, optname, optval, optlen); //unused
+    // return lwip_setsockopt(sockfd, level, optname, optval, optlen); //unused
+    return 0;
 }
 
 int do_getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen){
