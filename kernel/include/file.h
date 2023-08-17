@@ -28,6 +28,7 @@ struct file {
   uint64 t0_nsec;
   uint64 t1_sec;
   uint64 t1_nsec;
+  int socketnum;
 };
 
 // #define major(dev)  ((dev) >> 16 & 0xFFFF)
