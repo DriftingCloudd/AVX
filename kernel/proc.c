@@ -62,9 +62,6 @@ cpuinit(void)
     it->intena = 0;
     it->noff = 0;
   }
-  #ifdef debug
-    printf("cpuinit\n");
-  #endif
 }
 
 // initialize the proc table at boot time.

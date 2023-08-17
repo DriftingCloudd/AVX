@@ -21,6 +21,7 @@
 #include "include/socket.h"
 #ifndef QEMU
 #include "include/sd_final.h"
+#include "include/uart8250.h"
 extern void _start(void);
 #endif
 extern void _entry(void);
@@ -70,16 +71,10 @@ main(unsigned long hartid, unsigned long dtb_pa)
     userinit();      // first user process
     debug_print("hart %d init done\n", hartid);
     
-    for(int i = 0; i < NCPU; i++) {
-      if(i == hartid)
-        continue;
-      //sbi_send_ipi(mask, 1);
-#ifdef QEMU
-      sbi_hart_start(i, (unsigned long)_entry, 0);
-#else
-      //sbi_hart_start(i, (unsigned long)_start, 0);
+#ifdef visionfive
+      sbi_hart_start(2, (unsigned long)_start, 0);
 #endif
-    }
+    
     __sync_synchronize();
     started = 1;
   }
@@ -89,13 +84,18 @@ main(unsigned long hartid, unsigned long dtb_pa)
     while (started == 0)
       ;
     __sync_synchronize();
-    #ifdef DEBUG
-    debug_print("hart %d enter main()...\n", hartid);
-    #endif
     kvminithart();
     trapinithart();
     plicinithart();  // ask PLIC for device interrupts
     debug_print("hart 1 init done\n");
+    printf("hart 2\n");
+    while(1){
+      int c = uart8250_getc();
+			if (-1 != c) {
+        // uart8250_putc(c);
+				consoleintr(c);
+			}
+    }
   }
   scheduler();
 }

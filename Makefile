@@ -55,6 +55,7 @@ OBJS += \
   $K/thread.o \
   $K/futex.o \
   $K/pselect.o \
+  $K/uart8250.o \
 
 
 ifeq ($(platform), qemu)
@@ -139,7 +140,7 @@ build: userprogs $T/kernel
 image = $T/kernel.bin
 
 QEMU = qemu-system-riscv64
-CPUS := 1
+CPUS := 2
 
 QEMUOPTS = -machine virt -m 128M -nographic -kernel target/kernel 
 # use multi-core 
@@ -159,12 +160,12 @@ gdb-client:
 
 all:
 	@gunzip -k sdcard.img.gz
-	@make build platform=visionfive mode=release exam=yes
+	@make build platform=visionfive mode=release exam=no
 	@cp target/kernel.bin os.bin
 
 qemu-run:
-	@make build platform=qemu mode=release exam=yes
-#	@make fs
+	@make build platform=qemu mode=release exam=no
+# 	@make fs
 	@$(QEMU) $(QEMUOPTS)
 
 $K/bin.S:$U/initcode $U/init-for-test
