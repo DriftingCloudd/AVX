@@ -30,6 +30,7 @@ void tcpip_init_with_loopback(void) {
 
 // 分配并初始化一个socket，将对应的信息填入其中
 int do_socket(int domain, int type, int protocol){
+    type &= 0xf;
     return lwip_socket(domain, type, protocol);
 }
 
@@ -85,8 +86,8 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
 }
 
 int do_setsockopt(int sockfd, int level, int optname, void *optval, socklen_t optlen){
-    // return lwip_setsockopt(sockfd, level, optname, optval, optlen); //unused
-    return 0;
+    return lwip_setsockopt(sockfd, level, optname, optval, optlen); //unused
+    // return 0;
 }
 
 int do_getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *optlen){
