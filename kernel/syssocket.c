@@ -170,8 +170,11 @@ sys_connect(void) {
     //     in.sin_port = 65535;
     //     in.sin_addr.s_addr = 16777343;
     // }
-    
-    return do_connect(f->socketnum, &in, addrlen);
+    int result = do_connect(f->socketnum, &in, addrlen);
+
+    if (0 == result)
+        return 0;
+    return -97;
 }
 
 uint64
