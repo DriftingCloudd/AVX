@@ -52,7 +52,7 @@ tcpip_init_done(void *arg) {
 void tcpip_init_with_loopback(void) {
   // Initialize the lwIP stack
   volatile int tcpip_done = 0;
-  tcpip_init(tcpip_init_done, &tcpip_done);
+  tcpip_init(tcpip_init_done, (void*)&tcpip_done);
 }
 
 // 分配并初始化一个socket，将对应的信息填入其中

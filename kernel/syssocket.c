@@ -16,6 +16,7 @@
 #include "include/vm.h"
 #include "include/mmap.h"
 #include "include/sysinfo.h"
+#include "include/kalloc.h"
 
 static int
 fdalloc(struct file *f)
@@ -82,19 +83,23 @@ sys_socket(void) {
         return -1;
     }
     struct file *f;
-    int fd;
+    int fd = 0;
     if ((f = filealloc()) == NULL || (fd = fdalloc(f)) < 0) {
         if (f) {
             fileclose(f);
         }
     }
+    debug_print("[sys_socket] type %p\n", type);
     f->type = FD_SOCK;
     f->off = 0;
     f->ep = 0;
     f->readable = 1;
     f->writable = 1;
     f->socketnum = do_socket(domain, type, protocol);
-    
+    if(type & 0x800){
+        int argp = 1;
+        lwip_ioctl(f->socketnum, FIONBIO, (void*)&argp);
+    }
     return fd;
 }
 
@@ -123,7 +128,10 @@ sys_bind(void) {
         return -1;
     struct sockaddr_in in = {.sin_len = 16, .sin_family = in_compat.sin_family, .sin_port = in_compat.sin_port,
                              .sin_addr = in_compat.sin_addr, .sin_zero = {0}};
-    return do_bind(f->socketnum, &in, addrlen);
+    if(in.sin_addr.s_addr == 0){
+        in.sin_addr.s_addr = 16777343;
+    }
+    return do_bind(f->socketnum, (struct sockaddr*)&in, addrlen);
 }
 
 uint64
@@ -170,7 +178,7 @@ sys_connect(void) {
     //     in.sin_port = 65535;
     //     in.sin_addr.s_addr = 16777343;
     // }
-    int result = do_connect(f->socketnum, &in, addrlen);
+    int result = do_connect(f->socketnum, (struct sockaddr*)&in, addrlen);
 
     if (0 == result)
         return 0;
@@ -203,7 +211,25 @@ sys_accept(void) {
     socklen_t inlen;
     if(copyin(myproc()->pagetable,(char*)&inlen, (uint64)addrlen, sizeof(socklen_t)) < 0)
         return -1;
-    return do_accept(f->socketnum, &in, &inlen);
+    int ret = do_accept(f->socketnum, (struct sockaddr*)&in, &inlen);
+    if(ret > 0){ 
+        struct file *f2 = NULL;
+        int fd;
+        if ((f2 = filealloc()) == NULL || (fd = fdalloc(f2)) < 0) {
+            if (f2) {
+                fileclose(f2);
+            }
+            return -1;
+        }
+        f2->type = FD_SOCK;
+        f2->off = 0;
+        f2->ep = 0;
+        f2->readable = 1;
+        f2->writable = 1;
+        f2->socketnum = ret;
+        return fd;
+    }
+    return ret;
 }
 
 uint64
@@ -219,11 +245,11 @@ sys_sendto(void) {
         printf("sys_sendto: argint(0, &sockfd) < 0\n");
         return -1;
     }
-    if (argaddr(1, &buf) < 0) {
+    if (argaddr(1, (uint64*)&buf) < 0) {
         printf("sys_sendto: argaddr(1, (void *)&buf) < 0\n");
         return -1;
     }
-    if (argint(2, &len) < 0) {
+    if (argint(2, (int*)&len) < 0) {
         printf("sys_sendto: argint(2, &len) < 0\n");
         return -1;
     }
@@ -245,7 +271,7 @@ sys_sendto(void) {
         return -1;
     struct sockaddr_in in = {.sin_len = 16, .sin_family = in_compat.sin_family, .sin_port = in_compat.sin_port,
                              .sin_addr = in_compat.sin_addr, .sin_zero = {0}};
-    return do_sendto(f->socketnum, buf, len, flags, &in, addrlen);
+    return do_sendto(f->socketnum, buf, len, flags, (struct sockaddr*)&in, addrlen);
 }
 
 uint64
@@ -261,11 +287,11 @@ sys_recvfrom(void) {
         printf("sys_recvfrom: argint(0, &sockfd) < 0\n");
         return -1;
     }
-    if (argaddr(1, &buf) < 0) {
+    if (argaddr(1, (uint64*)&buf) < 0) {
         printf("sys_recvfrom: argaddr(1, (void *)&buf) < 0\n");
         return -1;
     }
-    if (argint(2, &len) < 0) {
+    if (argint(2, (int*)&len) < 0) {
         printf("sys_recvfrom: argint(2, &len) < 0\n");
         return -1;
     }
@@ -289,7 +315,7 @@ sys_recvfrom(void) {
     socklen_t inlen;
     if(copyin(myproc()->pagetable,(char*)&inlen, (uint64)addrlen, sizeof(socklen_t)) < 0)
         return -1;
-    return do_recvfrom(f->socketnum, buf, len, flags, &in, &inlen);
+    return do_recvfrom(f->socketnum, buf, len, flags, (struct sockaddr*)&in, &inlen);
 }
 
 uint64
@@ -321,7 +347,13 @@ sys_getsockname(void) {
     socklen_t inlen;
     if(copyin(myproc()->pagetable,(char*)&inlen, (uint64)addrlen, sizeof(socklen_t)) < 0)
         return -1;
-    return do_getsockname(f->socketnum, (struct sockaddr *)&in, &inlen);
+    int ret = do_getsockname(f->socketnum, (struct sockaddr *)&in, &inlen);
+    in_compat.sin_family = in.sin_family;
+    in_compat.sin_addr = in.sin_addr;
+    in_compat.sin_port = in.sin_port;
+    if(copyout(myproc()->pagetable, (uint64)addr, (char*)&in_compat, sizeof(struct sockaddr_in_compat)) < 0)
+        return -1;
+    return ret;
 }
 
 uint64
@@ -348,7 +380,7 @@ sys_setsockopt(void) {
         printf("sys_setsockopt: argaddr(3, (void *)&optval) < 0\n");
         return -1;
     }
-    if (argint(4, &optlen) < 0) {
+    if (argint(4, (int*)&optlen) < 0) {
         printf("sys_setsockopt: argint(4, &optlen) < 0\n");
         return -1;
     }

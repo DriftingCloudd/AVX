@@ -214,11 +214,11 @@ QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 gdb-server: 
 	@make build platform=qemu
-	@make fs
+# @make fs
 	@$(QEMU) $(QEMUOPTS) -s -S
 
 gdb-client:
-	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
+	riscv64-unknown-elf-gdb -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 all:
 	@gunzip -k sdcard.img.gz
