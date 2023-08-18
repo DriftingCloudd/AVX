@@ -1253,6 +1253,13 @@ threadalloc(void (*fn)(void *), void *arg)
 
   p = allocproc();
 
+  //记得后面算的时候加上原本就有pgsize
+  int inc_stack_size = 64 * PGSIZE;
+
+  //虽然调用的是uvm开头的函数，实际上是给kpagetable映射
+  uvmalloc1(p->kpagetable, VKSTACK + PGSIZE, VKSTACK + PGSIZE + inc_stack_size, PTE_R | PTE_W);
+  p->context.sp = VKSTACK + PGSIZE + inc_stack_size;
+  p->main_thread->context.sp = p->context.sp;
   p->tmask = 0;
 
   copytrapframe(p->main_thread->trapframe,p->trapframe);

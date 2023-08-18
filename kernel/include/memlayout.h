@@ -90,7 +90,7 @@
 // map kernel stacks beneath the trampoline,
 // each surrounded by invalid guard pages.
 // #define KSTACK(p)               (TRAMPOLINE - ((p) + 1) * 2 * PGSIZE)
-#define VKSTACK                 0x3EC0000000L
+#define VKSTACK                 0x3EC0000000L //0x3E_C000_0000
 
 // User memory layout.
 // Address zero first:
