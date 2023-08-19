@@ -105,10 +105,10 @@ sys_socket(void) {
     if (type & SOCK_CLOEXEC) {
         myproc()->exec_close[fd] = 1;
     }
-    if(type & 0x800){
-        int argp = 1;
-        lwip_ioctl(f->socketnum, FIONBIO, (void*)&argp);
-    }
+    // if(type & 0x800){
+    //     int argp = 1;
+    //     lwip_ioctl(f->socketnum, FIONBIO, (void*)&argp);
+    // }
     return fd;
 }
 
