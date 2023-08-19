@@ -10,7 +10,7 @@
 #include "include/pipe.h"
 #include "include/pselect.h"
 #include "include/param.h"
-
+#include "include/socket.h"
 //后续可移动到util中
 
 /* flags数组每个元素为64bit，可以表示的flag数量为：数组大小*64 */
@@ -123,7 +123,9 @@ sys_pselect6(void)
 			case FD_DEVICE:
 			case FD_ENTRY:
 			case FD_SOCK:
-				
+				if(do_lwip_select(f->socketnum, (struct timeval*)&timeout) > 0){
+					ret++;
+				}
 			break;
 
 			default:
@@ -150,7 +152,9 @@ sys_pselect6(void)
 			case FD_DEVICE:
 			case FD_ENTRY:
 			case FD_SOCK:
-				
+				if(do_lwip_select(f->socketnum, (struct timeval*)&timeout) > 0){
+					ret++;
+				}
 			break;
 
 			default:

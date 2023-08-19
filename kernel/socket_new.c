@@ -1,3 +1,4 @@
+#include "kernel/include/memlayout.h"
 #include "lwip/ip_addr.h"
 #include "lwip/ip.h"
 #include "lwip/init.h"
@@ -43,10 +44,30 @@ convert_common_optname_to_lwip(uint32 common) {
     return lwip_optnames[common];
 }
 extern pagetable_t tcpip_pagetable;
+extern struct proc proc[NPROC];
 static void
 tcpip_init_done(void *arg) {
   volatile int *tcpip_done = arg;
   *tcpip_done = 1;
+
+    for(int i=0;i<NPROC;i++){
+        if( &proc[i] == myproc()) continue;
+        char *mem;
+        uint64 a;
+        uint64 start = PROCVKSTACK(i);
+        uint64 end = start + KSTACKSIZE;
+        for(a = start; a < end; a += PGSIZE){
+            mem = kalloc();
+            if(mem == NULL){
+                panic("[kpagetable]kalloc failed\n");
+            }
+            memset(mem, 0, PGSIZE);
+            if (mappages(myproc()->kpagetable, a, PGSIZE, (uint64)mem, PTE_R | PTE_W) != 0) {
+                panic("[kpagetable]map page failed\n");
+            }
+        }
+    }
+
   tcpip_pagetable = myproc()->kpagetable;
 }
 
@@ -114,6 +135,7 @@ int do_getsockname(int sockfd, struct sockaddr *addr, socklen_t *addrlen){
 }
 
 int do_setsockopt(int sockfd, int level, int optname, void *optval, socklen_t optlen){
+    return 0;
     return lwip_setsockopt(sockfd, level == 1? 0xfff : level,
                            convert_common_optname_to_lwip(optname), optval, optlen); //unused
     // return 0;
@@ -125,5 +147,18 @@ int do_getsockopt(int sockfd, int level, int optname, void *optval, socklen_t *o
 
 int do_socketpair(int domain, int type, int protocol, int sv[2]){
     // return lwip_socketpair(domain, type, protocol, sv); //unused
+    return 0;
+}
+
+int do_lwip_select(int socknum, struct timeval * timeout){
+    fd_set readset;
+    FD_ZERO(&readset);
+    FD_SET(socknum, &readset);
+    int result = lwip_select(socknum + 1, &readset, NULL, NULL, timeout);
+    if(result > 0){
+        if(FD_ISSET(socknum, &readset)){
+            return 1;
+        }
+    }
     return 0;
 }

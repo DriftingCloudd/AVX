@@ -34,7 +34,7 @@ static int first = 0;
 extern void boot_stack(void);
 extern void boot_stack_top(void);
 extern void initlogbuffer(void);
-
+extern int tcp_start_listen;
 void
 main(unsigned long hartid, unsigned long dtb_pa)
 {
@@ -44,6 +44,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
   #else
   if(hartid == 1) {
   #endif
+    tcp_start_listen = 0;
     first = 1;
     cpuinit();
     consoleinit();

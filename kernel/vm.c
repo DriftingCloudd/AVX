@@ -633,7 +633,12 @@ proc_kpagetable(struct proc* p)
   pagetable_t kpt = (pagetable_t) kalloc();
   if (kpt == NULL)
     return NULL;
-  memmove(kpt, kernel_pagetable, PGSIZE);
+  if(tcpip_pagetable != NULL){
+    memmove(kpt, tcpip_pagetable, PGSIZE);
+    return kpt;
+  }else{
+    memmove(kpt, kernel_pagetable, PGSIZE);
+  }
 
   int procaddrnum = get_proc_addr_num(p);
   
@@ -645,7 +650,6 @@ proc_kpagetable(struct proc* p)
     mem = kalloc();
     if(mem == NULL){
       vmunmap(kpt, start, (a-start)/PGSIZE, 1);
-      vmunmap(kernel_pagetable, start, (a-start)/PGSIZE, 0);
       printf("kpagetable kalloc failed\n");
       goto fail;
     }
@@ -653,19 +657,9 @@ proc_kpagetable(struct proc* p)
     if (mappages(kpt, a, PGSIZE, (uint64)mem, PTE_R | PTE_W) != 0) {
       kfree(mem);
       vmunmap(kpt, start, (a-start)/PGSIZE, 1);
-      vmunmap(kernel_pagetable, start, (a-start)/PGSIZE, 0);
       printf("[kpagetable]map page failed\n");
       goto fail;
     }
-    if(tcpip_pagetable != NULL){
-      if(mappages(tcpip_pagetable, a, PGSIZE, (uint64)mem, PTE_R | PTE_W) != 0){
-        vmunmap(kpt, start, (a-start + PGSIZE)/PGSIZE, 1);
-        vmunmap(tcpip_pagetable, start, (a-start)/PGSIZE, 0);
-        printf("[kpagetable]map page failed\n");
-        goto fail;
-      }
-    }
-    
   }
 
   return kpt;
@@ -707,11 +701,10 @@ kvmfreeusr(pagetable_t kpt)
 void
 kvmfree(pagetable_t kpt, int stack_free, struct proc* p)
 {
-  if (stack_free) {
+  if (stack_free && tcpip_pagetable == NULL) {
     uint64 procaddrnum = get_proc_addr_num(p);
     uint64 prockstack = PROCVKSTACK(procaddrnum);
     vmunmap(kpt, prockstack, KSTACKSIZE / PGSIZE, 1);
-    vmunmap(tcpip_pagetable, prockstack, KSTACKSIZE / PGSIZE, 0);
     pte_t pte = kpt[PX(2, prockstack - PGSIZE)];
     if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
       kfreewalk((pagetable_t) PTE2PA(pte));

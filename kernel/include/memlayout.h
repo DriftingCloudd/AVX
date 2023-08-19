@@ -92,8 +92,9 @@
 // each surrounded by invalid guard pages.
 // #define KSTACK(p)               (TRAMPOLINE - ((p) + 1) * 2 * PGSIZE)
 #define VKSTACK                 0x3EC0000000L //0x3E_C000_0000
-#define KSTACKSIZE              8 * PGSIZE
-#define PROCVKSTACK(paddrnum)        (VKSTACK - ((((paddrnum) + 1) % NPROC) * (KSTACKSIZE + 2 * PGSIZE)) + 2 * PGSIZE)
+#define KSTACKSIZE              6 * PGSIZE
+#define EXTRASIZE               2 * PGSIZE
+#define PROCVKSTACK(paddrnum)        (VKSTACK - ((((paddrnum) + 1) % NPROC) * (KSTACKSIZE + EXTRASIZE)) + EXTRASIZE)
 
 // User memory layout.
 // Address zero first:

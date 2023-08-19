@@ -17,7 +17,9 @@
 #include "include/mmap.h"
 #include "include/sysinfo.h"
 #include "include/kalloc.h"
+#include "lwip/include/arch/errno.h"
 
+int tcp_start_listen;
 static int
 fdalloc(struct file *f)
 {
@@ -150,6 +152,8 @@ sys_listen(void) {
         return -1;
     }
     // debug_print("sys_listen sockfd:%d, backlog:%d\n", sockfd, backlog);
+    tcp_start_listen = 1;
+    printf("tcp_start_listen = 1\n");
     return do_listen(f->socketnum, backlog);
 }
 
@@ -181,8 +185,12 @@ sys_connect(void) {
     //     in.sin_port = 65535;
     //     in.sin_addr.s_addr = 16777343;
     // }
+    while(tcp_start_listen == 0){
+        printf("tcp_start_listen = 0\n");
+    }
+    printf("tcp_start_listen = 1\n");
     int result = do_connect(f->socketnum, (struct sockaddr*)&in, addrlen);
-
+    printf("sys_connect: result = %d errorno :%d \n", result, errno);
     if (0 == result)
         return 0;
     return -97;

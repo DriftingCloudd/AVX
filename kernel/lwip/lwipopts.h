@@ -56,6 +56,8 @@
 // Smaller values increase performance
 // Larger values increase simultaneously active TCP connections limit
 #define MEMP_NUM_TCP_PCB 5
+#define MEMP_NUM_NETCONN                100
+#define MEMP_NUM_NETBUF                 100
 
 // Memory options
 #define MEM_SIZE         (1 * 1024 * 1024)
