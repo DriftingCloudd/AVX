@@ -101,6 +101,7 @@
 #define SYS_sendto      206
 #define SYS_recvfrom    207
 #define SYS_setsockopt  208
+#define SYS_getsockopt  209
 #define SYS_pread       67
 #define SYS_mprotect    226
 #define SYS_madvise     233

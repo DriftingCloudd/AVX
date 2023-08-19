@@ -1,4 +1,5 @@
 
+#include "include/sysnum.h"
 #include "include/types.h"
 #include "include/param.h"
 #include "include/memlayout.h"
@@ -205,6 +206,7 @@ extern uint64 sys_sendto(void);
 extern uint64 sys_recvfrom(void);
 extern uint64 sys_getsockname(void);
 extern uint64 sys_setsockopt(void);
+extern uint64 sys_getsockopt(void);
 extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
@@ -314,6 +316,7 @@ static uint64 (*syscalls[])(void) = {
   // [SYS_getpeername] sys_getpeername,
   // [SYS_socketpair]  sys_socketpair,
   [SYS_setsockopt]  sys_setsockopt,
+  [SYS_getsockopt]  sys_getsockopt,
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
   [SYS_getrusage]   sys_getrusage,

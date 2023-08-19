@@ -61,6 +61,7 @@ typedef int64 ptrdiff_t;
 #define SZT_F   "d"
 
 #define SSIZE_MAX  0x7fffffffL
+#define INT_MAX    0x7fffffffL
 
 #define LWIP_PLATFORM_DIAG(x)	printf x
 #define LWIP_PLATFORM_ASSERT(x)	panic(x)

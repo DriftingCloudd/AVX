@@ -276,7 +276,7 @@ sys_sendto(void) {
         printf("sys_sendto: argint(5, &addrlen) < 0\n");
         return -1;
     }
-    printf("sys_sendto: sockfd:%d, buf:%p, len:%d, flags:%d, dest_addr:%p, addrlen:%d\n", sockfd, buf, len, flags, dest_addr, addrlen);
+    // printf("sys_sendto: sockfd:%d, buf:%p, len:%d, flags:%d, dest_addr:%p, addrlen:%d\n", sockfd, buf, len, flags, dest_addr, addrlen);
     struct sockaddr_in_compat in_compat;
     if(copyin(myproc()->pagetable,(char*)&in_compat, (uint64)dest_addr, sizeof(struct sockaddr_in_compat)) < 0)
         return -1;
@@ -403,4 +403,44 @@ sys_setsockopt(void) {
     int ret = do_setsockopt(f->socketnum, level, optname, koptval, optlen);
     kfree(koptval);
     return ret;
+}
+
+void
+sys_getsockopt(void) {
+    int sockfd;
+    int level;
+    int optname;
+    void *optval;
+    socklen_t *optlen;
+    struct file *f;
+    if (argfd(0,&sockfd, &f) < 0) {
+        printf("sys_getsockopt: argint(0, &sockfd) < 0\n");
+        return;
+    }
+    if (argint(1, &level) < 0) {
+        printf("sys_getsockopt: argint(1, &level) < 0\n");
+        return;
+    }
+    if (argint(2, &optname) < 0) {
+        printf("sys_getsockopt: argint(2, &optname) < 0\n");
+        return;
+    }
+    if (argaddr(3, (void *)&optval) < 0) {
+        printf("sys_getsockopt: argaddr(3, (void *)&optval) < 0\n");
+        return;
+    }
+    if (argaddr(4, (void *)&optlen) < 0) {
+        printf("sys_getsockopt: argint(4, (int *)optlen) < 0\n");
+        return;
+    }
+    char koptval[256];
+    socklen_t koptlen;
+    int ret = do_getsockopt(f->socketnum, level, optname, koptval, &koptlen);
+    if(copyout(myproc()->pagetable, (uint64)optval, koptval, koptlen) < 0) {
+        return;
+    }
+    if(copyout(myproc()->pagetable, (uint64)optlen, (char*)&koptlen, sizeof(socklen_t)) < 0) {
+        return;
+    }
+    return;
 }
