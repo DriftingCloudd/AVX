@@ -20,6 +20,7 @@
 #include "include/riscv.h"
 #include "include/proc.h"
 #include "include/sbi.h"
+#include "include/uart8250.h"
 #include "include/uart.h"
 
 #define BACKSPACE 0x100
@@ -28,11 +29,29 @@
 void consputc(int c) {
   if(c == BACKSPACE){
     // if the user typed backspace, overwrite with a space.
+#ifdef visionfive
+    uart8250_putc('\b');
+    uart8250_putc(' ');
+    uart8250_putc('\b');
+#else
     sbi_console_putchar('\b');
     sbi_console_putchar(' ');
     sbi_console_putchar('\b');
-  } else {
+#endif
+  } else if(c == '\n' || c == '\r'){
+#ifdef visionfive
+    uart8250_putc('\r');
+    uart8250_putc('\n');
+#else
+    sbi_console_putchar('\n');
+#endif
+  }
+  else {
+#ifdef visionfive
+    uart8250_putc(c);
+#else
     sbi_console_putchar(c);
+#endif
   }
 }
 struct {
@@ -59,7 +78,11 @@ consolewrite(int user_src, uint64 src, int n)
     char c;
     if(either_copyin(&c, user_src, src+i, 1) == -1)
       break;
+#ifdef visionfiveq
+    uart8250_putc(c);
+#else
     sbi_console_putchar(c);
+#endif
   }
   release(&cons.lock);
 
@@ -153,11 +176,7 @@ consoleintr(int c)
     break;
   default:
     if(c != 0 && cons.e-cons.r < INPUT_BUF){
-      #ifndef QEMU
-      if (c == '\r') break;     // on k210, "enter" will input \n and \r
-      #else
       c = (c == '\r') ? '\n' : c;
-      #endif
       // echo back to the user.
       consputc(c);
 
@@ -183,6 +202,9 @@ consoleinit(void)
   initlock(&cons.lock, "cons");
 #ifdef QEMU
   uartinit();
+#endif
+#ifdef visionfive
+  uart8250_init(UART, 24000000, 115200, 2, 4, 0);
 #endif
   cons.e = cons.w = cons.r = 0;
   

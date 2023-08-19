@@ -8,7 +8,7 @@
 #include "include/proc.h"
 #include "include/printf.h"
 #include "include/string.h"
-
+#include "include/uart8250.h"
 /*
  * the kernel's page table.
  */
@@ -29,8 +29,9 @@ kvminit()
   memset(kernel_pagetable, 0, PGSIZE);
 
   // uart registers
-  kvmmap(UART_V, UART, 0x1000, PTE_R | PTE_W);
-  
+#ifdef visionfive
+  kvmmap(UART_V, UART, 0x10000, PTE_R | PTE_W);
+#endif
   #ifdef QEMU
   // virtio mmio disk interface
   kvmmap(VIRTIO0_V, VIRTIO0, PGSIZE, PTE_R | PTE_W);
@@ -64,17 +65,13 @@ kvminit()
 void
 kvminithart()
 {
-#ifdef DEBUG
-  printf("successfully before satp\n");
-#endif
-  // reg_info();
+  
   sfence_vma();
   w_satp(MAKE_SATP(kernel_pagetable));
+  //修改uart的地址映射
+  uart8250_change_base_addr(UART_V);
   // sfence_vma();
-  // w_satp(0);
-  // reg_info();
   #ifdef DEBUG
-  printf("successfully write satp\n");
   printf("kvminithart\n");
   #endif
 }
