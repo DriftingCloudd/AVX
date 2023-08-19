@@ -1442,14 +1442,25 @@ sys_readlinkat(void)
   uint64 addr2;
   char path[FAT32_MAX_PATH];
   int dirfd = 0;
-  if(argfd(0, &dirfd, NULL) < 0)
+  struct file* df;
+  struct dirent *dp = NULL;
+  struct proc *p = myproc();
+  printf("arrive a\n");
+  if(argfd(0, &dirfd, &df) < 0)
   {
-    return -1;
+    if(dirfd!=AT_FDCWD&&path[0]!='/'){
+      return -1;
+    }
+    dp = p->cwd;
+  }else{
+    dp = df->ep;
   }
+    printf("arrive b\n");
   if (argstr(1, path, FAT32_MAX_PATH) < 0 || argaddr(2, &addr2) < 0 || argint(3, &bufsiz) < 0)
   {
     return -1;
   }
+      printf("arrive c\n");
   int copy_size;
   if (bufsiz < strlen(path))
   {
