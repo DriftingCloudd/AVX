@@ -84,9 +84,9 @@ sys_socket(void) {
         printf("sys_socket: argint(2, &protocol) < 0\n");
         return -1;
     }
-    if(domain != AF_INET){
-        return -97;
-    }
+    // if(domain != AF_INET){
+    //     return -97;
+    // }
     struct file *f;
     int fd = 0;
     if ((f = filealloc()) == NULL || (fd = fdalloc(f)) < 0) {
@@ -100,7 +100,11 @@ sys_socket(void) {
     f->ep = 0;
     f->readable = 1;
     f->writable = 1;
+    f->socket_type = type;
     f->socketnum = do_socket(domain, type, protocol);
+    if (type & SOCK_CLOEXEC) {
+        myproc()->exec_close[fd] = 1;
+    }
     if(type & 0x800){
         int argp = 1;
         lwip_ioctl(f->socketnum, FIONBIO, (void*)&argp);

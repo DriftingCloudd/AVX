@@ -29,10 +29,10 @@
 // #define IPPROTO_SCTP 132 // SCTP协议
 // #define IPPROTO_ICMP 1   // ICMP协议
 
-// #define SOCK_CLOEXEC   02000000
-// #define SOCK_NONBLOCK  04000
-// #define FD_CLOEXEC 1
-// #define O_NONBLOCK (SOCK_NONBLOCK)
+#define SOCK_CLOEXEC   02000000
+#define SOCK_NONBLOCK  04000
+#define FD_CLOEXEC 1
+#define O_NONBLOCK (SOCK_NONBLOCK)
 // #define SO_RCVTIMEO	20
 
 // #define MAX_SOCK_NUM 16
