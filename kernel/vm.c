@@ -13,6 +13,7 @@
  * the kernel's page table.
  */
 pagetable_t kernel_pagetable;
+pagetable_t tcpip_pagetable;
 
 extern char etext[];  // kernel.ld sets this to end of kernel code.
 extern char trampoline[]; // trampoline.S
@@ -22,6 +23,7 @@ extern char trampoline[]; // trampoline.S
 void
 kvminit()
 {
+  tcpip_pagetable = NULL;
   kernel_pagetable = (pagetable_t) kalloc();
 #ifdef DEBUG
   printf("kernel_pagetable: %p\n", kernel_pagetable);
@@ -131,7 +133,7 @@ walkaddr(pagetable_t pagetable, uint64 va)
 
   pte = walk(pagetable, va, 0);
   if(pte == 0){
-    // printf("walkaddr: pte == 0\n");
+    printf("walkaddr: pte == 0\n");
     return NULL;
   }
   if((*pte & PTE_V) == 0){
@@ -200,8 +202,11 @@ mappages(pagetable_t pagetable, uint64 va, uint64 size, uint64 pa, int perm)
   for(;;){
     if((pte = walk(pagetable, a, 1)) == NULL)
       return -1;
-    if(*pte & PTE_V)
+    if(*pte & PTE_V){
+      printf("mappages:%p %p\n", a, PTE2PA(*pte));
       panic("remap");
+    }
+      
     *pte = PA2PTE(pa) | perm | PTE_V;
     if(a == last)
       break;
@@ -623,24 +628,50 @@ copyinstr2(char *dst, uint64 srcva, uint64 max)
 
 // initialize kernel pagetable for each process.
 pagetable_t
-proc_kpagetable()
+proc_kpagetable(struct proc* p)
 {
   pagetable_t kpt = (pagetable_t) kalloc();
   if (kpt == NULL)
     return NULL;
   memmove(kpt, kernel_pagetable, PGSIZE);
 
-  // remap stack and trampoline, because they share the same page table of level 1 and 0
-  char *pstack = kalloc();
-  if(pstack == NULL)
-    goto fail;
-  if (mappages(kpt, VKSTACK, PGSIZE, (uint64)pstack, PTE_R | PTE_W) != 0)
-    goto fail;
+  int procaddrnum = get_proc_addr_num(p);
   
+  char *mem;
+  uint64 a;
+  uint64 start = PROCVKSTACK(procaddrnum);
+  uint64 end = start + KSTACKSIZE;
+  for(a = start; a < end; a += PGSIZE){
+    mem = kalloc();
+    if(mem == NULL){
+      vmunmap(kpt, start, (a-start)/PGSIZE, 1);
+      vmunmap(kernel_pagetable, start, (a-start)/PGSIZE, 0);
+      printf("kpagetable kalloc failed\n");
+      goto fail;
+    }
+    memset(mem, 0, PGSIZE);
+    if (mappages(kpt, a, PGSIZE, (uint64)mem, PTE_R | PTE_W) != 0) {
+      kfree(mem);
+      vmunmap(kpt, start, (a-start)/PGSIZE, 1);
+      vmunmap(kernel_pagetable, start, (a-start)/PGSIZE, 0);
+      printf("[kpagetable]map page failed\n");
+      goto fail;
+    }
+    if(tcpip_pagetable != NULL){
+      if(mappages(tcpip_pagetable, a, PGSIZE, (uint64)mem, PTE_R | PTE_W) != 0){
+        vmunmap(kpt, start, (a-start + PGSIZE)/PGSIZE, 1);
+        vmunmap(tcpip_pagetable, start, (a-start)/PGSIZE, 0);
+        printf("[kpagetable]map page failed\n");
+        goto fail;
+      }
+    }
+    
+  }
+
   return kpt;
 
 fail:
-  kvmfree(kpt, 1);
+  kvmfree(kpt, 1, p);
   return NULL;
 }
 
@@ -674,18 +705,23 @@ kvmfreeusr(pagetable_t kpt)
 }
 
 void
-kvmfree(pagetable_t kpt, int stack_free)
+kvmfree(pagetable_t kpt, int stack_free, struct proc* p)
 {
   if (stack_free) {
-    vmunmap(kpt, VKSTACK, 1, 1);
-    pte_t pte = kpt[PX(2, VKSTACK)];
+    uint64 procaddrnum = get_proc_addr_num(p);
+    uint64 prockstack = PROCVKSTACK(procaddrnum);
+    vmunmap(kpt, prockstack, KSTACKSIZE / PGSIZE, 1);
+    vmunmap(tcpip_pagetable, prockstack, KSTACKSIZE / PGSIZE, 0);
+    pte_t pte = kpt[PX(2, prockstack - PGSIZE)];
     if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
       kfreewalk((pagetable_t) PTE2PA(pte));
     }
-    pte = kpt[PX(2, VKSTACK - PGSIZE)];
-    if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
-      kfreewalk((pagetable_t) PTE2PA(pte));
-    }
+    // for(uint64 a = prockstack; a < prockstack + KSTACKSIZE; a += PGSIZE){
+    //   pte = kpt[PX(2, a)];
+    //   if ((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0) {
+    //     kfreewalk((pagetable_t) PTE2PA(pte));
+    //   }
+    // }
   }
   kvmfreeusr(kpt);
   kfree(kpt);

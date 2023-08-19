@@ -534,7 +534,7 @@ int exec(char *path, char **argv, char ** env)
   proc_freepagetable(oldpagetable, oldsz);
   w_satp(MAKE_SATP(p->kpagetable));
   sfence_vma();
-  kvmfree(oldkpagetable, 0);
+  kvmfree(oldkpagetable, 0, myproc());
   
   return argc; // this ends up in a0, the first argument to main(argc, argv)
 
@@ -545,7 +545,7 @@ int exec(char *path, char **argv, char ** env)
   if(pagetable)
     proc_freepagetable(pagetable, sz);
   if(kpagetable)
-    kvmfree(kpagetable, 0);
+    kvmfree(kpagetable, 0, myproc());
   if(interpreter){
     eunlock(interpreter);
     eput(interpreter);

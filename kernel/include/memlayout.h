@@ -1,6 +1,6 @@
 #ifndef __MEMLAYOUT_H
 #define __MEMLAYOUT_H
-
+#include "param.h"
 // Physical memory layout
 
 // k210 peripherals
@@ -87,10 +87,13 @@
 // in both user and kernel space.
 #define TRAMPOLINE              (MAXVA - PGSIZE)
 
+// 0x3F00000000L 上面是 mmio地址
 // map kernel stacks beneath the trampoline,
 // each surrounded by invalid guard pages.
 // #define KSTACK(p)               (TRAMPOLINE - ((p) + 1) * 2 * PGSIZE)
 #define VKSTACK                 0x3EC0000000L //0x3E_C000_0000
+#define KSTACKSIZE              8 * PGSIZE
+#define PROCVKSTACK(paddrnum)        (VKSTACK - ((((paddrnum) + 1) % NPROC) * (KSTACKSIZE + 2 * PGSIZE)) + 2 * PGSIZE)
 
 // User memory layout.
 // Address zero first:

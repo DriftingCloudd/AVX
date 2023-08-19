@@ -3,7 +3,7 @@
 
 #include "types.h"
 #include "riscv.h"
-
+#include "proc.h"
 void            kvminit(void);
 void            kvminithart(void);
 uint64          kvmpa(uint64);
@@ -25,9 +25,9 @@ int             copyout_zero(pagetable_t pagetable, uint64 dstva, uint64 len);
 int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
-pagetable_t     proc_kpagetable(void);
+pagetable_t     proc_kpagetable(struct proc* p);
 void            kvmfreeusr(pagetable_t kpt);
-void            kvmfree(pagetable_t kpagetable, int stack_free);
+void            kvmfree(pagetable_t kpt, int stack_free, struct proc* p);
 uint64          kwalkaddr(pagetable_t pagetable, uint64 va);
 int             copyout2(uint64 dstva, char *src, uint64 len);
 int             copyin2(char *dst, uint64 srcva, uint64 len);

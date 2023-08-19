@@ -42,11 +42,12 @@ static uint32
 convert_common_optname_to_lwip(uint32 common) {
     return lwip_optnames[common];
 }
-
+extern pagetable_t tcpip_pagetable;
 static void
 tcpip_init_done(void *arg) {
   volatile int *tcpip_done = arg;
   *tcpip_done = 1;
+  tcpip_pagetable = myproc()->kpagetable;
 }
 
 void tcpip_init_with_loopback(void) {

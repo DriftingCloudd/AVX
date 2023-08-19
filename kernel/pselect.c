@@ -123,7 +123,7 @@ sys_pselect6(void)
 			case FD_DEVICE:
 			case FD_ENTRY:
 			case FD_SOCK:
-				ret++;
+				
 			break;
 
 			default:
@@ -150,7 +150,7 @@ sys_pselect6(void)
 			case FD_DEVICE:
 			case FD_ENTRY:
 			case FD_SOCK:
-				ret++;
+				
 			break;
 
 			default:

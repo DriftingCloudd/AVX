@@ -261,12 +261,12 @@ found:
   // An empty user page table.
   // And an identical kernel page table for this proc.
   if ((p->pagetable = proc_pagetable(p)) == NULL ||
-      (p->kpagetable = proc_kpagetable()) == NULL) {
+      (p->kpagetable = proc_kpagetable(p)) == NULL) {
     freeproc(p);
     release(&p->lock);
     return NULL;
   }
-  p->kstack = VKSTACK;
+  p->kstack = PROCVKSTACK(get_proc_addr_num(p));
 
   p->exec_close = kalloc();
   for (int fd = 0; fd < NOFILE; fd++)
@@ -276,7 +276,7 @@ found:
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
-  p->context.sp = p->kstack + PGSIZE;
+  p->context.sp = p->kstack + KSTACKSIZE;
   p->main_thread = allocNewThread();
   copycontext(&p->main_thread->context,&p->context);
   p->thread_num++;
@@ -322,7 +322,7 @@ freeproc(struct proc *p)
   }
 
   if (p->kpagetable) {
-    kvmfree(p->kpagetable, 1);
+    kvmfree(p->kpagetable, 1, p);
   }
   p->kpagetable = 0;
   if(p->pagetable){
@@ -1234,9 +1234,10 @@ clone(uint64 new_stack, uint64 new_fn)
 }
 
 void
-threadhelper()
+threadhelper(uint64 sp)
 {
   release(&myproc()->lock);
+  printf("threadhelper sp %p\n", sp);
   void (*fn)(void*) = (void (*)(void*))myproc()->fn;
   void *arg = myproc()->arg;
   printf("threadhelper fn %p arg %p\n", fn, arg);
@@ -1253,22 +1254,25 @@ threadalloc(void (*fn)(void *), void *arg)
 
   p = allocproc();
 
-  //记得后面算的时候加上原本就有pgsize
-  int inc_stack_size = 64 * PGSIZE;
-
-  //虽然调用的是uvm开头的函数，实际上是给kpagetable映射
-  uvmalloc1(p->kpagetable, VKSTACK + PGSIZE, VKSTACK + PGSIZE + inc_stack_size, PTE_R | PTE_W);
-  p->context.sp = VKSTACK + PGSIZE + inc_stack_size;
-  p->main_thread->context.sp = p->context.sp;
   p->tmask = 0;
 
   copytrapframe(p->main_thread->trapframe,p->trapframe);
 
-  p->main_thread->context.ra = (uint64)threadhelper;
+  p->main_thread->context.ra = (uint64)threadstub;
   
   p->fn = fn;
   p->arg = arg;
 
   release(&p->lock);
   return p;
+}
+
+
+int get_proc_addr_num(struct proc *p){
+  for(int i = 0; i < NPROC; i++){
+    if(&proc[i] == p){
+      return i;
+    }
+  }
+  return -1;
 }

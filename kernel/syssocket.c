@@ -82,6 +82,9 @@ sys_socket(void) {
         printf("sys_socket: argint(2, &protocol) < 0\n");
         return -1;
     }
+    if(domain != AF_INET){
+        return -97;
+    }
     struct file *f;
     int fd = 0;
     if ((f = filealloc()) == NULL || (fd = fdalloc(f)) < 0) {

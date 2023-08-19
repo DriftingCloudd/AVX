@@ -7,15 +7,15 @@
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg,
                             int stacksize, int prio) {
   LWIP_UNUSED_ARG(name);
-  LWIP_UNUSED_ARG(stacksize);
+  // LWIP_UNUSED_ARG(stacksize);
   LWIP_UNUSED_ARG(prio);
-  
+  printf("sys_thread_new: %s stacksize:%d\n", name, stacksize);
   sys_thread_t t = threadalloc(thread, arg);
   if (t == NULL) {
     panic("sys_thread_new: threadalloc failed\n");
     return NULL;
   }
-  safestrcpy(t->name, name, sizeof t->name);
+  safestrcpy(t->name, name, sizeof (t->name));
   acquire(&t->lock);
   t->state = RUNNABLE;
   t->main_thread->state = t_RUNNABLE;
@@ -32,6 +32,7 @@ static struct {
 } lwprot;
 
 sys_prot_t sys_arch_protect(void) {
+  // debug_print("sys_arch_protect\n");
   sys_prot_t r;
 
   push_off();
@@ -48,6 +49,7 @@ sys_prot_t sys_arch_protect(void) {
 }
 
 void sys_arch_unprotect(sys_prot_t pval) {
+  // debug_print("sys_arch_unprotect\n");
   if (lwprot.cpu != mycpu() || lwprot.depth == 0)
     panic("sys_arch_unprotect");
   lwprot.depth--;
@@ -60,15 +62,23 @@ void sys_arch_unprotect(sys_prot_t pval) {
 // sys sem
 
 err_t sys_sem_new(sys_sem_t *sem, u8_t count) {
+  // debug_print("sys_sem_new\n");
   sem_init(sem, count);
   return ERR_OK;
 }
 
-void sys_sem_free(sys_sem_t *sem) { sem_destroy(sem); }
+void sys_sem_free(sys_sem_t *sem) {
+  // debug_print("sys_sem_free\n");
+  sem_destroy(sem); 
+}
 
-void sys_sem_signal(sys_sem_t *sem) { sem_post(sem); }
+void sys_sem_signal(sys_sem_t *sem) {
+  // debug_print("sys_sem_signal\n");
+  sem_post(sem); 
+}
 
 u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout) {
+  // debug_print("sys_arch_sem_wait\n");
   if (timeout == 0) {
     sem_wait(sem);
     return 0;
@@ -78,12 +88,19 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout) {
   return 0;
 }
 
-int sys_sem_valid(sys_sem_t *sem) { return sem_is_valid(sem); }
+int sys_sem_valid(sys_sem_t *sem) {
+  // debug_print("sys_sem_valid\n");
+  return sem_is_valid(sem); 
+}
 
-void sys_sem_set_invalid(sys_sem_t *sem) { sem_set_invalid(sem); }
+void sys_sem_set_invalid(sys_sem_t *sem) {
+  // debug_print("sys_sem_set_invalid\n");
+  sem_set_invalid(sem); 
+}
 
 // sys mailbox
 err_t sys_mbox_new(sys_mbox_t *mbox, int size) {
+  // debug_print("sys_mbox_new %p\n", mbox);
   if (size > MBOXSLOTS) {
     printf("sys_mbox_new: size %u\n", size);
     return ERR_MEM;
@@ -97,11 +114,18 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size) {
   return ERR_OK;
 }
 
-void sys_mbox_set_invalid(sys_mbox_t *mbox) { mbox->invalid = 1; }
+void sys_mbox_set_invalid(sys_mbox_t *mbox) { 
+  // debug_print("sys_mbox_set_invalid %p\n", mbox);
+  mbox->invalid = 1; 
+}
 
-int sys_mbox_valid(sys_mbox_t *mbox) { return !mbox->invalid; }
+int sys_mbox_valid(sys_mbox_t *mbox) {
+  // debug_print("sys_mbox_valid %p\n", mbox);
+  return !mbox->invalid; 
+}
 
 err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg) {
+  // debug_print("sys_mbox_trypost %p\n", mbox);
   err_t r = ERR_MEM;
 
   acquire(&mbox->s);
@@ -113,6 +137,9 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg) {
   }
   release(&mbox->s);
 
+  if(r ==ERR_OK){
+    // debug_print("sys_mbox_trypost %p success\n", mbox);
+  }
   return r;
 }
 
@@ -127,9 +154,11 @@ void sys_mbox_post(sys_mbox_t *mbox, void *msg) {
   mbox->head++;
   sem_post(&mbox->sem);
   release(&mbox->s);
+  // debug_print("sys_mbox_post %p success\n", mbox);
 }
 
 void sys_mbox_free(sys_mbox_t *mbox) {
+  // debug_print("sys_mbox_free %p\n", mbox);
   if (mbox->head != mbox->tail)
     panic("sys_mbox_free");
 }
@@ -161,6 +190,9 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout) {
 
 done:
   release(&mbox->s);
+  if(r != SYS_ARCH_TIMEOUT){
+    // debug_print("sys_arch_mbox_fetch %p success\n", mbox);
+  }
   return r;
 }
 
@@ -175,10 +207,14 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg) {
     r = 0;
   }
   release(&mbox->s);
+  if(r == 0){
+    // debug_print("sys_arch_mbox_tryfetch %p success\n", mbox);
+  }
   return r;
 }
 
 err_t sys_mbox_trypost_fromisr(sys_mbox_t *mbox, void *msg) {
+  // debug_print("sys_mbox_trypost_fromisr %p\n", mbox);
   u32_t r = ERR_MEM;
 
   if (mbox->head - mbox->tail < MBOXSLOTS) {
