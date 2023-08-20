@@ -97,6 +97,18 @@ fileclose(struct file *f)
   }
 }
 
+static int hashpath1(char* name){
+  int hashvalue = 0;
+  for(int i = 0;name[i];i++){
+    hashvalue = hashvalue*128;
+    hashvalue += name[i];
+    if(hashvalue > 1000000){
+      hashvalue = hashvalue%1000000;
+    }
+  }
+  return hashvalue;
+}
+
 // Get metadata about file f.
 // addr is a user virtual address, pointing to a struct stat.
 int
@@ -120,8 +132,36 @@ filestat(struct file *f, uint64 addr)
     if(copyout(myproc()->pagetable, addr, (char *)&kst, sizeof(kst)) < 0)
       return -1;
     return 0;
-  }
-  return -1;
+  } else if(f->type == FD_DEVICE) {
+    if(f->major < 0 || !devsw[f->major].read)
+          return -1;
+    struct devsw* mydev = devsw + f->major;
+    acquire(&mydev->lk);
+    struct kstat* st = &kst;
+    st->st_dev = mydev-devsw;
+    st->st_size = 0;
+    st->st_blksize = 128;
+    st->st_blocks = 0;
+    st->st_atime_nsec = 0;
+    st->st_atime_sec = 0;
+    st->st_ctime_nsec = 0;
+    st->st_ctime_sec = 0;
+    st->st_mtime_nsec = 0;
+    st->st_mtime_sec = 0;
+    st->st_uid = 0;
+    st->st_gid = 0;
+    st->st_rdev = 0;
+    st->st_nlink = 1;
+    st->st_ino = hashpath1(mydev->name);
+    st->st_mode = S_IFCHR;
+    release(&mydev->lk);
+  } else {
+    return -1;
+  } 
+  if(copyout(myproc()->pagetable, addr, (char *)&kst, sizeof(kst)) < 0)
+    return -1;
+  
+  return 0;
 }
 
 uint64

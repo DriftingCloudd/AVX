@@ -195,6 +195,7 @@ extern uint64 sys_sched_getaffinity();
 extern uint64 sys_pselect6();
 extern uint64 sys_tkill();
 
+
 // socket syscalls
 extern uint64 sys_socket(void);
 extern uint64 sys_bind(void);
@@ -211,6 +212,8 @@ extern uint64 sys_madvise();
 extern uint64 sys_getrusage();
 extern uint64 sys_sched_setscheduler();
 extern uint64 sys_clock_getres();
+extern uint64 sys_copy_file_range();
+
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -323,6 +326,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sched_setscheduler]  sys_sched_setscheduler,
   [SYS_clock_getres]  sys_clock_getres,
   [SYS_shutdown]      sys_shutdown,
+  [SYS_copy_file_range] sys_copy_file_range,
 };
 
 static char *sysnames[] = {
@@ -435,6 +439,7 @@ static char *sysnames[] = {
   [SYS_sched_setscheduler]  "sched_setscheduler",
   [SYS_clock_getres]  "clock_getres",
   [SYS_shutdown]       "shutdown",
+  [SYS_copy_file_range] "copy_file_range",
 };
 
 void

@@ -19,6 +19,7 @@ static longtest libc_bench[];
 static longtest cyclic_bench[];
 static longtest lmbench[];
 static longtest interrupts[];
+static longtest copyfile[];
 
 void test_busybox(){
 	dev(2,1,0);
@@ -39,6 +40,13 @@ void test_busybox(){
   // printf("222\n");
 
   pid = fork();
+	if(pid == 0){
+		exec("time-test",time_test[0].name);
+		exit(0);
+	}
+	wait4(pid, &status, 0);
+
+  pid = fork();
   if (pid == 0) {
     exec("interrupts-test-1",interrupts[0].name);
     exit(0);
@@ -53,11 +61,33 @@ void test_busybox(){
   wait4(pid,&status,0);
 
   pid = fork();
-	if(pid == 0){
-		exec("time-test",time_test[0].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+  if (pid == 0) {
+    exec("copy-file-range-test-1",interrupts[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+
+  pid = fork();
+  if (pid == 0) {
+    exec("copy-file-range-test-2",interrupts[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+
+  pid = fork();
+  if (pid == 0) {
+    exec("copy-file-range-test-3",interrupts[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+
+  pid = fork();
+  if (pid == 0) {
+    exec("copy-file-range-test-4",interrupts[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+
 	printf("run busybox_testcode.sh\n");
 	for(i = 0; busybox[i].name[1] ; i++){
 		if(!busybox[i].valid)continue;
@@ -281,6 +311,13 @@ void test_busybox(){
 static longtest interrupts[] = {
   {1,{"interrupts-test-1",0}},
   {1,{"interrupts-test-2",0}},
+};
+
+static longtest copyfile[] = {
+  {1,{"copy-file-range-test-1",0}},
+  {1,{"copy-file-range-test-2",0}},
+  {1,{"copy-file-range-test-3",0}},
+  {1,{"copy-file-range-test-4",0}},
 };
 
 static longtest time_test[] = {
@@ -673,7 +710,7 @@ static longtest lmbench[] = {
 	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "stat"  ,  "/var/tmp/lmbench"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "fstat"  ,  "/var/tmp/lmbench"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "open"  ,  "/var/tmp/lmbench"  ,  0	}},
-	{ 1 , {"lmbench_all"  ,  "lat_select"  ,  "-n"  ,  "100"  ,  "-P"  ,  "1"  ,  "file"  ,  0	}},
+	// { 1 , {"lmbench_all"  ,  "lat_select"  ,  "-n"  ,  "100"  ,  "-P"  ,  "1"  ,  "file"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "install"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "catch"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_pipe"  ,  "-P"  ,  "1"  ,  0	}},

@@ -111,5 +111,6 @@
 #define SYS_sched_setscheduler 119
 #define SYS_clock_getres    114
 #define SYS_pselect6    72
+#define SYS_copy_file_range 285
 
 #endif
