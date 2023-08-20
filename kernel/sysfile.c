@@ -1577,7 +1577,7 @@ sys_copy_file_range(void)
     return 0;
   }
   int pagenum;
-  if (len % PGSIZE)
+  if (len % PGSIZE == 0)
   {
     pagenum = len / PGSIZE;
   }
@@ -1586,10 +1586,11 @@ sys_copy_file_range(void)
     pagenum = len / PGSIZE + 1;
   }
   
-  
+  printf("pagenum:%d\n", pagenum);
   char **pbuf;
   uint64 lastlen = len - PGSIZE*(pagenum - 1);
   pbuf = kalloc();
+  memset(pbuf, 0, PGSIZE);
   for(int i=0;i<pagenum;i++){
     pbuf[i] = kalloc();
     memset(pbuf[i], 0, PGSIZE);
@@ -1611,6 +1612,7 @@ sys_copy_file_range(void)
   //   printf("%d ",buf[i]);
   // }
   if(off_out == NULL){
+    printf("off_out == null\n");
       if(fp_out->off > fp_out->ep->file_size){
         char * buf = kalloc();
         memset(buf, 0, PGSIZE);
@@ -1622,8 +1624,13 @@ sys_copy_file_range(void)
         for(int i=0;i<pagenum - 1;i++){
           ewrite(fp_out->ep, 0, (uint64)pbuf[i], fp_out->off + i * PGSIZE ,PGSIZE);
         }
+        for(int i=0;i<PGSIZE;i++){
+          printf("%d ",pbuf[pagenum-1][i]);
+        }
+          printf("ewrite lastlen %d\n", lastlen);
           ewrite(fp_out->ep, 0, (uint64)pbuf[pagenum-1], fp_out->off + (pagenum - 1)* PGSIZE,lastlen);
-      }
+          printf("file?_size:%d\n", fp_out->ep->file_size);   
+       }
       fp_out->off += len;
   }
 
