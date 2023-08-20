@@ -46,3 +46,5 @@ entry("rename");
 entry("wait4");
 entry("shutdown");
 entry("copy_file_range");
+entry("ftruncate");
+entry("lseek");

@@ -38,6 +38,8 @@ int rename(char *old, char *new);
 int ftruncate(int fd, int len);
 int shutdown(void);
 int copy_file_range(int, void *, int, void *, int, int);
+int ftruncate(int, int);
+int lseek(int ,int,int );
 
 // ulib.c
 int stat(const char*, struct stat*);

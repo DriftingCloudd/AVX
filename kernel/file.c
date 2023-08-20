@@ -442,6 +442,14 @@ fileseek(struct file *f, uint64 offset, int whence)
         ret = offset;
         f ->off = offset;
     } else if (whence == SEEK_CUR) {
+      // if(f->off + offset > f->ep->file_size){
+      //   char * buf = kalloc();
+      //   memset(buf, 0, PGSIZE);
+      //   printf("before file size%d\n", f->ep->file_size);
+      //   ewrite(f->ep, 0, buf, f->ep->file_size, f->off + offset - f->ep->file_size);
+      //   printf("after file size%d\n", f->ep->file_size);
+      //   kfree(buf);
+      // }
         ret = (f->off += offset);
     } else if (whence == SEEK_END) {
         ret = f->off = f->ep->file_size + offset;

@@ -1568,17 +1568,71 @@ sys_copy_file_range(void)
   uint64 len;
 
   printf("enter here!\n");
-  if (argfd(0, &fd_in, &fp_in) < 0 || argaddr(1, &off_in) < 0 || argfd(2, &fd_out, &fp_out) < 0 || argint(3, &off_in) < 0 || argint(4, &len) < 0)
+  if (argfd(0, &fd_in, &fp_in) < 0 || argaddr(1, &off_in) < 0 || argfd(2, &fd_out, &fp_out) < 0 || argaddr(3, &off_in) < 0 || argint(4, &len) < 0)
   {
     return -1;
   }
+  if (len == 0)
+  {
+    return 0;
+  }
+  int pagenum;
+  if (len % PGSIZE)
+  {
+    pagenum = len / PGSIZE;
+  }
+  else
+  {
+    pagenum = len / PGSIZE + 1;
+  }
   
-  char buf[200];
- 
-  eread(fp_in->ep, 0, (uint64)buf, fp_in->off ,len);
+  
+  char **pbuf;
+  uint64 lastlen = len - PGSIZE*(pagenum - 1);
+  pbuf = kalloc();
+  for(int i=0;i<pagenum;i++){
+    pbuf[i] = kalloc();
+    memset(pbuf[i], 0, PGSIZE);
+  }
+  printf("len %d\n", len);
+  char * buf;
+  printf("eread off %d\n", fp_in->off);
+  if(off_in == 0){
+    for(int i=0;i<pagenum - 1;i++){
+      eread(fp_in->ep, 0, (uint64)pbuf[i], fp_in->off + i * PGSIZE ,PGSIZE);
+    }
+    eread(fp_in->ep, 0, (uint64)pbuf[pagenum-1], fp_in->off + (pagenum - 1)* PGSIZE,lastlen);
+    fp_in->off += len;
+  }else{
+    
+  }
 
-  ewrite(fp_out->ep, 0, (uint64)buf,fp_out->off, len);
+  // for(int i=0;i<len;i++){
+  //   printf("%d ",buf[i]);
+  // }
+  if(off_out == NULL){
+      if(fp_out->off > fp_out->ep->file_size){
+        char * buf = kalloc();
+        memset(buf, 0, PGSIZE);
+        ewrite(fp_out->ep, 0, buf, fp_out->ep->file_size, fp_out->off - fp_out->ep->file_size);
+        kfree(buf);
+      }
+      if (len > 0)
+      {
+        for(int i=0;i<pagenum - 1;i++){
+          ewrite(fp_out->ep, 0, (uint64)pbuf[i], fp_out->off + i * PGSIZE ,PGSIZE);
+        }
+          ewrite(fp_out->ep, 0, (uint64)pbuf[pagenum-1], fp_out->off + (pagenum - 1)* PGSIZE,lastlen);
+      }
+      fp_out->off += len;
+  }
 
-  return 0;
+
+  
+  for(int i=0;i<pagenum;i++){
+    kfree(pbuf[i]);
+  }
+  kfree(pbuf);
+  return len;
 
 }
