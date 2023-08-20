@@ -993,6 +993,7 @@ sys_openat()
   dirf = NULL;
   struct dirent *dp = NULL,*ep;
   argfd(0,&dirfd,&dirf);
+  // printf("entere here!\n");
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
   }
@@ -1014,7 +1015,6 @@ sys_openat()
     return fd;
   }
   flags |= O_RDWR;
-
   if (dirf && FD_ENTRY == dirf->type) {
     dp = dirf->ep;
     if (!(dp->attribute & ATTR_DIRECTORY)) {
@@ -1483,6 +1483,82 @@ sys_readlinkat(void)
   // return 0;
 }
 
+static uint64 creat_file(){
+  char path[FAT32_MAX_FILENAME] = "/test.txt";
+  int dirfd,flags,mode,fd;
+  struct file *f,*dirf;
+  dirf = NULL;
+  struct dirent *dp = NULL,*ep;
+  argfd(0,&dirfd,&dirf);
+  // if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
+  //   return -1;
+  // }
+  dirfd = -100;
+  flags |= O_RDWR;
+
+  if (dirf && FD_ENTRY == dirf->type) {
+    dp = dirf->ep;
+    if (!(dp->attribute & ATTR_DIRECTORY)) {
+      eunlock(dp);
+      dp = NULL;
+    }
+  }
+  debug_print("%s\n", path);
+  if (NULL == (ep = new_ename(dp,path))) {
+    // 如果文件不存在
+    if ((flags & O_CREATE) || strncmp(path,"/proc/loadavg",13) == 0 || strncmp(path,"/tmp/testsuite-",15) == 0 ||strncmp(path,"/dev/zero",9) == 0 ||strncmp(path,"/etc/passwd",11) == 0 ||strncmp(path,"/proc/meminfo",13) == 0 || strncmp(path,"/dev/tty",8) == 0 || strncmp(path,"/etc/localtime",14) == 0 || strncmp(path,"/dev/misc/rtc",13) == 0 || strncmp(path,"/proc/mounts",12) == 0) {
+      ep = new_create(dp,path,T_FILE,flags);
+      if (NULL == ep) {
+        // 创建不了dirent
+        return -1;
+      }
+    }
+    if (!ep) {
+      return -1;
+    }
+  } else {
+    elock(ep);
+  }
+  // 如果ename成功创建了ep,那么返回的dirent是已经上锁的
+
+  if ((ep->attribute & ATTR_DIRECTORY) && ( !(flags&O_WRONLY) && !(flags&O_RDWR) )) {
+    eunlock(ep);
+    eput(ep);
+    printf("directory only can be read\n");
+
+    return -1;
+  }
+
+  if(NULL == (f = filealloc()) || (fd = fdalloc(f)) < 0) {
+    // 文件描述符或者文件创建失败
+    if (f) {
+      fileclose(f);
+    }
+    eunlock(ep);
+    eput(ep);
+    return -24;
+  }
+  if (!(ep->attribute & ATTR_DIRECTORY) && (flags & O_TRUNC)) {
+    etrunc(ep);
+  }
+  f->type = FD_ENTRY; 
+  f->off = (flags & O_APPEND) ? ep->file_size : 0;
+  f->ep = ep;
+  f->readable = !(flags & O_WRONLY);
+  f->writable = (flags & O_WRONLY) || (flags & O_RDWR);
+  eunlock(ep);
+  if (dp) {
+    elock(dp);
+  }
+  struct proc *p = myproc();
+  p->exec_close[fd] = 0;
+  if (strncmp(path,"/dev/zero",9) == 0) {
+    strncpy(f->ep->filename,"zero",4);
+  }
+  
+  return fd;
+}
+
 uint64
 sys_copy_file_range(void)
 {
@@ -1491,10 +1567,18 @@ sys_copy_file_range(void)
   uint64 off_in, off_out;
   uint64 len;
 
-  if (argfd(0, &fd_in, &fp_in) < 0 || argaddr(1, &off_in) < 0 || argfd(2, &fd_out, &fp_out) < 0 || argint(3, &len) < 0)
+  printf("enter here!\n");
+  if (argfd(0, &fd_in, &fp_in) < 0 || argaddr(1, &off_in) < 0 || argfd(2, &fd_out, &fp_out) < 0 || argint(3, &off_in) < 0 || argint(4, &len) < 0)
   {
     return -1;
   }
   
+  char buf[200];
+ 
+  eread(fp_in->ep, 0, (uint64)buf, fp_in->off ,len);
+
+  ewrite(fp_out->ep, 0, (uint64)buf,fp_out->off, len);
+
+  return 0;
 
 }
