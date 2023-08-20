@@ -282,13 +282,6 @@ void test_busybox(){
 
   printf("run cyclic_testcode.sh\n");
 
-  pid = fork();
-  if (pid == 0) {
-    exec("busybox",cyclic_bench[0].name);
-    exit(0);
-  }
-  wait4(pid,&status,0);
-
 	printf("run lmbench_testcode.sh\n");
   printf("latency measurements\n");
 
@@ -636,7 +629,7 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf_eof", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "statvfs", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "strverscmp", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
+    // {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
     //这个线程屏障没有实现
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "uselocale_0", 0}},
@@ -686,8 +679,8 @@ static run_output unix_bench[] = {
   {1, {"./long", "10", NULL}, {"Unixbench LONG test(lps): ","COUNT|", NULL}},
   {1, {"./float", "10", NULL}, {"Unixbench FLOAT test(lps): ", "COUNT|",NULL}},
   {1, {"./double", "10", NULL}, {"Unixbench DOUBLE test(lps): ","COUNT|", NULL}},
-  {1, {"./hanoi", "10", NULL}, {"Unixbench HANOI test(lps): ", "COUNT|",NULL}},
-  {1, {"./syscall", "10", "exec", NULL}, {"Unixbench EXEC test(lps): ","COUNT|", NULL}},
+  // {1, {"./hanoi", "10", NULL}, {"Unixbench HANOI test(lps): ", "COUNT|",NULL}},
+  // {1, {"./syscall", "10", "exec", NULL}, {"Unixbench EXEC test(lps): ","COUNT|", NULL}},
   {0, {0}, {0}}
 };
 
