@@ -194,6 +194,7 @@ extern uint64 sys_sched_getparam();
 extern uint64 sys_sched_getaffinity();
 extern uint64 sys_pselect6();
 extern uint64 sys_tkill();
+extern uint64 sys_copy_file_range();
 
 // socket syscalls
 extern uint64 sys_socket(void);
@@ -300,6 +301,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_setitimer]   sys_setitimer,
   [SYS_pselect6]    sys_pselect6,
   [SYS_tkill]       sys_tkill,
+  [SYS_copy_file_range] sys_copy_file_range,
 
   // socket syscalls
   [SYS_socket]      sys_socket,
@@ -417,6 +419,7 @@ static char *sysnames[] = {
   [SYS_pselect6]    "pselect6",
   [SYS_readlinkat]  "readlinkat",
   [SYS_tkill]       "tkill",
+  [SYS_copy_file_range] "copy_file_range",
 
   //socket syscalls
   [SYS_socket]      "socket",

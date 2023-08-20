@@ -1482,3 +1482,19 @@ sys_readlinkat(void)
   return copy_size;
   // return 0;
 }
+
+uint64
+sys_copy_file_range(void)
+{
+  int fd_in, fd_out;
+  struct file *fp_in, *fp_out;
+  uint64 off_in, off_out;
+  uint64 len;
+
+  if (argfd(0, &fd_in, &fp_in) < 0 || argaddr(1, &off_in) < 0 || argfd(2, &fd_out, &fp_out) < 0 || argint(3, &len) < 0)
+  {
+    return -1;
+  }
+  
+
+}

@@ -88,6 +88,7 @@
 #define SYS_statfs      43
 #define SYS_setitimer   103
 #define SYS_tkill       130
+#define SYS_copy_file_range 285
 
 #define SYS_shutdown    1000
 
