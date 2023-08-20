@@ -18,13 +18,15 @@ static run_output unix_bench[];
 static longtest libc_bench[];
 static longtest cyclic_bench[];
 static longtest lmbench[];
+static longtest interrupts[];
 
 void test_busybox(){
 	dev(2,1,0);
 	dup(0);
 	dup(0);
 
-	int status,pid;
+	int status,pid,i;
+
   // printf("111\n");
   // pid = fork();
   // if (pid == 0) {
@@ -35,6 +37,21 @@ void test_busybox(){
   // printf("%d\n",status);
   // printf("222\n");
   // printf("222\n");
+
+  pid = fork();
+  if (pid == 0) {
+    exec("interrupts-test-1",interrupts[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+
+  pid = fork();
+  if (pid == 0) {
+    exec("interrupts-test-2",interrupts[1].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
+
   pid = fork();
 	if(pid == 0){
 		exec("time-test",time_test[0].name);
@@ -42,7 +59,6 @@ void test_busybox(){
 	}
 	wait4(pid, &status, 0);
 	printf("run busybox_testcode.sh\n");
-	int i;
 	for(i = 0; busybox[i].name[1] ; i++){
 		if(!busybox[i].valid)continue;
 		pid = fork();
@@ -80,14 +96,7 @@ void test_busybox(){
 	pid = fork();
 	if(pid == 0){
 		exec("iozone",iozone[0].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
-	printf("iozone automatic measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[0].name);
-		exit(0);
+    exit(0);
 	}
 	wait4(pid, &status, 0);
 
@@ -99,13 +108,7 @@ void test_busybox(){
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("iozone throughput write/read measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[1].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+
 
 	printf("iozone throughput random-read measurements\n");
 	pid = fork();
@@ -114,13 +117,7 @@ void test_busybox(){
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("iozone throughput random-read measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[2].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+
 
 	printf("iozone throughput read-backwards measurements\n");
 	pid = fork();
@@ -129,13 +126,7 @@ void test_busybox(){
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("iozone throughput read-backwards measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[3].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+
 
 	printf("iozone throughput stride-read measurements\n");
 	pid = fork();
@@ -144,21 +135,8 @@ void test_busybox(){
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("iozone throughput stride-read measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[4].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
 
-	printf("iozone throughput fwrite/fread measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[5].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+
 	printf("iozone throughput fwrite/fread measurements\n");
 	pid = fork();
 	if(pid == 0){
@@ -174,13 +152,6 @@ void test_busybox(){
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("iozone throughput pwrite/pread measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[6].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
 
 	printf("iozone throughput pwritev/preadv measurements\n");
 	pid = fork();
@@ -189,13 +160,7 @@ void test_busybox(){
 		exit(0);
 	}
 	wait4(pid, &status, 0);
-	printf("iozone throughput pwritev/preadv measurements\n");
-	pid = fork();
-	if(pid == 0){
-		exec("iozone",iozone[7].name);
-		exit(0);
-	}
-	wait4(pid, &status, 0);
+
 
 
 	/**
@@ -287,6 +252,12 @@ void test_busybox(){
 
   printf("run cyclic_testcode.sh\n");
 
+  pid = fork();
+  if (pid == 0) {
+    exec("busybox",cyclic_bench[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
 
 	printf("run lmbench_testcode.sh\n");
   printf("latency measurements\n");
@@ -306,6 +277,11 @@ void test_busybox(){
   shutdown();
   exit(0);
 }
+
+static longtest interrupts[] = {
+  {1,{"interrupts-test-1",0}},
+  {1,{"interrupts-test-2",0}},
+};
 
 static longtest time_test[] = {
 	{1, {"time-test",0}},
@@ -502,7 +478,7 @@ static longtest libctest[] = {
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "sscanf_eof", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "statvfs", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "strverscmp", 0 } },
-  { 1, {"./runtest.exe", "-w", "entry-static.exe", "syscall_sign_extend", 0 } },
+  // 下面这个qemu可以，板子不可以
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "syscall_sign_extend", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "uselocale_0", 0 } },
   { 1, {"./runtest.exe", "-w", "entry-static.exe", "wcsncpy_read_overflow", 0 } },
@@ -623,10 +599,9 @@ static longtest libctest_dy[] = {
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "sscanf_eof", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "statvfs", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "strverscmp", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "syscall_sign_extend", 0}},
-    {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "tls_get_new_dtv", 0}},
+    //这个线程屏障没有实现
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "uselocale_0", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsncpy_read_overflow", 0}},
     {1, {"./runtest.exe", "-w", "entry-dynamic.exe", "wcsstr_false_negative", 0}},
@@ -662,9 +637,9 @@ static run_output unix_bench[] = {
   {1, {"./fstime", "-w", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_WRITE_MIDDLE test(KBps): ", "WRITE COUNT|",NULL}},
   {1, {"./fstime", "-r", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_READ_MIDDLE test(KBps): ","READ COUNT|", NULL}},
   {1, {"./fstime", "-c", "-t", "20", "-b", "1024", "-m", "2000", NULL}, {"Unixbench FS_COPY_MIDDLE test(KBps): ","COPY COUNT|", NULL}},
-  // {1, {"./fstime", "-w", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_WRITE_BIG test(KBps): ", NULL}},
-  // {1, {"./fstime", "-r", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_READ_BIG test(KBps): ", NULL}},
-  // {1, {"./fstime", "-c", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_COPY_BIG test(KBps): ", NULL}},
+  {1, {"./fstime", "-w", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_WRITE_BIG test(KBps): ", NULL}},
+  {1, {"./fstime", "-r", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_READ_BIG test(KBps): ", NULL}},
+  {1, {"./fstime", "-c", "-t", "20", "-b", "4096", "-m", "8000", NULL}, {"Unixbench FS_COPY_BIG test(KBps): ", NULL}},
   {1, {"./looper", "20", "./multi.sh", "1", NULL}, {"Unixbench SHELL1 test(lpm): ", NULL}},
   {1, {"./looper", "20", "./multi.sh", "8", NULL}, {"Unixbench SHELL8 test(lpm): ", NULL}},
   {1, {"./looper", "20", "./multi.sh", "16", NULL}, {"Unixbench SHELL16 test(lpm): ", NULL}},
@@ -685,7 +660,7 @@ static longtest libc_bench[] = {
 
 
 static longtest cyclic_bench[] = {
-  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p2","-D","20s","-q",0}},
+  {1,{"busybox","sh","cyclictest_testcode.sh",0}},
   {0,{0}},
 };
 
@@ -695,31 +670,30 @@ static longtest lmbench[] = {
 	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "write" ,  0	}},
 	{ 1 , {"busybox"  ,  "mkdir"  ,  "-p"  ,  "/var/tmp"  ,  0	}},
 	{ 1 , {"busybox"  ,  "touch"  ,  "/var/tmp/lmbench"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "stat"  ,  "/var/tmp/lmbench"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "stat"  ,  "/var/tmp/lmbench"  ,  0	}},
 	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "fstat"  ,  "/var/tmp/lmbench"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "open"  ,  "/var/tmp/lmbench"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_select"  ,  "-n"  ,  "100"  ,  "-P"  ,  "1"  ,  "file"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "install"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_syscall"  ,  "-P"  ,  "1"  ,  "open"  ,  "/var/tmp/lmbench"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_select"  ,  "-n"  ,  "100"  ,  "-P"  ,  "1"  ,  "file"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "install"  ,  0	}},
 	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "catch"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_sig"  ,  "-P"  ,  "1"  ,  "prot"  ,  "lat_sig"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_pipe"  ,  "-P"  ,  "1"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "fork"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "exec"  ,  0	}},
-	// { 1 , {"busybox"  ,  "cp"  ,  "hello"  ,  "/tmp"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "shell"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lmdd"  ,  "label=File /var/tmp/XXX write bandwidth:"  ,  "of=/var/tmp/XXX"  ,  "move=1m"  ,  "fsync=1"  ,  "print=3"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_mmap"  ,  "-P"  ,  "1"  ,  "512k"  ,  "/var/tmp/XXX"  ,  0	}},
-	// { 1 , {"busybox"  ,  "echo"  ,  "file"  ,  "system"  ,  "latency"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_fs"  ,  "/var/tmp"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "lat_pagefault"  ,  "-P"  ,  "1"  ,  "/var/tmp/XXX"  ,  0	}},
-	// { 1 , {"busybox"  ,  "echo"  ,  "Bandwidth"  ,  "measurements"  ,  0	}},
-	// // { 1 , {"lmbench_all"  ,  "bw_pipe",    "-P"  ,  "1"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "bw_file_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "io_only"  ,  "/var/tmp/XXX"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "bw_file_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "open2close"  ,  "/var/tmp/XXX"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "bw_mmap_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "mmap_only"  ,  "/var/tmp/XXX"  ,  0	}},
-	// { 1 , {"lmbench_all"  ,  "bw_mmap_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "open2close"  ,  "/var/tmp/XXX"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_pipe"  ,  "-P"  ,  "1"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "fork"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "exec"  ,  0	}},
+	{ 1 , {"busybox"  ,  "cp"  ,  "hello"  ,  "/tmp"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_proc"  ,  "-P"  ,  "1"  ,  "shell"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lmdd"  ,  "label=File /var/tmp/XXX write bandwidth:"  ,  "of=/var/tmp/XXX"  ,  "move=1m"  ,  "fsync=1"  ,  "print=3"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_pagefault"  ,  "-P"  ,  "1"  ,  "/var/tmp/XXX"  ,  0	}},	
+  { 1 , {"lmbench_all"  ,  "lat_mmap"  ,  "-P"  ,  "1"  ,  "512k"  ,  "/var/tmp/XXX"  ,  0	}},
+	{ 1 , {"busybox"  ,  "echo"  ,  "file"  ,  "system"  ,  "latency"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_fs"  ,  "/var/tmp"  ,  0	}},
+	{ 1 , {"busybox"  ,  "echo"  ,  "Bandwidth"  ,  "measurements"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "bw_pipe",    "-P"  ,  "1"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "bw_file_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "io_only"  ,  "/var/tmp/XXX"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "bw_file_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "open2close"  ,  "/var/tmp/XXX"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "bw_mmap_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "mmap_only"  ,  "/var/tmp/XXX"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "bw_mmap_rd"  ,  "-P"  ,  "1"  ,  "512k"  ,  "open2close"  ,  "/var/tmp/XXX"  ,  0	}},
 	{ 1 , {"busybox"  ,  "echo"  ,  "context"  ,  "switch"  ,  "overhead"  ,  0	}},
-	{ 1 , {"lmbench_all"  ,  "lat_ctx"  ,  "-P"  ,  "1"  ,  "-s"  ,  "32"  ,  "2"  ,  "4"  ,  0	}},
+	{ 1 , {"lmbench_all"  ,  "lat_ctx"  ,  "-P"  ,  "1"  ,  "-s"  ,  "32"  ,  "2"  ,  "4"  ,"8","16","24","32","64","96",  0	}},
 	{ 0 , { 0 , 0				}},
 };
 

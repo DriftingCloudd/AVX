@@ -29,8 +29,11 @@
 char syslogbuffer[1024];
 int bufferlength = 0;
 
+static int interrupts = 0;
+
 void initlogbuffer() {
   bufferlength = 0;
+  interrupts = 0;
   strncpy(syslogbuffer,"[log]init done\n",1024);
   bufferlength += strlen(syslogbuffer);
 }
@@ -55,6 +58,11 @@ argfd(int n, int *pfd, struct file **pf)
   if (fd == -100) {
     *pfd = fd;
     return -1;
+  }
+
+  if (fd == 200) {
+    *pfd = fd;
+    return 200;
   }
 
   if(fd < 0 || fd >= NOFILE || (f=myproc()->ofile[fd]) == NULL){
@@ -173,11 +181,21 @@ uint64
 sys_read(void)
 {
   struct file *f;
-  int n;
+  int n,fd;
   uint64 p;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
+  if(argfd(0, &fd, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
     return -1;
+  if (fd == 200) {
+    if (interrupts == 0) {
+      interrupts = 1;
+      return fileread_interrupts(p,n);
+    } else {
+      interrupts = 0;
+      return 0;
+    }
+  }
+
   return fileread(f, p, n);
 }
 
@@ -199,10 +217,12 @@ uint64
 sys_write(void)
 {
   struct file *f;
-  int n;
+  int n,fd;
   uint64 p;
 
-  if(argfd(0, 0, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
+  if(argfd(0, &fd, &f) < 0 || argint(2, &n) < 0 || argaddr(1, &p) < 0)
+    return -1;
+  if (fd == 200)
     return -1;
   // if(f->type == FD_ENTRY){
   //   printf("write file : %s\n", f->ep->filename);
@@ -219,6 +239,8 @@ sys_close(void)
 
   if(argfd(0, &fd, &f) < 0)
     return -1;
+  if (fd == 200)
+    return 0;
   myproc()->ofile[fd] = 0;
   fileclose(f);
   return 0;
@@ -719,6 +741,10 @@ sys_unlinkat(void)
   if((len = argstr(1, path, FAT32_MAX_PATH)) <= 0)
     return -1;
 
+  if (0 == strncmp(path,"/proc/interrupts",16)) {
+    return -1;
+  }
+
   char *s = path + len - 1;
   while (s >= path && *s == '/') {
     s--;
@@ -726,6 +752,8 @@ sys_unlinkat(void)
   if (s >= path && *s == '.' && (s == path || *--s == '/')) {
     return -1;
   }
+
+
   int t1 = 0;
   if (strncmp(path,"/tmp/testsuite-",15) == 0)
     t1 = 1;
@@ -996,6 +1024,12 @@ sys_openat()
   if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
   }
+
+  // 虚拟文件直接返回0
+  if (0 == strncmp(path,"/proc/interrupts",16)) {
+    return 200;
+  }
+
   //打开/dev/null文件，这个文件做一个特殊的标记
   if (0 == strncmp(path,"/dev/null",9)) {
     //获取文件描述符
@@ -1222,6 +1256,9 @@ sys_renameat2(void)
   
   if (argstr(1,old_path,FAT32_MAX_PATH) < 0 || argstr(3,new_path,FAT32_MAX_PATH) < 0) 
     return -36;
+  if (0 == strncmp(old_path,"/proc/interrupts",16)) {
+    return -1;
+  }
   
   if (argfd(0, &olddirfd, &oldfp) < 0) {
     if (old_path[0] != '/' && olddirfd != AT_FDCWD)

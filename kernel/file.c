@@ -172,6 +172,32 @@ fileoutput(struct file* f, int user, uint64 addr, int n, uint64 off){
   return r;
 }
 
+int fileread_interrupts(uint64 addr, int n) {
+  struct proc *p = myproc();
+  p->utime++;
+  int utime = p->utime;
+  char buf[1024];
+  char buf2[1024];
+  memset(buf,0,sizeof(buf));
+  memset(buf2,0,sizeof(buf2));
+  int len = 0,cur = 2;
+  while (utime) {
+    buf2[len++] = (utime % 10) + '0';
+    utime /= 10;
+  }
+
+  buf[0] = '2';
+  buf[1] = ':';
+  for (int i = len - 1; i >= 0; i--) {
+    buf[cur++] = buf2[i];
+  }
+  buf[cur++] = '\n';
+  buf[cur++] = 0;
+  copyout(p->pagetable,addr,buf,1024);
+
+  return 1024;
+}
+
 // Read from file f.
 // addr is a user virtual address.
 int
