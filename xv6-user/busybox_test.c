@@ -246,8 +246,14 @@ void test_busybox(){
 
   printf("run iperf_testcode.sh\n");
 
-  // printf("run cyclic_testcode.sh\n");
+  printf("run cyclic_testcode.sh\n");
 
+  pid = fork();
+  if (pid == 0) {
+    exec("busybox",cyclic_bench[0].name);
+    exit(0);
+  }
+  wait4(pid,&status,0);
 
 	// printf("run lmbench_testcode.sh\n");
   // printf("latency measurements\n");
@@ -645,7 +651,7 @@ static longtest libc_bench[] = {
 
 
 static longtest cyclic_bench[] = {
-  {1,{"./cyclictest","-a","-i","1000","-t1","-n","-p2","-D","20s","-q",0}},
+  {1,{"busybox","sh","cyclictest_testcode.sh",0}},
   {0,{0}},
 };
 
