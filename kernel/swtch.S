@@ -40,3 +40,7 @@ swtch:
         ret
 
 	
+.globl threadstub
+threadstub:
+        mv a0, sp
+        call threadhelper

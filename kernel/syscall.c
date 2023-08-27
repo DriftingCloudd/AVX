@@ -1,4 +1,5 @@
 
+#include "include/sysnum.h"
 #include "include/types.h"
 #include "include/param.h"
 #include "include/memlayout.h"
@@ -206,6 +207,7 @@ extern uint64 sys_sendto(void);
 extern uint64 sys_recvfrom(void);
 extern uint64 sys_getsockname(void);
 extern uint64 sys_setsockopt(void);
+extern uint64 sys_getsockopt(void);
 extern uint64 sys_pread();
 extern uint64 sys_mprotect();
 extern uint64 sys_madvise();
@@ -316,6 +318,7 @@ static uint64 (*syscalls[])(void) = {
   // [SYS_getpeername] sys_getpeername,
   // [SYS_socketpair]  sys_socketpair,
   [SYS_setsockopt]  sys_setsockopt,
+  [SYS_getsockopt]  sys_getsockopt,
   [SYS_madvise]     sys_madvise,
   [SYS_futex]       sys_futex,
   [SYS_getrusage]   sys_getrusage,
@@ -448,16 +451,14 @@ syscall(void)
 
   num = p->trapframe->a7;
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-    // if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
-        if(num != 66 && num != 113)
+    if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime && num != SYS_sendto && num != SYS_recvfrom)
       debug_print("pid %d call %d: %s\n", p->pid, num, sysnames[num]);
     p->trapframe->a0 = syscalls[num]();
     if(num == SYS_openat && p->trapframe->a0 == -1){
       printf("");
     }
     // trace
-    // if(num != 64 && num != 63 && num != SYS_writev && num != SYS_clock_gettime)
-        if(num != 66 && num != 113)
+    if(num != SYS_read && num != SYS_write && num != SYS_writev && num != SYS_sendto && num != SYS_recvfrom)
       debug_print("pid %d: %s -> %d\n", p->pid, sysnames[num], p->trapframe->a0);
     // printf("pid %d call %d: %s a0:%p sp:%p\n", p->pid, num, sysnames[num], p->trapframe->a0, p->trapframe->sp);
     if ((p->tmask & (1 << num)) != 0) {

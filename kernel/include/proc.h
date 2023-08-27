@@ -94,6 +94,10 @@ struct proc {
   __sigset_t sig_set; // signal mask
   __sigset_t sig_pending; // pending signal
   struct trapframe *sig_tf; // trapframe for signal
+
+  //kernel thread
+  void (*fn)(void *);
+  void *arg;
 };
 
 typedef struct rlimit {
@@ -145,4 +149,6 @@ uint64            sys_yield();
 uint64          clone(uint64 new_stack, uint64 new_fn);
 uint64          thread_clone(uint64 stackVa,uint64 ptid,uint64 tls,uint64 ctid);
 
+struct proc*    threadalloc(void (*fn)(void *), void *arg);
+int             get_proc_addr_num(struct proc *p);
 #endif

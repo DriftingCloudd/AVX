@@ -261,12 +261,12 @@ found:
   // An empty user page table.
   // And an identical kernel page table for this proc.
   if ((p->pagetable = proc_pagetable(p)) == NULL ||
-      (p->kpagetable = proc_kpagetable()) == NULL) {
+      (p->kpagetable = proc_kpagetable(p)) == NULL) {
     freeproc(p);
     release(&p->lock);
     return NULL;
   }
-  p->kstack = VKSTACK;
+  p->kstack = PROCVKSTACK(get_proc_addr_num(p));
 
   p->exec_close = kalloc();
   for (int fd = 0; fd < NOFILE; fd++)
@@ -276,7 +276,7 @@ found:
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
   p->context.ra = (uint64)forkret;
-  p->context.sp = p->kstack + PGSIZE;
+  p->context.sp = p->kstack + KSTACKSIZE;
   p->main_thread = allocNewThread();
   copycontext(&p->main_thread->context,&p->context);
   p->thread_num++;
@@ -322,7 +322,7 @@ freeproc(struct proc *p)
   }
 
   if (p->kpagetable) {
-    kvmfree(p->kpagetable, 1);
+    kvmfree(p->kpagetable, 1, p);
   }
   p->kpagetable = 0;
   if(p->pagetable){
@@ -752,6 +752,7 @@ scheduler(void)
         p->main_thread = t;
         copycontext(&p->context,&p->main_thread->context);
         copytrapframe(p->trapframe,p->main_thread->trapframe);
+        //debug_print("run proc %d ra %p sp %p kpt %p\n", p->pid, p->context.ra, p->context.sp, p->kpagetable);
         p->main_thread->state = t_RUNNING;
         p->main_thread->awakeTime = 0;
         p->state = RUNNING;
@@ -790,11 +791,11 @@ sched(void)
 {
   int intena;
   struct proc *p = myproc();
-  // printf("sched p->pid %d\n", p->pid);
+  //debug_print("sched p->pid %d\n", p->pid);
   if(!holding(&p->lock))
     panic("sched p->lock");
   if(mycpu()->noff != 1){
-    printf("noff:%d\n", mycpu()->noff);
+    debug_print("noff:%d\n", mycpu()->noff);
     panic("sched locks");
   }
   if(p->state == RUNNING || p->main_thread->state == t_RUNNING)
@@ -1231,4 +1232,48 @@ clone(uint64 new_stack, uint64 new_fn)
   release(&np->lock);
 
   return pid;
+}
+
+void
+threadhelper(uint64 sp)
+{
+  release(&myproc()->lock);
+  printf("threadhelper sp %p\n", sp);
+  void (*fn)(void*) = (void (*)(void*))myproc()->fn;
+  void *arg = myproc()->arg;
+  printf("threadhelper fn %p arg %p\n", fn, arg);
+  fn(arg);
+  exit(0);
+}
+
+extern void threadstub(void);
+
+struct proc *
+threadalloc(void (*fn)(void *), void *arg)
+{
+  struct proc *p;
+
+  p = allocproc();
+
+  p->tmask = 0;
+
+  copytrapframe(p->main_thread->trapframe,p->trapframe);
+
+  p->main_thread->context.ra = (uint64)threadstub;
+  
+  p->fn = fn;
+  p->arg = arg;
+
+  release(&p->lock);
+  return p;
+}
+
+
+int get_proc_addr_num(struct proc *p){
+  for(int i = 0; i < NPROC; i++){
+    if(&proc[i] == p){
+      return i;
+    }
+  }
+  return -1;
 }

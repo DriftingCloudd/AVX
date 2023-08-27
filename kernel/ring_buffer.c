@@ -1,5 +1,6 @@
 #include "include/ring_buffer.h"
 #include "include/proc.h"
+#include "include/string.h"
 
 struct spinlock ring_buffer_lock;
 
@@ -101,17 +102,22 @@ size_t write_ring_buffer(struct ring_buffer *rbuf, char *buf, size_t size)
 	acquire(&ring_buffer_lock);
 	int len = min(ring_buffer_free(rbuf), size);
 	if (len > 0){
-		char tmp[RING_BUFFER_SIZE + 1];
-		copyin(myproc()->pagetable, tmp, (uint64)buf, len);
+		// char tmp[RING_BUFFER_SIZE + 1];
+		// memset(tmp, 0, RING_BUFFER_SIZE + 1);
+		// copyin(myproc()->pagetable, tmp, (uint64)buf, len);
+		// memcpy(tmp, buf, len);
 		if (rbuf->tail + len > rbuf->size) {
 			int right = rbuf->size - rbuf->tail,
 				left = len - right;
-			memcpy(rbuf->buf + rbuf->tail, tmp, right);
+			// memcpy(rbuf->buf + rbuf->tail, tmp, right);
+			copyin(myproc()->pagetable, rbuf->buf + rbuf->tail, (uint64)buf, right);
 			if (left > 0)
-				memcpy(rbuf->buf, tmp + right, left);
+				// memcpy(rbuf->buf, tmp + right, left);
+				copyin(myproc()->pagetable, rbuf->buf, (uint64)buf + right, left);
 		}
 		else {
-			memcpy(rbuf->buf + rbuf->tail, tmp, len);
+			// memcpy(rbuf->buf + rbuf->tail, tmp, len);
+			copyin(myproc()->pagetable, rbuf->buf + rbuf->tail, (uint64)buf, len);
 		}
 
 		rbuf->tail = (rbuf->tail + len) % (rbuf->size);

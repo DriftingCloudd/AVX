@@ -24,10 +24,12 @@ struct file {
   uint off;          // FD_ENTRY
   short major;       // FD_DEVICE
   struct socket* sock; // FD_SOCK
+  uint64 socket_type;  // for fcntl
   uint64 t0_sec;
   uint64 t0_nsec;
   uint64 t1_sec;
   uint64 t1_nsec;
+  int socketnum;
 };
 
 // #define major(dev)  ((dev) >> 16 & 0xFFFF)
