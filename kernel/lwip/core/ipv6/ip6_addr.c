@@ -8,8 +8,8 @@
  * Copyright (c) 2010 Inico Technologies Ltd.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
@@ -21,14 +21,14 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGE.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
  *
@@ -42,22 +42,22 @@
 
 #include "lwip/opt.h"
 
-#if LWIP_IPV6  /* don't build if not configured for use in lwipopts.h */
+#if LWIP_IPV6 /* don't build if not configured for use in lwipopts.h */
 
-#include "lwip/ip_addr.h"
 #include "lwip/def.h"
+#include "lwip/ip_addr.h"
 #include "lwip/netif.h"
 
 #include <string.h>
 
 #if LWIP_IPV4
 #include "lwip/ip4_addr.h" /* for ip6addr_aton to handle IPv4-mapped addresses */
-#endif /* LWIP_IPV4 */
+#endif                     /* LWIP_IPV4 */
 
 /* used by IP6_ADDR_ANY(6) in ip6_addr.h */
 const ip_addr_t ip6_addr_any = IPADDR6_INIT(0ul, 0ul, 0ul, 0ul);
 
-#define lwip_xchar(i)        ((char)((i) < 10 ? '0' + (i) : 'A' + (i) - 10))
+#define lwip_xchar(i) ((char)((i) < 10 ? '0' + (i) : 'A' + (i)-10))
 
 /**
  * Check whether "cp" is a valid ascii representation
@@ -68,24 +68,22 @@ const ip_addr_t ip6_addr_any = IPADDR6_INIT(0ul, 0ul, 0ul, 0ul);
  * @param addr pointer to which to save the ip address in network order
  * @return 1 if cp could be converted to addr, 0 on failure
  */
-int
-ip6addr_aton(const char *cp, ip6_addr_t *addr)
-{
+int ip6addr_aton(const char *cp, ip6_addr_t *addr) {
   u32_t addr_index, zero_blocks, current_block_index, current_block_value;
   const char *s;
 #if LWIP_IPV4
   int check_ipv4_mapped = 0;
 #endif /* LWIP_IPV4 */
 
-  /* Count the number of colons, to count the number of blocks in a "::" sequence
-     zero_blocks may be 1 even if there are no :: sequences */
+  /* Count the number of colons, to count the number of blocks in a "::"
+     sequence zero_blocks may be 1 even if there are no :: sequences */
   zero_blocks = 8;
   for (s = cp; *s != 0; s++) {
     if (*s == ':') {
       zero_blocks--;
 #if LWIP_IPV4
     } else if (*s == '.') {
-      if ((zero_blocks == 5) ||(zero_blocks == 2)) {
+      if ((zero_blocks == 5) || (zero_blocks == 2)) {
         check_ipv4_mapped = 1;
         /* last block could be the start of an IPv4 address */
         zero_blocks--;
@@ -109,8 +107,7 @@ ip6addr_aton(const char *cp, ip6_addr_t *addr)
       if (addr) {
         if (current_block_index & 0x1) {
           addr->addr[addr_index++] |= current_block_value;
-        }
-        else {
+        } else {
           addr->addr[addr_index] = current_block_value << 16;
         }
       }
@@ -161,9 +158,11 @@ ip6addr_aton(const char *cp, ip6_addr_t *addr)
       }
     } else if (lwip_isxdigit(*s)) {
       /* add current digit */
-      current_block_value = (current_block_value << 4) +
-          (lwip_isdigit(*s) ? (u32_t)(*s - '0') :
-          (u32_t)(10 + (lwip_islower(*s) ? *s - 'a' : *s - 'A')));
+      current_block_value =
+          (current_block_value << 4) +
+          (lwip_isdigit(*s)
+               ? (u32_t)(*s - '0')
+               : (u32_t)(10 + (lwip_islower(*s) ? *s - 'a' : *s - 'A')));
     } else {
       /* unexpected digit, space? CRLF? */
       break;
@@ -173,12 +172,11 @@ ip6addr_aton(const char *cp, ip6_addr_t *addr)
   if (addr) {
     if (current_block_index & 0x1) {
       addr->addr[addr_index++] |= current_block_value;
-    }
-    else {
+    } else {
       addr->addr[addr_index] = current_block_value << 16;
     }
 #if LWIP_IPV4
-fix_byte_order_and_return:
+  fix_byte_order_and_return:
 #endif
     /* convert to network byte order. */
     for (addr_index = 0; addr_index < 4; addr_index++) {
@@ -214,9 +212,7 @@ fix_byte_order_and_return:
  * @return pointer to a global static (!) buffer that holds the ASCII
  *         representation of addr
  */
-char *
-ip6addr_ntoa(const ip6_addr_t *addr)
-{
+char *ip6addr_ntoa(const ip6_addr_t *addr) {
   static char str[40];
   return ip6addr_ntoa_r(addr, str, 40);
 }
@@ -230,9 +226,7 @@ ip6addr_ntoa(const ip6_addr_t *addr)
  * @return either pointer to buf which now holds the ASCII
  *         representation of addr or NULL if buf was too small
  */
-char *
-ip6addr_ntoa_r(const ip6_addr_t *addr, char *buf, int buflen)
-{
+char *ip6addr_ntoa_r(const ip6_addr_t *addr, char *buf, int buflen) {
   u32_t current_block_index, current_block_value, next_block_value;
   s32_t i;
   u8_t zero_flag, empty_block_flag;
@@ -260,7 +254,8 @@ ip6addr_ntoa_r(const ip6_addr_t *addr, char *buf, int buflen)
   i = 0;
   empty_block_flag = 0; /* used to indicate a zero chain for "::' */
 
-  for (current_block_index = 0; current_block_index < 8; current_block_index++) {
+  for (current_block_index = 0; current_block_index < 8;
+       current_block_index++) {
     /* get the current 16-bit block */
     current_block_value = lwip_htonl(addr->addr[current_block_index >> 1]);
     if ((current_block_index & 0x1) == 0) {
@@ -279,11 +274,12 @@ ip6addr_ntoa_r(const ip6_addr_t *addr, char *buf, int buflen)
         break;
       }
       if (empty_block_flag == 0) {
-        /* generate empty block "::", but only if more than one contiguous zero block,
-         * according to current formatting suggestions RFC 5952. */
-        next_block_value = lwip_htonl(addr->addr[(current_block_index + 1) >> 1]);
+        /* generate empty block "::", but only if more than one contiguous zero
+         * block, according to current formatting suggestions RFC 5952. */
+        next_block_value =
+            lwip_htonl(addr->addr[(current_block_index + 1) >> 1]);
         if ((current_block_index & 0x1) == 0x01) {
-            next_block_value = next_block_value >> 16;
+          next_block_value = next_block_value >> 16;
         }
         next_block_value &= 0xffff;
         if (next_block_value == 0) {
@@ -332,8 +328,7 @@ ip6addr_ntoa_r(const ip6_addr_t *addr, char *buf, int buflen)
 
     if (((current_block_value & 0xf0) == 0) && (zero_flag)) {
       /* do nothing */
-    }
-    else {
+    } else {
       buf[i++] = lwip_xchar(((current_block_value & 0xf0) >> 4));
       zero_flag = 0;
       if (i >= buflen) {

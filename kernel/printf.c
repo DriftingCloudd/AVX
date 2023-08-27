@@ -4,14 +4,14 @@
 
 #include <stdarg.h>
 
-#include "include/types.h"
-#include "include/param.h"
-#include "include/riscv.h"
-#include "include/spinlock.h"
 #include "include/console.h"
+#include "include/param.h"
 #include "include/printf.h"
 #include "include/proc.h"
+#include "include/riscv.h"
+#include "include/spinlock.h"
 #include "include/string.h"
+#include "include/types.h"
 
 volatile int panicked = 0;
 
@@ -32,21 +32,18 @@ static struct {
   int locking;
 } pr;
 
-void printstring(const char* s) {
-    while (*s)
-    {
-        consputc(*s++);
-    }
+void printstring(const char *s) {
+  while (*s) {
+    consputc(*s++);
+  }
 }
 
-void
-printint(int xx, int base, int sign)
-{
+void printint(int xx, int base, int sign) {
   char buf[16];
   int i;
   uint x;
 
-  if(sign && (sign = xx < 0))
+  if (sign && (sign = xx < 0))
     x = -xx;
   else
     x = xx;
@@ -54,19 +51,16 @@ printint(int xx, int base, int sign)
   i = 0;
   do {
     buf[i++] = digits[x % base];
-  } while((x /= base) != 0);
+  } while ((x /= base) != 0);
 
-  if(sign)
+  if (sign)
     buf[i++] = '-';
 
-  while(--i >= 0)
+  while (--i >= 0)
     consputc(buf[i]);
 }
 
-
-static void
-printptr(uint64 x)
-{
+static void printptr(uint64 x) {
   int i;
   consputc('0');
   consputc('x');
@@ -74,9 +68,7 @@ printptr(uint64 x)
     consputc(digits[x >> (sizeof(uint64) * 8 - 4)]);
 }
 
-void
-debug_print(char *fmt, ...)
-{
+void debug_print(char *fmt, ...) {
 #ifdef DEBUG
   va_list ap;
   int i, c;
@@ -84,24 +76,24 @@ debug_print(char *fmt, ...)
   char *s;
 
   locking = pr.locking;
-  if(locking)
+  if (locking)
     acquire(&pr.lock);
-  
-  if (fmt == 0){
+
+  if (fmt == 0) {
     consputc('A');
     panic("null fmt");
   }
 
   va_start(ap, fmt);
-  for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
-    if(c != '%'){
+  for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
+    if (c != '%') {
       consputc(c);
       continue;
     }
     c = fmt[++i] & 0xff;
-    if(c == 0)
+    if (c == 0)
       break;
-    switch(c){
+    switch (c) {
     case 'd':
       printint(va_arg(ap, int), 10, 1);
       break;
@@ -112,9 +104,9 @@ debug_print(char *fmt, ...)
       printptr(va_arg(ap, uint64));
       break;
     case 's':
-      if((s = va_arg(ap, char*)) == 0)
+      if ((s = va_arg(ap, char *)) == 0)
         s = "(null)";
-      for(; *s; s++)
+      for (; *s; s++)
         consputc(*s);
       break;
     case '%':
@@ -127,14 +119,12 @@ debug_print(char *fmt, ...)
       break;
     }
   }
-  if(locking)
+  if (locking)
     release(&pr.lock);
 #endif
 }
 
-void
-serious_print(char *fmt, ...)
-{
+void serious_print(char *fmt, ...) {
 #ifndef EXAM
   va_list ap;
   int i, c;
@@ -142,24 +132,24 @@ serious_print(char *fmt, ...)
   char *s;
 
   locking = pr.locking;
-  if(locking)
+  if (locking)
     acquire(&pr.lock);
-  
-  if (fmt == 0){
+
+  if (fmt == 0) {
     consputc('A');
     panic("null fmt");
   }
 
   va_start(ap, fmt);
-  for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
-    if(c != '%'){
+  for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
+    if (c != '%') {
       consputc(c);
       continue;
     }
     c = fmt[++i] & 0xff;
-    if(c == 0)
+    if (c == 0)
       break;
-    switch(c){
+    switch (c) {
     case 'd':
       printint(va_arg(ap, int), 10, 1);
       break;
@@ -170,9 +160,9 @@ serious_print(char *fmt, ...)
       printptr(va_arg(ap, uint64));
       break;
     case 's':
-      if((s = va_arg(ap, char*)) == 0)
+      if ((s = va_arg(ap, char *)) == 0)
         s = "(null)";
-      for(; *s; s++)
+      for (; *s; s++)
         consputc(*s);
       break;
     case '%':
@@ -185,39 +175,37 @@ serious_print(char *fmt, ...)
       break;
     }
   }
-  if(locking)
+  if (locking)
     release(&pr.lock);
 #endif
 }
 
 // Print to the console. only understands %d, %x, %p, %s.
-void
-printf(char *fmt, ...)
-{
+void printf(char *fmt, ...) {
   va_list ap;
   int i, c;
   int locking;
   char *s;
 
   locking = pr.locking;
-  if(locking)
+  if (locking)
     acquire(&pr.lock);
-  
-  if (fmt == 0){
+
+  if (fmt == 0) {
     consputc('A');
     panic("null fmt");
   }
 
   va_start(ap, fmt);
-  for(i = 0; (c = fmt[i] & 0xff) != 0; i++){
-    if(c != '%'){
+  for (i = 0; (c = fmt[i] & 0xff) != 0; i++) {
+    if (c != '%') {
       consputc(c);
       continue;
     }
     c = fmt[++i] & 0xff;
-    if(c == 0)
+    if (c == 0)
       break;
-    switch(c){
+    switch (c) {
     case 'd':
       printint(va_arg(ap, int), 10, 1);
       break;
@@ -228,9 +216,9 @@ printf(char *fmt, ...)
       printptr(va_arg(ap, uint64));
       break;
     case 's':
-      if((s = va_arg(ap, char*)) == 0)
+      if ((s = va_arg(ap, char *)) == 0)
         s = "(null)";
-      for(; *s; s++)
+      for (; *s; s++)
         consputc(*s);
       break;
     case '%':
@@ -243,32 +231,31 @@ printf(char *fmt, ...)
       break;
     }
   }
-  if(locking)
+  if (locking)
     release(&pr.lock);
 }
 
 void checkup1(struct proc *p) {
-  if (strncmp(p->name,"libc-bench",10) == 0 && p->thread_num > 1) {
+  if (strncmp(p->name, "libc-bench", 10) == 0 && p->thread_num > 1) {
     magic_count++;
-    switch (magic_count)
-    {
+    switch (magic_count) {
     case 1:
-      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n",magic1);
+      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n", magic1);
       break;
-        case 2:
-      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n",magic2);
+    case 2:
+      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n", magic2);
       break;
-          case 3:
-      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n",magic3);
+    case 3:
+      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n", magic3);
       break;
-          case 4:
-      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n",magic4);
+    case 4:
+      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n", magic4);
       break;
-          case 5:
-      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n",magic5);
+    case 5:
+      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n", magic5);
       break;
-          case 6:
-      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n",magic6);
+    case 6:
+      printf("  time: 0.%s, virt: 0, res: 0, dirty: 0\n\n", magic6);
       break;
     default:
       break;
@@ -276,10 +263,8 @@ void checkup1(struct proc *p) {
   }
 }
 
-void
-panic(char *s)
-{
-  if(strncmp(s, "No futex Resource!", 18) == 0){
+void panic(char *s) {
+  if (strncmp(s, "No futex Resource!", 18) == 0) {
     exit(0);
   }
   serious_print("%p\n", s);
@@ -288,12 +273,11 @@ panic(char *s)
   serious_print("\n");
   backtrace();
   panicked = 1; // freeze uart output from other CPUs
-  for(;;)
+  for (;;)
     ;
 }
 
-void backtrace()
-{
+void backtrace() {
   uint64 *fp = (uint64 *)r_fp();
   uint64 *bottom = (uint64 *)PGROUNDUP((uint64)fp);
   serious_print("backtrace:\n");
@@ -304,35 +288,47 @@ void backtrace()
   }
 }
 
-void
-printfinit(void)
-{
+void printfinit(void) {
   initlock(&pr.lock, "pr");
-  pr.locking = 1;   // changed, used to be 1
+  pr.locking = 1; // changed, used to be 1
 }
 
 #ifdef QEMU
 void print_logo() {
-    printf("  (`-.            (`-.                            .-')       ('-.    _   .-')\n");
-    printf(" ( OO ).        _(OO  )_                        .(  OO)    _(  OO)  ( '.( OO )_ \n");
-    printf("(_/.  \\_)-. ,--(_/   ,. \\  ,--.                (_)---\\_)  (,------.  ,--.   ,--.) ,--. ,--.  \n");
-    printf(" \\  `.'  /  \\   \\   /(__/ /  .'       .-')     '  .-.  '   |  .---'  |   `.'   |  |  | |  |   \n");
-    printf("  \\     /\\   \\   \\ /   / .  / -.    _(  OO)   ,|  | |  |   |  |      |         |  |  | | .-')\n");
-    printf("   \\   \\ |    \\   '   /, | .-.  '  (,------. (_|  | |  |  (|  '--.   |  |'.'|  |  |  |_|( OO )\n");
-    printf("  .'    \\_)    \\     /__)' \\  |  |  '------'   |  | |  |   |  .--'   |  |   |  |  |  | | `-' /\n");
-    printf(" /  .'.  \\      \\   /    \\  `'  /              '  '-'  '-. |  `---.  |  |   |  | ('  '-'(_.-'\n");
-    printf("'--'   '--'      `-'      `----'                `-----'--' `------'  `--'   `--'   `-----'\n");
+  printf("  (`-.            (`-.                            .-')       ('-.    "
+         "_   .-')\n");
+  printf(" ( OO ).        _(OO  )_                        .(  OO)    _(  OO)  "
+         "( '.( OO )_ \n");
+  printf("(_/.  \\_)-. ,--(_/   ,. \\  ,--.                (_)---\\_)  "
+         "(,------.  ,--.   ,--.) ,--. ,--.  \n");
+  printf(" \\  `.'  /  \\   \\   /(__/ /  .'       .-')     '  .-.  '   |  "
+         ".---'  |   `.'   |  |  | |  |   \n");
+  printf("  \\     /\\   \\   \\ /   / .  / -.    _(  OO)   ,|  | |  |   |  |  "
+         "    |         |  |  | | .-')\n");
+  printf("   \\   \\ |    \\   '   /, | .-.  '  (,------. (_|  | |  |  (|  "
+         "'--.   |  |'.'|  |  |  |_|( OO )\n");
+  printf("  .'    \\_)    \\     /__)' \\  |  |  '------'   |  | |  |   |  "
+         ".--'   |  |   |  |  |  | | `-' /\n");
+  printf(" /  .'.  \\      \\   /    \\  `'  /              '  '-'  '-. |  "
+         "`---.  |  |   |  | ('  '-'(_.-'\n");
+  printf("'--'   '--'      `-'      `----'                `-----'--' `------'  "
+         "`--'   `--'   `-----'\n");
 }
 #else
 void print_logo() {
-    printf(" (`-')           (`-')                   <-.(`-')\n");
-    printf(" (OO )_.->      _(OO )                    __( OO)\n");
-    printf(" (_| \\_)--.,--.(_/,-.\\  ,--.    (`-')     ,--.(_/,-.\\|--------- .----.  \n");
-    printf(" \\  `.'  / \\   \\ / (_/ /  .'    ( OO).->  \\   \\ / (_/|         \\_,-.  | \n");
-    printf("  \\    .')  \\   /   / .  / -.  (,------.   \\   /   / |--------	  .' .' \n");
-    printf("  .'    \\  _ \\     /_)'  .-. \\  `------'  _ \\     /_)|           .'  /_  \n");
-    printf(" /  .'.  \\ \\-'\\   /   \\  `-' /            \\-'\\   /   |          |      | \n");
-    printf("`--'   '--'    `-'     `----'                 `-'    |          `------' \n");
+  printf(" (`-')           (`-')                   <-.(`-')\n");
+  printf(" (OO )_.->      _(OO )                    __( OO)\n");
+  printf(" (_| \\_)--.,--.(_/,-.\\  ,--.    (`-')     ,--.(_/,-.\\|--------- "
+         ".----.  \n");
+  printf(" \\  `.'  / \\   \\ / (_/ /  .'    ( OO).->  \\   \\ / (_/|         "
+         "\\_,-.  | \n");
+  printf("  \\    .')  \\   /   / .  / -.  (,------.   \\   /   / "
+         "|--------	  .' .' \n");
+  printf("  .'    \\  _ \\     /_)'  .-. \\  `------'  _ \\     /_)|           "
+         ".'  /_  \n");
+  printf(" /  .'.  \\ \\-'\\   /   \\  `-' /            \\-'\\   /   |         "
+         " |      | \n");
+  printf("`--'   '--'    `-'     `----'                 `-'    |          "
+         "`------' \n");
 }
 #endif
-  

@@ -1,16 +1,17 @@
 /**
  * @file
  * 6LowPAN over BLE output for IPv6 (RFC7668).
-*/
+ */
 
 /*
  * Copyright (c) 2017 Benjamin Aigner
- * Copyright (c) 2015 Inico Technologies Ltd. , Author: Ivan Delamer <delamer@inicotech.com>
+ * Copyright (c) 2015 Inico Technologies Ltd. , Author: Ivan Delamer
+ * <delamer@inicotech.com>
  *
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
@@ -22,20 +23,19 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGE.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * Author: Benjamin Aigner <aignerb@technikum-wien.at>
  *
  * Based on the original 6lowpan implementation of lwIP ( @see 6lowpan.c)
  */
-
 
 /**
  * @defgroup rfc7668if 6LoWPAN over BLE (RFC7668)
@@ -48,10 +48,13 @@
  *
  * Usage:
  * - add this netif
- *   - don't add IPv4 addresses (no IPv4 support in RFC7668), pass 'NULL','NULL','NULL'
- *   - use the BLE to EUI64 conversation util to create an IPv6 link-local address from the BLE MAC (@ref ble_addr_to_eui64)
+ *   - don't add IPv4 addresses (no IPv4 support in RFC7668), pass
+ * 'NULL','NULL','NULL'
+ *   - use the BLE to EUI64 conversation util to create an IPv6 link-local
+ * address from the BLE MAC (@ref ble_addr_to_eui64)
  *   - input function: @ref rfc7668_input
- * - set the link output function, which transmits output data to an established L2CAP channel
+ * - set the link output function, which transmits output data to an established
+ * L2CAP channel
  * - If data arrives (HCI event "L2CAP_DATA_PACKET"):
  *   - allocate a @ref PBUF_RAW buffer
  *   - let the pbuf struct point to the incoming data or copy it to the buffer
@@ -65,20 +68,19 @@
  * - support neighbor discovery
  */
 
-
 #include "netif/lowpan6_ble.h"
 
 #if LWIP_IPV6
 
 #include "lwip/ip.h"
-#include "lwip/pbuf.h"
 #include "lwip/ip_addr.h"
-#include "lwip/netif.h"
-#include "lwip/nd6.h"
 #include "lwip/mem.h"
-#include "lwip/udp.h"
-#include "lwip/tcpip.h"
+#include "lwip/nd6.h"
+#include "lwip/netif.h"
+#include "lwip/pbuf.h"
 #include "lwip/snmp.h"
+#include "lwip/tcpip.h"
+#include "lwip/udp.h"
 
 #include <string.h>
 
@@ -102,20 +104,19 @@ static struct lowpan6_link_addr rfc7668_peer_addr;
  * @param dst IPv6 destination space
  * @param src BLE MAC address source
  * @param public_addr If the LWIP_RFC7668_LINUX_WORKAROUND_PUBLIC_ADDRESS
- * option is set, bit 0x02 will be set if param=0 (no public addr); cleared otherwise
+ * option is set, bit 0x02 will be set if param=0 (no public addr); cleared
+ * otherwise
  *
  * @see LWIP_RFC7668_LINUX_WORKAROUND_PUBLIC_ADDRESS
  */
-void
-ble_addr_to_eui64(u8_t *dst, const u8_t *src, int public_addr)
-{
+void ble_addr_to_eui64(u8_t *dst, const u8_t *src, int public_addr) {
   /* according to RFC7668 ch 3.2.2. */
   memcpy(dst, src, 3);
   dst[3] = 0xFF;
   dst[4] = 0xFE;
   memcpy(&dst[5], &src[3], 3);
 #if LWIP_RFC7668_LINUX_WORKAROUND_PUBLIC_ADDRESS
-  if(public_addr) {
+  if (public_addr) {
     dst[0] &= ~0x02;
   } else {
     dst[0] |= 0x02;
@@ -135,20 +136,18 @@ ble_addr_to_eui64(u8_t *dst, const u8_t *src, int public_addr)
  * @param src IPv6 source
  *
  */
-void
-eui64_to_ble_addr(u8_t *dst, const u8_t *src)
-{
+void eui64_to_ble_addr(u8_t *dst, const u8_t *src) {
   /* according to RFC7668 ch 3.2.2. */
-  memcpy(dst,src,3);
-  memcpy(&dst[3],&src[5],3);
+  memcpy(dst, src, 3);
+  memcpy(&dst[3], &src[5], 3);
 }
 
 /** Set an address used for stateful compression.
  * This expects an address of 6 or 8 bytes.
  */
-static err_t
-rfc7668_set_addr(struct lowpan6_link_addr *addr, const u8_t *in_addr, size_t in_addr_len, int is_mac_48, int is_public_addr)
-{
+static err_t rfc7668_set_addr(struct lowpan6_link_addr *addr,
+                              const u8_t *in_addr, size_t in_addr_len,
+                              int is_mac_48, int is_public_addr) {
   if ((in_addr == NULL) || (addr == NULL)) {
     return ERR_VAL;
   }
@@ -168,35 +167,33 @@ rfc7668_set_addr(struct lowpan6_link_addr *addr, const u8_t *in_addr, size_t in_
   return ERR_OK;
 }
 
-
 /** Set the local address used for stateful compression.
  * This expects an address of 8 bytes.
  */
-err_t
-rfc7668_set_local_addr_eui64(struct netif *netif, const u8_t *local_addr, size_t local_addr_len)
-{
+err_t rfc7668_set_local_addr_eui64(struct netif *netif, const u8_t *local_addr,
+                                   size_t local_addr_len) {
   /* netif not used for now, the address is stored globally... */
   LWIP_UNUSED_ARG(netif);
-  return rfc7668_set_addr(&rfc7668_local_addr, local_addr, local_addr_len, 0, 0);
+  return rfc7668_set_addr(&rfc7668_local_addr, local_addr, local_addr_len, 0,
+                          0);
 }
 
 /** Set the local address used for stateful compression.
  * This expects an address of 6 bytes.
  */
-err_t
-rfc7668_set_local_addr_mac48(struct netif *netif, const u8_t *local_addr, size_t local_addr_len, int is_public_addr)
-{
+err_t rfc7668_set_local_addr_mac48(struct netif *netif, const u8_t *local_addr,
+                                   size_t local_addr_len, int is_public_addr) {
   /* netif not used for now, the address is stored globally... */
   LWIP_UNUSED_ARG(netif);
-  return rfc7668_set_addr(&rfc7668_local_addr, local_addr, local_addr_len, 1, is_public_addr);
+  return rfc7668_set_addr(&rfc7668_local_addr, local_addr, local_addr_len, 1,
+                          is_public_addr);
 }
 
 /** Set the peer address used for stateful compression.
  * This expects an address of 8 bytes.
  */
-err_t
-rfc7668_set_peer_addr_eui64(struct netif *netif, const u8_t *peer_addr, size_t peer_addr_len)
-{
+err_t rfc7668_set_peer_addr_eui64(struct netif *netif, const u8_t *peer_addr,
+                                  size_t peer_addr_len) {
   /* netif not used for now, the address is stored globally... */
   LWIP_UNUSED_ARG(netif);
   return rfc7668_set_addr(&rfc7668_peer_addr, peer_addr, peer_addr_len, 0, 0);
@@ -205,12 +202,12 @@ rfc7668_set_peer_addr_eui64(struct netif *netif, const u8_t *peer_addr, size_t p
 /** Set the peer address used for stateful compression.
  * This expects an address of 6 bytes.
  */
-err_t
-rfc7668_set_peer_addr_mac48(struct netif *netif, const u8_t *peer_addr, size_t peer_addr_len, int is_public_addr)
-{
+err_t rfc7668_set_peer_addr_mac48(struct netif *netif, const u8_t *peer_addr,
+                                  size_t peer_addr_len, int is_public_addr) {
   /* netif not used for now, the address is stored globally... */
   LWIP_UNUSED_ARG(netif);
-  return rfc7668_set_addr(&rfc7668_peer_addr, peer_addr, peer_addr_len, 1, is_public_addr);
+  return rfc7668_set_addr(&rfc7668_peer_addr, peer_addr, peer_addr_len, 1,
+                          is_public_addr);
 }
 
 /** Encapsulate IPv6 frames for BLE transmission
@@ -219,16 +216,15 @@ rfc7668_set_peer_addr_mac48(struct netif *netif, const u8_t *peer_addr, size_t p
  *  *) According to RFC6282
  *  *) See Figure 2, contains base format of bit positions
  *  *) Fragmentation not necessary (done at L2CAP layer of BLE)
- * @note Currently the pbuf allocation uses 256 bytes. If longer packets are used (possible due to MTU=1480Bytes), increase it here!
+ * @note Currently the pbuf allocation uses 256 bytes. If longer packets are
+ * used (possible due to MTU=1480Bytes), increase it here!
  *
  * @param p Pbuf struct, containing the payload data
  * @param netif Output network interface. Should be of RFC7668 type
  *
  * @return Same as netif->output.
  */
-static err_t
-rfc7668_compress(struct netif *netif, struct pbuf *p)
-{
+static err_t rfc7668_compress(struct netif *netif, struct pbuf *p) {
   struct pbuf *p_frag;
   u16_t remaining_len;
   u8_t *buffer;
@@ -236,7 +232,8 @@ rfc7668_compress(struct netif *netif, struct pbuf *p)
   u8_t hidden_header_len;
   err_t err;
 
-  LWIP_ASSERT("lowpan6_frag: netif->linkoutput not set", netif->linkoutput != NULL);
+  LWIP_ASSERT("lowpan6_frag: netif->linkoutput not set",
+              netif->linkoutput != NULL);
 
 #if LWIP_6LOWPAN_IPHC
 
@@ -251,10 +248,12 @@ rfc7668_compress(struct netif *netif, struct pbuf *p)
   LWIP_ASSERT("this needs a pbuf in one piece", p_frag->len == p_frag->tot_len);
 
   /* Write IP6 header (with IPHC). */
-  buffer = (u8_t*)p_frag->payload;
+  buffer = (u8_t *)p_frag->payload;
 
-  err = lowpan6_compress_headers(netif, (u8_t *)p->payload, p->len, buffer, p_frag->len,
-    &lowpan6_header_len, &hidden_header_len, rfc7668_context, &rfc7668_local_addr, &rfc7668_peer_addr);
+  err = lowpan6_compress_headers(netif, (u8_t *)p->payload, p->len, buffer,
+                                 p_frag->len, &lowpan6_header_len,
+                                 &hidden_header_len, rfc7668_context,
+                                 &rfc7668_local_addr, &rfc7668_peer_addr);
   if (err != ERR_OK) {
     MIB2_STATS_NETIF_INC(netif, ifoutdiscards);
     pbuf_free(p_frag);
@@ -273,16 +272,17 @@ rfc7668_compress(struct netif *netif, struct pbuf *p)
 
   /* send the packet */
   MIB2_STATS_NETIF_ADD(netif, ifoutoctets, p_frag->tot_len);
-  LWIP_DEBUGF(LWIP_LOWPAN6_DEBUG|LWIP_DBG_TRACE, ("rfc7668_output: sending packet %p\n", (void *)p));
+  LWIP_DEBUGF(LWIP_LOWPAN6_DEBUG | LWIP_DBG_TRACE,
+              ("rfc7668_output: sending packet %p\n", (void *)p));
   err = netif->linkoutput(netif, p_frag);
 
   pbuf_free(p_frag);
 
   return err;
-#else /* LWIP_6LOWPAN_IPHC */
+#else  /* LWIP_6LOWPAN_IPHC */
   /* 6LoWPAN over BLE requires IPHC! */
   return ERR_IF;
-#endif/* LWIP_6LOWPAN_IPHC */
+#endif /* LWIP_6LOWPAN_IPHC */
 }
 
 /**
@@ -294,11 +294,10 @@ rfc7668_compress(struct netif *netif, struct pbuf *p)
  * @param idx Context id
  * @param context IPv6 addr for this context
  *
- * @return ERR_OK (if everything is fine), ERR_ARG (if the context id is out of range), ERR_VAL (if contexts disabled)
+ * @return ERR_OK (if everything is fine), ERR_ARG (if the context id is out of
+ * range), ERR_VAL (if contexts disabled)
  */
-err_t
-rfc7668_set_context(u8_t idx, const ip6_addr_t *context)
-{
+err_t rfc7668_set_context(u8_t idx, const ip6_addr_t *context) {
 #if LWIP_6LOWPAN_NUM_CONTEXTS > 0
   /* check if the ID is possible */
   if (idx >= LWIP_6LOWPAN_NUM_CONTEXTS) {
@@ -324,9 +323,8 @@ rfc7668_set_context(u8_t idx, const ip6_addr_t *context)
  *
  * @return See rfc7668_compress
  */
-err_t
-rfc7668_output(struct netif *netif, struct pbuf *q, const ip6_addr_t *ip6addr)
-{
+err_t rfc7668_output(struct netif *netif, struct pbuf *q,
+                     const ip6_addr_t *ip6addr) {
   /* dst ip6addr is not used here, we only have one peer */
   LWIP_UNUSED_ARG(ip6addr);
 
@@ -343,34 +341,36 @@ rfc7668_output(struct netif *netif, struct pbuf *q, const ip6_addr_t *ip6addr)
  *
  * @return ERR_OK if everything was fine
  */
-err_t
-rfc7668_input(struct pbuf * p, struct netif *netif)
-{
-  u8_t * puc;
+err_t rfc7668_input(struct pbuf *p, struct netif *netif) {
+  u8_t *puc;
 
   MIB2_STATS_NETIF_ADD(netif, ifinoctets, p->tot_len);
 
   /* Load first header byte */
-  puc = (u8_t*)p->payload;
+  puc = (u8_t *)p->payload;
 
   /* no IP header compression */
   if (*puc == 0x41) {
-    LWIP_DEBUGF(LWIP_LOWPAN6_DECOMPRESSION_DEBUG, ("Completed packet, removing dispatch: 0x%2x \n", *puc));
+    LWIP_DEBUGF(LWIP_LOWPAN6_DECOMPRESSION_DEBUG,
+                ("Completed packet, removing dispatch: 0x%2x \n", *puc));
     /* This is a complete IPv6 packet, just skip header byte. */
     pbuf_remove_header(p, 1);
-  /* IPHC header compression */
-  } else if ((*puc & 0xe0 )== 0x60) {
-    LWIP_DEBUGF(LWIP_LOWPAN6_DECOMPRESSION_DEBUG, ("Completed packet, decompress dispatch: 0x%2x \n", *puc));
+    /* IPHC header compression */
+  } else if ((*puc & 0xe0) == 0x60) {
+    LWIP_DEBUGF(LWIP_LOWPAN6_DECOMPRESSION_DEBUG,
+                ("Completed packet, decompress dispatch: 0x%2x \n", *puc));
     /* IPv6 headers are compressed using IPHC. */
-    p = lowpan6_decompress(p, 0, rfc7668_context, &rfc7668_peer_addr, &rfc7668_local_addr);
+    p = lowpan6_decompress(p, 0, rfc7668_context, &rfc7668_peer_addr,
+                           &rfc7668_local_addr);
     /* if no pbuf is returned, handle as discarded packet */
     if (p == NULL) {
       MIB2_STATS_NETIF_INC(netif, ifindiscards);
       return ERR_OK;
     }
-  /* invalid header byte, discard */
+    /* invalid header byte, discard */
   } else {
-    LWIP_DEBUGF(LWIP_LOWPAN6_DECOMPRESSION_DEBUG, ("Completed packet, discarding: 0x%2x \n", *puc));
+    LWIP_DEBUGF(LWIP_LOWPAN6_DECOMPRESSION_DEBUG,
+                ("Completed packet, discarding: 0x%2x \n", *puc));
     MIB2_STATS_NETIF_INC(netif, ifindiscards);
     pbuf_free(p);
     return ERR_OK;
@@ -383,10 +383,11 @@ rfc7668_input(struct pbuf * p, struct netif *netif)
     u16_t i;
     LWIP_DEBUGF(LWIP_RFC7668_IP_UNCOMPRESSED_DEBUG, ("IPv6 payload:\n"));
     for (i = 0; i < p->len; i++) {
-      if ((i%4)==0) {
+      if ((i % 4) == 0) {
         LWIP_DEBUGF(LWIP_RFC7668_IP_UNCOMPRESSED_DEBUG, ("\n"));
       }
-      LWIP_DEBUGF(LWIP_RFC7668_IP_UNCOMPRESSED_DEBUG, ("%2X ", *((u8_t *)p->payload+i)));
+      LWIP_DEBUGF(LWIP_RFC7668_IP_UNCOMPRESSED_DEBUG,
+                  ("%2X ", *((u8_t *)p->payload + i)));
     }
     LWIP_DEBUGF(LWIP_RFC7668_IP_UNCOMPRESSED_DEBUG, ("\np->len: %d\n", p->len));
   }
@@ -406,9 +407,7 @@ rfc7668_input(struct pbuf * p, struct netif *netif)
  *
  * @return ERR_OK if everything went fine
  */
-err_t
-rfc7668_if_init(struct netif *netif)
-{
+err_t rfc7668_if_init(struct netif *netif) {
   netif->name[0] = 'b';
   netif->name[1] = 't';
   /* local function as IPv6 output */
@@ -436,9 +435,7 @@ rfc7668_if_init(struct netif *netif)
  *
  * @return see @ref tcpip_inpkt, same return values
  */
-err_t
-tcpip_rfc7668_input(struct pbuf *p, struct netif *inp)
-{
+err_t tcpip_rfc7668_input(struct pbuf *p, struct netif *inp) {
   /* send data to upper layer, return the result */
   return tcpip_inpkt(p, inp, rfc7668_input);
 }

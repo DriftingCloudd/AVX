@@ -2,7 +2,6 @@
 #include "../include/lwip/err.h"
 #include "../include/lwip/sys.h"
 
-
 // sys thread
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg,
                             int stacksize, int prio) {
@@ -15,7 +14,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg,
     panic("sys_thread_new: threadalloc failed\n");
     return NULL;
   }
-  safestrcpy(t->name, name, sizeof (t->name));
+  safestrcpy(t->name, name, sizeof(t->name));
   acquire(&t->lock);
   t->state = RUNNABLE;
   t->main_thread->state = t_RUNNABLE;
@@ -69,12 +68,12 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count) {
 
 void sys_sem_free(sys_sem_t *sem) {
   // debug_print("sys_sem_free\n");
-  sem_destroy(sem); 
+  sem_destroy(sem);
 }
 
 void sys_sem_signal(sys_sem_t *sem) {
   // debug_print("sys_sem_signal\n");
-  sem_post(sem); 
+  sem_post(sem);
 }
 
 u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout) {
@@ -90,12 +89,12 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout) {
 
 int sys_sem_valid(sys_sem_t *sem) {
   // debug_print("sys_sem_valid\n");
-  return sem_is_valid(sem); 
+  return sem_is_valid(sem);
 }
 
 void sys_sem_set_invalid(sys_sem_t *sem) {
   // debug_print("sys_sem_set_invalid\n");
-  sem_set_invalid(sem); 
+  sem_set_invalid(sem);
 }
 
 // sys mailbox
@@ -114,14 +113,14 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size) {
   return ERR_OK;
 }
 
-void sys_mbox_set_invalid(sys_mbox_t *mbox) { 
+void sys_mbox_set_invalid(sys_mbox_t *mbox) {
   // debug_print("sys_mbox_set_invalid %p\n", mbox);
-  mbox->invalid = 1; 
+  mbox->invalid = 1;
 }
 
 int sys_mbox_valid(sys_mbox_t *mbox) {
   // debug_print("sys_mbox_valid %p\n", mbox);
-  return !mbox->invalid; 
+  return !mbox->invalid;
 }
 
 err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg) {
@@ -137,7 +136,7 @@ err_t sys_mbox_trypost(sys_mbox_t *mbox, void *msg) {
   }
   release(&mbox->s);
 
-  if(r ==ERR_OK){
+  if (r == ERR_OK) {
     // debug_print("sys_mbox_trypost %p success\n", mbox);
   }
   return r;
@@ -190,7 +189,7 @@ u32_t sys_arch_mbox_fetch(sys_mbox_t *mbox, void **msg, u32_t timeout) {
 
 done:
   release(&mbox->s);
-  if(r != SYS_ARCH_TIMEOUT){
+  if (r != SYS_ARCH_TIMEOUT) {
     // debug_print("sys_arch_mbox_fetch %p success\n", mbox);
   }
   return r;
@@ -207,7 +206,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg) {
     r = 0;
   }
   release(&mbox->s);
-  if(r == 0){
+  if (r == 0) {
     // debug_print("sys_arch_mbox_tryfetch %p success\n", mbox);
   }
   return r;

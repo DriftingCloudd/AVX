@@ -8,8 +8,8 @@
  * Copyright (c) 2010 Inico Technologies Ltd.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
@@ -21,14 +21,14 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGE.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
  *
@@ -44,13 +44,13 @@
 #if LWIP_IPV6 && LWIP_ETHERNET
 
 #include "lwip/ethip6.h"
-#include "lwip/nd6.h"
-#include "lwip/pbuf.h"
+#include "lwip/icmp6.h"
+#include "lwip/inet_chksum.h"
 #include "lwip/ip6.h"
 #include "lwip/ip6_addr.h"
-#include "lwip/inet_chksum.h"
+#include "lwip/nd6.h"
 #include "lwip/netif.h"
-#include "lwip/icmp6.h"
+#include "lwip/pbuf.h"
 #include "lwip/prot/ethernet.h"
 #include "netif/ethernet.h"
 
@@ -75,9 +75,8 @@
  * @return
  * - ERR_OK or the return value of @ref nd6_get_next_hop_addr_or_queue.
  */
-err_t
-ethip6_output(struct netif *netif, struct pbuf *q, const ip6_addr_t *ip6addr)
-{
+err_t ethip6_output(struct netif *netif, struct pbuf *q,
+                    const ip6_addr_t *ip6addr) {
   struct eth_addr dest;
   const u8_t *hwaddr;
   err_t result;
@@ -98,7 +97,8 @@ ethip6_output(struct netif *netif, struct pbuf *q, const ip6_addr_t *ip6addr)
     dest.addr[5] = ((const u8_t *)(&(ip6addr->addr[3])))[3];
 
     /* Send out. */
-    return ethernet_output(netif, q, (const struct eth_addr*)(netif->hwaddr), &dest, ETHTYPE_IPV6);
+    return ethernet_output(netif, q, (const struct eth_addr *)(netif->hwaddr),
+                           &dest, ETHTYPE_IPV6);
   }
 
   /* We have a unicast destination IP address */
@@ -117,7 +117,8 @@ ethip6_output(struct netif *netif, struct pbuf *q, const ip6_addr_t *ip6addr)
 
   /* Send out the packet using the returned hardware address. */
   SMEMCPY(dest.addr, hwaddr, 6);
-  return ethernet_output(netif, q, (const struct eth_addr*)(netif->hwaddr), &dest, ETHTYPE_IPV6);
+  return ethernet_output(netif, q, (const struct eth_addr *)(netif->hwaddr),
+                         &dest, ETHTYPE_IPV6);
 }
 
 #endif /* LWIP_IPV6 && LWIP_ETHERNET */

@@ -8,8 +8,8 @@
  *
  * Usage (there must be a default netif before!):
  * @code{.c}
- *   netif_add(&zep_netif, NULL, NULL, NULL, NULL, zepif_init, tcpip_6lowpan_input);
- *   netif_create_ip6_linklocal_address(&zep_netif, 1);
+ *   netif_add(&zep_netif, NULL, NULL, NULL, NULL, zepif_init,
+ * tcpip_6lowpan_input); netif_create_ip6_linklocal_address(&zep_netif, 1);
  *   netif_set_up(&zep_netif);
  *   netif_set_link_up(&zep_netif);
  * @endcode
@@ -19,8 +19,8 @@
  * Copyright (c) 2018 Simon Goldschmidt
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
@@ -32,14 +32,14 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
  * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
- * OF SUCH DAMAGE.
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+ * EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
+ * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
  *
@@ -51,20 +51,20 @@
 
 #if LWIP_IPV6 && LWIP_UDP
 
-#include "netif/lowpan6.h"
-#include "lwip/udp.h"
 #include "lwip/timeouts.h"
+#include "lwip/udp.h"
+#include "netif/lowpan6.h"
 #include <string.h>
 
 /** Define this to 1 to loop back TX packets for testing */
 #ifndef ZEPIF_LOOPBACK
-#define ZEPIF_LOOPBACK    0
+#define ZEPIF_LOOPBACK 0
 #endif
 
-#define ZEP_MAX_DATA_LEN  127
+#define ZEP_MAX_DATA_LEN 127
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
 struct zep_hdr {
@@ -82,7 +82,7 @@ struct zep_hdr {
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 struct zepif_state {
@@ -94,9 +94,7 @@ struct zepif_state {
 static u8_t zep_lowpan_timer_running;
 
 /* Helper function that calls the 6LoWPAN timer and reschedules itself */
-static void
-zep_lowpan_timer(void *arg)
-{
+static void zep_lowpan_timer(void *arg) {
   lowpan6_tmr();
   if (zep_lowpan_timer_running) {
     sys_timeout(LOWPAN6_TMR_INTERVAL, zep_lowpan_timer, arg);
@@ -104,10 +102,8 @@ zep_lowpan_timer(void *arg)
 }
 
 /* Pass received pbufs into 6LowPAN netif */
-static void
-zepif_udp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
-               const ip_addr_t *addr, u16_t port)
-{
+static void zepif_udp_recv(void *arg, struct udp_pcb *pcb, struct pbuf *p,
+                           const ip_addr_t *addr, u16_t port) {
   err_t err;
   struct netif *netif_lowpan6 = (struct netif *)arg;
   struct zep_hdr *zep;
@@ -164,9 +160,7 @@ err_return:
 }
 
 /* Send 6LoWPAN TX packets as UDP broadcast */
-static err_t
-zepif_linkoutput(struct netif *netif, struct pbuf *p)
-{
+static err_t zepif_linkoutput(struct netif *netif, struct pbuf *p) {
   err_t err;
   struct pbuf *q;
   struct zep_hdr *zep;
@@ -192,8 +186,8 @@ zepif_linkoutput(struct netif *netif, struct pbuf *p)
   zep->prot_id[0] = 'E';
   zep->prot_id[1] = 'X';
   zep->prot_version = 2;
-  zep->type = 1; /* Data */
-  zep->channel_id = 0; /* whatever */
+  zep->type = 1;                  /* Data */
+  zep->channel_id = 0;            /* whatever */
   zep->device_id = lwip_htons(1); /* whatever */
   zep->crc_mode = 1;
   zep->unknown_1 = 0xff;
@@ -204,9 +198,11 @@ zepif_linkoutput(struct netif *netif, struct pbuf *p)
   err = pbuf_copy_partial_pbuf(q, p, p->tot_len, sizeof(struct zep_hdr));
   if (err == ERR_OK) {
 #if ZEPIF_LOOPBACK
-    zepif_udp_recv(netif, state->pcb, pbuf_clone(PBUF_RAW, PBUF_RAM, q), NULL, 0);
+    zepif_udp_recv(netif, state->pcb, pbuf_clone(PBUF_RAW, PBUF_RAM, q), NULL,
+                   0);
 #endif
-    err = udp_sendto(state->pcb, q, state->init.zep_dst_ip_addr, state->init.zep_dst_udp_port);
+    err = udp_sendto(state->pcb, q, state->init.zep_dst_ip_addr,
+                     state->init.zep_dst_udp_port);
   }
   pbuf_free(q);
 
@@ -218,12 +214,11 @@ zepif_linkoutput(struct netif *netif, struct pbuf *p)
  * Set up a raw 6LowPAN netif and surround it with input- and output
  * functions for ZEP
  */
-err_t
-zepif_init(struct netif *netif)
-{
+err_t zepif_init(struct netif *netif) {
   err_t err;
   struct zepif_init *init_state = (struct zepif_init *)netif->state;
-  struct zepif_state *state = (struct zepif_state *)mem_malloc(sizeof(struct zepif_state));
+  struct zepif_state *state =
+      (struct zepif_state *)mem_malloc(sizeof(struct zepif_state));
 
   LWIP_ASSERT("zepif needs an input callback", netif->input != NULL);
 
@@ -242,7 +237,8 @@ zepif_init(struct netif *netif)
   }
 #if LWIP_IPV4
   if (state->init.zep_dst_ip_addr == NULL) {
-    /* With IPv4 enabled, default to broadcasting packets if no address is set */
+    /* With IPv4 enabled, default to broadcasting packets if no address is set
+     */
     state->init.zep_dst_ip_addr = IP_ADDR_BROADCAST;
   }
 #endif /* LWIP_IPV4 */
@@ -254,7 +250,8 @@ zepif_init(struct netif *netif)
     err = ERR_MEM;
     goto err_ret;
   }
-  err = udp_bind(state->pcb, state->init.zep_src_ip_addr, state->init.zep_src_udp_port);
+  err = udp_bind(state->pcb, state->init.zep_src_ip_addr,
+                 state->init.zep_src_udp_port);
   if (err != ERR_OK) {
     goto err_ret;
   }

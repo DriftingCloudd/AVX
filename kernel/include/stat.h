@@ -1,5 +1,6 @@
 #ifndef __STAT_H
 #define __STAT_H
+#include "types.h"
 
 #define T_DIR     1   // Directory
 #define T_FILE    2   // File

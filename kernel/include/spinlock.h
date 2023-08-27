@@ -1,6 +1,6 @@
 #ifndef __SPINLOCK_H
 #define __SPINLOCK_H
-
+#include "types.h"
 struct cpu;
 
 // Mutual exclusion lock.
