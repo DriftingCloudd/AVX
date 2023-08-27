@@ -5,7 +5,7 @@
 - riscv64-linux-gnu toolchain
 
 # doc
-    AVX512OS.pdf in doc directory
+    doc directory
 
 # run on qemu
     make all
